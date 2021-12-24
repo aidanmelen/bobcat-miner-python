@@ -6,7 +6,13 @@ import unittest
 import main, bobcat, checks
 
 
-class TestMain(unittest.TestCase):
+# class TestMain(unittest.TestCase):
+#     def test_main(self):
+#         """Test main"""
+#         pass
+
+
+class TestChecks(unittest.TestCase):
     def setUp(self):
         self.mock_status = {
             "status": "Synced",
