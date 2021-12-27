@@ -15,85 +15,63 @@ class Bobcat:
         self.speed = None
         self.dig = None
 
-        self.base_url = "http://" + ip_address
-        base64_auth_token_bytes = base64.b64encode(
-            f"{self.username}:{self.password}".encode("utf-8")
-        )
+        self._set_base64_auth_token()
+
+    def _set_base64_auth_token(self):
+        """Set the base64 auth token used by post calls to the API."""
+        utf8_auth_token = f"{self.username}:{self.password}".encode("utf-8")
+        base64_auth_token_bytes = base64.b64encode(utf8_auth_token)
         base64_auth_token = str(base64_auth_token_bytes, "utf-8")
         self.basic_auth_token_header = {"Authorization": f"Basic {base64_auth_token}"}
 
-    def set_status(self, status):
-        """Set the bobcat miner status."""
-        self.status = status
+    def refresh_status(self):
+        """Refresh data for the bobcat miner status."""
+        self.status = requests.get("http://" + self.ip_address + "/status.json").json()
 
-    def set_miner(self, miner):
-        """Set the bobcat miner data."""
-        self.miner = miner
+    def refresh_miner(self):
+        """Refresh data for the bobcat miner data."""
+        self.miner = requests.get("http://" + self.ip_address + "/miner.json").json()
 
-    def set_speed(self, speed):
-        """Set the bobcat miner network speed."""
-        self.speed = speed
+    def refresh_speed(self):
+        """Refresh data for the bobcat miner network speed."""
+        self.speed = requests.get("http://" + self.ip_address + "/speed.json").json()
 
-    def set_dig(self, dig):
-        """Set the bobcat miner DNS data."""
-        self.dig = dig
+    def refresh_dig(self):
+        """Refresh data for the bobcat miner DNS data."""
+        self.dig = requests.get("http://" + self.ip_address + "/dig.json").json()
 
-    def get_status(self):
-        """Get the bobcat miner status."""
-        return self.status
-
-    def get_miner(self):
-        """Get the bobcat miner data."""
-        return self.miner
-
-    def get_speed(self):
-        """Get the bobcat miner network speed."""
-        return self.speed
-
-    def get_dig(self):
-        """Get the bobcat miner DNS data."""
-        return self.dig
-
-    def request_status(self):
-        """Retreive the bobcat miner status."""
-        return requests.get(self.base_url + "/status.json").json()
-
-    def request_miner(self):
-        """Retreive the bobcat miner data."""
-        return requests.get(self.base_url + "/miner.json").json()
-
-    def request_speed(self):
-        """Retreive the bobcat miner network speed."""
-        return requests.get(self.base_url + "/speed.json").json()
-
-    def request_dig(self):
-        """Retreive the bobcat miner DNS data."""
-        return requests.get(self.base_url + "/dig.json").json()
-
-    def request_resync(self):
-        """Resync the bobcat miner."""
-        return requests.post(self.base_url + "/admin/resync", header=self.basic_auth_token_header)
-
-    def request_reset(self):
-        """Reset the bobcat miner."""
-        return requests.post(self.base_url + "/admin/reset", header=self.basic_auth_token_header)
-
-    def request_reboot(self):
-        """Reboot the bobcat miner."""
-        return requests.post(self.base_url + "/admin/reboot", header=self.basic_auth_token_header)
-
-    def request_fastsync(self):
-        """Fastsync the bobcat miner."""
-        return requests.post(self.base_url + "/admin/fastsync", header=self.basic_auth_token_header)
-
-    def refresh(self):
-        """Refresh the bobcat miner class attributes. (Warning) Frequently refreshing will degrade the bobcats performance."""
-        self.set_status(self.request_status())
-        self.set_miner(self.request_miner())
-        self.set_speed(self.request_speed())
-        self.set_dig(self.request_dig())
+    def refresh_all(self):
+        """Refresh data for all of the bobcat miner API's."""
+        self.refresh_status()
+        self.refresh_miner()
+        self.refresh_speed()
+        self.refresh_dig()
 
         return None
+
+    def resync(self):
+        """Resync the bobcat miner."""
+        return requests.post(
+            "http://" + self.ip_address + "/admin/resync", header=self.basic_auth_token_header
+        )
+
+    def reset(self):
+        """Reset the bobcat miner."""
+        return requests.post(
+            "http://" + self.ip_address + "/admin/reset", header=self.basic_auth_token_header
+        )
+
+    def reboot(self):
+        """Reboot the bobcat miner."""
+        return requests.post(
+            "http://" + self.ip_address + "/admin/reboot", header=self.basic_auth_token_header
+        )
+
+    def fastsync(self):
+        """Fastsync the bobcat miner."""
+        return requests.post(
+            "http://" + self.ip_address + "/admin/fastsync", header=self.basic_auth_token_header
+        )
 
     def is_running(self):
         """Check if the bobcat miner is running."""
@@ -103,7 +81,7 @@ class Bobcat:
         """Check if the bobcat miner is synced with the Helium blockchain."""
         return self.status.get("status") == "Synced"
 
-    def has_safe_temp(self):
+    def is_temp_safe(self):
         """Check if the bobcat miner is operating within a safe tempurature range."""
         temp0 = int(self.miner.get("temp0").strip(" °C"))
         temp1 = int(self.miner.get("temp1").strip(" °C"))
@@ -117,10 +95,7 @@ class Bobcat:
     def is_healthy(self):
         """Check if the is synced with the Helium blockchain."""
         return (
-            self.is_running()
-            and self.is_synced()
-            and self.has_safe_temp()
-            and not self.has_errors()
+            self.is_running() and self.is_synced() and self.is_temp_safe() and not self.has_errors()
         )
 
     def is_relayed(self):
@@ -130,15 +105,15 @@ class Bobcat:
 
     def should_fastsync(self):
         """Check if the bobcat miner needs a fastsync."""
-        gap = int(self.status['gap'])
+        gap = int(self.status["gap"])
         return gap > 400 and gap < 10000
 
     def should_resync(self):
         """Check if the bobcat miner needs a resync."""
-        gap = int(self.status['gap'])
+        gap = int(self.status["gap"])
         return gap >= 10000
 
     def should_reset(self):
         """Check if the bobcat miner needs to be reset."""
-        gap = int(self.status['gap'])
+        gap = int(self.status["gap"])
         return self.has_errors() and gap >= 10000
