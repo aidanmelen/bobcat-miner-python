@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.9-slim
 
 COPY requirements.txt /requirements.txt 
 
@@ -10,6 +10,6 @@ COPY src/app /app
 
 WORKDIR /app
 
-ENTRYPOINT ["/bin/sh"]
+ENTRYPOINT ["/bin/bash"]
 
 CMD ["/entrypoint.sh"]

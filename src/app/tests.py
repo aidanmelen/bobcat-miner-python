@@ -3,7 +3,9 @@ from unittest.mock import patch, call
 
 import unittest
 
-import main, bobcat, checks
+from bobcat import Bobcat
+
+import main
 
 
 # class TestMain(unittest.TestCase):
@@ -12,9 +14,13 @@ import main, bobcat, checks
 #         pass
 
 
-class TestChecks(unittest.TestCase):
+class TestBobcat(unittest.TestCase):
     def setUp(self):
-        self.mock_status = {
+        self.mock_ip_address = "127.0.0.1"
+        self.mock_username = "bobcat"
+        self.mock_password = "miner"
+
+        self.mock_happy_path_status = {
             "status": "Synced",
             "gap": "0",
             "miner_height": "1148539",
@@ -22,7 +28,15 @@ class TestChecks(unittest.TestCase):
             "epoch": "30157",
         }
 
-        self.mock_miner = {
+        self.mock_sad_path_status = {
+            "status": "Not Synced",
+            "gap": "15000",
+            "miner_height": "1133539",
+            "blockchain_height": "1148539",
+            "epoch": "30157",
+        }
+
+        self.mock_happy_path_miner = {
             "ota_version": "1.0.2.66",
             "region": "region_us915",
             "frequency_plan": "us915",
@@ -100,35 +114,131 @@ class TestChecks(unittest.TestCase):
             "Latency": "7.669083ms",
         }
 
-    def test_check_is_healthy(self):
-        """Test check is healthy"""
-        result = checks.is_healthy(self.mock_status, self.mock_miner)
-        self.assertEqual(result, True)
+    @patch("requests.get")
+    def test_babcat_request_status(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address)
+        _ = b.request_status()
 
-    def test_check_is_relayed(self):
-        """Test check is relayed"""
-        result = checks.is_relayed(self.mock_miner)
-        self.assertEqual(result, False)
+        # assert
+        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/status.json")
 
-    def test_check_has_errors(self):
-        """Test check has errors"""
-        result = checks.has_errors(self.mock_miner)
-        self.assertEqual(result, False)
+    @patch("requests.get")
+    def test_babcat_request_miner(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address)
+        _ = b.request_miner()
 
-    def test_check_should_fastsync(self):
-        """Test check should fastsync"""
-        result = checks.should_fastsync(self.mock_status)
-        self.assertEqual(result, False)
+        # assert
+        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/miner.json")
 
-    def test_check_should_resync(self):
-        """Test check should resync"""
-        result = checks.should_fastsync(self.mock_status)
-        self.assertEqual(result, False)
+    @patch("requests.get")
+    def test_babcat_request_speed(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address)
+        _ = b.request_speed()
 
-    def test_check_should_reset(self):
-        """Test check should reset"""
-        result = checks.should_fastsync(self.mock_status)
-        self.assertEqual(result, False)
+        # assert
+        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/speed.json")
+
+    @patch("requests.get")
+    def test_babcat_request_dig(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address)
+        _ = b.request_dig()
+
+        # assert
+        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/dig.json")
+
+    @patch("requests.post")
+    def test_babcat_request_resync(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        _ = b.request_resync()
+
+        # assert
+        mock_requests_get.assert_called_once_with(
+            "http://" + self.mock_ip_address + "/admin/resync",
+            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+        )
+
+    @patch("requests.post")
+    def test_babcat_request_reset(self, mock_requests_get):
+        # act
+        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        _ = b.request_reset()
+
+        # assert
+        mock_requests_get.assert_called_once_with(
+            "http://" + self.mock_ip_address + "/admin/reset",
+            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+        )
+
+    @patch("requests.post")
+    def test_babcat_request_reboot(self, mock_requests_get):
+        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        _ = b.request_reboot()
+
+        # assert
+        mock_requests_get.assert_called_once_with(
+            "http://" + self.mock_ip_address + "/admin/reboot",
+            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+        )
+
+    @patch("requests.post")
+    def test_babcat_request_fastsync(self, mock_requests_get):
+        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        _ = b.request_fastsync()
+
+        # assert
+        mock_requests_get.assert_called_once_with(
+            "http://" + self.mock_ip_address + "/admin/fastsync",
+            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+        )
+
+    @patch("bobcat.Bobcat.request_dig")
+    @patch("bobcat.Bobcat.request_speed")
+    @patch("bobcat.Bobcat.request_miner")
+    @patch("bobcat.Bobcat.request_status")
+    def test_happy_path_babcat_is_healthy(
+        self, mock_bobcat_request_status, mock_bobcat_request_miner, mock_bobcat_request_speed, mock_bobcat_request_dig
+    ):
+        # assign
+        mock_bobcat_request_status.return_value = self.mock_happy_path_status
+        mock_bobcat_request_miner.return_value = self.mock_happy_path_miner
+
+        # act
+        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        b.refresh()
+
+        result = b.is_healthy()
+
+        # assert
+        self.assertTrue(result)
+
+    # @patch("bobcat.Bobcat.get_miner")
+    # def test_babcat_is_relayed(self, mock_miner):
+    #     """Test check is relayed"""
+    #     bobcat = Bobcat(self.mock_ip_address)
+    #     self.assertEqual(bobcat.is_relayed(), False)
+
+    # def test_babcat_has_errors(self):
+    #     """Test check has errors"""
+    #     bobcat = Bobcat(self.mock_ip_address)
+    #     result = bobcat.has_errors()
+    #     self.assertEqual(result, False)
+
+    # def test_babcat_should_fastsync(self):
+    #     """Test check should fastsync"""
+    #     bobcat = Bobcat(self.mock_ip_address)
+    #     result = bobcat.should_fastsync()
+    #     self.assertEqual(result, False)
+
+    # def test_babcat_should_resync(self):
+    #     """Test check should resync"""
+    #     bobcat = Bobcat(self.mock_ip_address)
+    #     result = bobcat.should_fastsync()
+    #     self.assertEqual(result, False)
 
 
 if __name__ == "__main__":
