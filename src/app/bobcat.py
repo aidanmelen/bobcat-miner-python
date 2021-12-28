@@ -10,10 +10,10 @@ class Bobcat:
         self.username = username
         self.password = password
 
-        self.status = None
-        self.miner = None
-        self.speed = None
-        self.dig = None
+        self.status = {}
+        self.miner = {}
+        self.speed = {}
+        self.dig = {}
 
         self._set_base64_auth_token()
 
@@ -27,26 +27,29 @@ class Bobcat:
     def refresh_status(self):
         """Refresh data for the bobcat miner status."""
         self.status = requests.get("http://" + self.ip_address + "/status.json").json()
+        return None
 
     def refresh_miner(self):
         """Refresh data for the bobcat miner data."""
         self.miner = requests.get("http://" + self.ip_address + "/miner.json").json()
+        return None
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed."""
         self.speed = requests.get("http://" + self.ip_address + "/speed.json").json()
+        return None
 
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data."""
         self.dig = requests.get("http://" + self.ip_address + "/dig.json").json()
-
+        return None
+    
     def refresh_all(self):
         """Refresh data for all of the bobcat miner API's."""
         self.refresh_status()
         self.refresh_miner()
         self.refresh_speed()
         self.refresh_dig()
-
         return None
 
     def resync(self):
@@ -86,7 +89,7 @@ class Bobcat:
         temp0 = int(self.miner.get("temp0").strip(" °C"))
         temp1 = int(self.miner.get("temp1").strip(" °C"))
 
-        return temp0 >= 0 and temp0 < 60 and temp1 >= 0 and temp1 < 60
+        return temp0 >= 0 and temp0 < 70 and temp1 >= 0 and temp1 < 70
 
     def has_errors(self):
         """Check for bobcat errors."""
@@ -100,9 +103,9 @@ class Bobcat:
 
     def is_relayed(self):
         """Check if the bobcat is being relayed."""
-        for port, status in self.miner["ports"].items():
-            return "44158" in port and status != "open"
-
+        public_ip = self.miner.get('public_ip')
+        return f"|/ip4/{public_ip}/tcp/44158|" not in self.miner.get('peerbook', [])
+                
     def should_fastsync(self):
         """Check if the bobcat miner needs a fastsync."""
         gap = int(self.status["gap"])
