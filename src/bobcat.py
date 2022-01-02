@@ -1,8 +1,7 @@
-"""Bobcat Miner API."""
+"""Bobcat Miner"""
 
 import base64
 import requests
-
 
 class Bobcat:
     def __init__(self, ip_address, username="bobcat", password="miner"):
@@ -23,6 +22,7 @@ class Bobcat:
         base64_auth_token_bytes = base64.b64encode(utf8_auth_token)
         base64_auth_token = str(base64_auth_token_bytes, "utf-8")
         self.basic_auth_token_header = {"Authorization": f"Basic {base64_auth_token}"}
+        return None
 
     def refresh_status(self):
         """Refresh data for the bobcat miner status."""
@@ -44,12 +44,16 @@ class Bobcat:
         self.dig = requests.get("http://" + self.ip_address + "/dig.json").json()
         return None
     
-    def refresh_all(self):
-        """Refresh data for all of the bobcat miner API's."""
-        self.refresh_status()
-        self.refresh_miner()
-        self.refresh_speed()
-        self.refresh_dig()
+    def refresh(self, status=True, miner=True, speed=True, dig=True):
+        """Refresh data for the bobcat miner."""
+        if status:
+            self.refresh_status()
+        if miner:
+            self.refresh_miner()
+        if speed:
+            self.refresh_speed()
+        if dig:
+            self.refresh_dig()
         return None
 
     def resync(self):
@@ -89,7 +93,9 @@ class Bobcat:
         temp0 = int(self.miner.get("temp0").strip(" °C"))
         temp1 = int(self.miner.get("temp1").strip(" °C"))
 
-        return temp0 >= 0 and temp0 < 70 and temp1 >= 0 and temp1 < 70
+        # Operating tempuratures from bobcat user manual
+        # https://fccid.io/2AZCK-MINER300/User-Manual/user-manual-5189053.pdf
+        return temp0 >= 0 and temp0 < 60 and temp1 >= 0 and temp1 < 60
 
     def has_errors(self):
         """Check for bobcat errors."""
@@ -115,8 +121,13 @@ class Bobcat:
         """Check if the bobcat miner needs a resync."""
         gap = int(self.status["gap"])
         return gap >= 10000
+    
+    def should_reboot(self):
+        """Check if the bobcat miner needs to be reboot."""
+        gap = int(self.status["gap"])
+        return not self.has_errors() and gap <= 10000
 
     def should_reset(self):
         """Check if the bobcat miner needs to be reset."""
         gap = int(self.status["gap"])
-        return self.has_errors() and gap >= 10000
+        return self.has_errors() and gap > 10000

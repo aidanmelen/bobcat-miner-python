@@ -1,11 +1,11 @@
-# bobcat_miner
+# bobcat-miner-python
 
-A python library for interacting with the bobcat miner diagnoser API.
+A python SDK for interacting with the bobcat miner.
 
 # Quick Start
 
 ```bash
-pip install bobcat-miner
+pip install bobcat-miner-python
 ```
 
 # Usage

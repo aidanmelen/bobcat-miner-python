@@ -6,7 +6,8 @@ RUN pip install -r /requirements.txt
 
 COPY entrypoint.sh /entrypoint.sh
 
-COPY src/app /app
+COPY src /app
+COPY tests /app
 
 WORKDIR /app
 
