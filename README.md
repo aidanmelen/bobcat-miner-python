@@ -13,9 +13,10 @@ pip install bobcat-miner-python
 ```python
 import bobcat_miner
 
-bobcat = Bobcat("192.168.1.10")
+bobcat = Bobcat(ip_address="192.168.1.10")
 
 # data refresh
+# warning: frequent and repetative refreshes may slow down your bobcat thus negatively effecting rewards.
 bobcat.refresh_status()
 print(bobcat.status)
 
@@ -28,7 +29,7 @@ print(bobcat.speed)
 bobcat.refresh_dig()
 print(bobcat.dig)
 
-bobcat.refresh_all()
+bobcat.refresh()
 
 # actions
 bobcat.reboot()
@@ -36,7 +37,7 @@ bobcat.resync()
 bobcat.fastsync()
 bobcat.reset()
 
-# helpers
+# diagnostics
 bobcat.is_healthy()
 bobcat.is_running()
 bobcat.is_synced()
