@@ -115,6 +115,9 @@ class TestSyncedBobcat(unittest.TestCase):
     def test_babcat_is_relayed(self):
         self.assertFalse(self.bobcat.is_relayed())
 
+    def is_local_network_slow(self):
+        self.assertFalse(self.bobcat.is_local_network_slow())
+
     def test_babcat_should_fastsync(self):
         self.assertFalse(self.bobcat.should_fastsync())
     
@@ -133,6 +136,9 @@ class TestUnsyncedBobcat(unittest.TestCase):
 
     def test_babcat_is_healthy(self):
         self.assertFalse(self.bobcat.is_healthy())
+    
+    def is_local_network_slow(self):
+        self.assertTrue(self.bobcat.is_local_network_slow())
 
     def test_babcat_should_fastsync(self):
         self.assertTrue(self.bobcat.should_fastsync())

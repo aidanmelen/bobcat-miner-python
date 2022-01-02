@@ -80,6 +80,11 @@ class Bobcat:
         return requests.post(
             "http://" + self.ip_address + "/admin/fastsync", header=self.basic_auth_token_header
         )
+    
+    # TODO write unittest
+    def can_connect_to_bobcat(self):
+        """Check local connection to the bobcat miner API"""
+        return requests.get(requests.get("http://" + self.ip_address).ok
 
     def is_running(self):
         """Check if the bobcat miner is running"""
@@ -127,7 +132,24 @@ class Bobcat:
     def is_relayed(self):
         """Check if the bobcat is being relayed"""
         public_ip = self.miner.get("public_ip")
-        return f"|/ip4/{public_ip}/tcp/44158|" not in self.miner.get("peerbook", [])
+        port_44158_is_open = any([f"/ip4/{public_ip}/tcp/44158" in pb.lower() for pb in self.miner.get("peerbook", [])])
+        return not port_44158_is_open
+    
+    def is_local_network_slow(self):
+        """Check if the local network for slowness and latency"""
+        download_speed = int(self.speed.get("DownloadSpeed").strip(" Mbit/s"))
+        upload_speed = int(self.speed.get("UploadSpeed").strip(" Mbit/s"))
+        latency = int(self.speed.get("Latency").strip("ms"))
+
+        is_download_speed_slow = download_speed < 5
+        is_upload_speed_slow = upload_speed < 5
+        is_latency_high = latency > 50
+        
+        return any(
+            is_download_speed_slow,
+            is_upload_speed_slow,
+            is_latency_high
+        )
 
     def should_fastsync(self):
         """Check if the bobcat miner needs a fastsync"""

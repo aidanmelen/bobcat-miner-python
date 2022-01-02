@@ -53,7 +53,7 @@ bobcat.should_fastsync()
 bobcat.should_reset()
 ```
 
-:warning: Frequent and repetative refreshes may slow down your bobcat thus negatively effecting rewards.
+:warning: Frequent refreshes may slow down your Bobcat thus negatively effecting rewards.
 
 # Donations
 

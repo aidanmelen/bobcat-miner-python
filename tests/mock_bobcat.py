@@ -207,8 +207,8 @@ def mock_unsynced_bobcat(*args, **kwargs):
     elif "/speed.json" in request_url:
         response_content = json.dumps({
             "DownloadSpeed": "5 Mbit/s",
-            "UploadSpeed": "2 Mbit/s",
-            "Latency": "100.669083ms",
+            "UploadSpeed": "9 Mbit/s",
+            "Latency": "85.234333ms",
         })
     elif "/dig.json" in request_url:
         response_content = json.dumps({
@@ -318,8 +318,8 @@ def mock_unhealthy_bobcat(*args, **kwargs):
     elif "/speed.json" in request_url:
         response_content = json.dumps({
             "DownloadSpeed": "5 Mbit/s",
-            "UploadSpeed": "2 Mbit/s",
-            "Latency": "100.669083ms",
+            "UploadSpeed": "9 Mbit/s",
+            "Latency": "85.234333ms",
         })
     elif "/dig.json" in request_url:
         response_content = json.dumps({
