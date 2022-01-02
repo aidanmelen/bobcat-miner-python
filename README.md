@@ -16,18 +16,21 @@ import bobcat_miner
 bobcat = Bobcat(ip_address="192.168.1.10")
 
 # data refresh
-# warning: frequent and repetative refreshes may slow down your bobcat thus negatively effecting rewards.
 bobcat.refresh_status()
 print(bobcat.status)
+# {"status": "Synced", "gap": "0", "miner_height": "1148539", "blockchain_height": "1148539", "epoch": "30157"}
 
 bobcat.refresh_miner()
 print(bobcat.miner)
+# {"ota_version": "1.0.2.66", "region": "region_us915", "frequency_plan": "us915", "animal": "my-mocked-miner", ... }
 
 bobcat.refresh_speed()
 print(bobcat.speed)
+# {"DownloadSpeed": "94 Mbit/s", "UploadSpeed": "57 Mbit/s", "Latency": "7.669083ms"}
 
 bobcat.refresh_dig()
 print(bobcat.dig)
+# {"name": "seed.helium.io.", "DNS": "Local DNS", "records": [{"A": "54.232.171.76", ... ]}
 
 bobcat.refresh()
 
@@ -49,6 +52,8 @@ bobcat.should_resync()
 bobcat.should_fastsync()
 bobcat.should_reset()
 ```
+
+:warning: Frequent and repetative refreshes may slow down your bobcat thus negatively effecting rewards.
 
 # Donations
 
