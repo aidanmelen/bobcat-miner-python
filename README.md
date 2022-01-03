@@ -32,8 +32,6 @@ bobcat.refresh_dig()
 print(bobcat.dig)
 # {"name": "seed.helium.io.", "DNS": "Local DNS", "records": [{"A": "54.232.171.76", ... ]}
 
-bobcat.refresh()
-
 # actions
 bobcat.reboot()
 bobcat.resync()
@@ -57,7 +55,7 @@ bobcat.should_reset()
 
 # Diagnoser Usage
 
-The diagnoser is meant to automate the adminstration on the bobcat. If the bobcat is in an unhealthy state then the diagnoser will atemmpt to repair it.
+The diagnoser is meant to automate bobcat miner adminstration. If the bobcat is unhealthy then the diagnoser will attempt to repair it.
 
 ```
 from bobcat import Bobcat
@@ -73,6 +71,10 @@ logger.info('refresh status data')
 
 diagnoser(bobcat)
 ```
+
+# Toubleshooting
+
+Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
 
 # Donations
 
