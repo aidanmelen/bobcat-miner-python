@@ -16,8 +16,9 @@ def diagnoser(bobcat):
 
     if not bobcat.can_connect():
         logger.error(
-            "Failed to conncet to bobcat ({bobcat.ip_address}). Please check your router for the bobcat's private ip address."
+            "Failed to connect to bobcat ({bobcat.ip_address}). Please check your router for the bobcat's private ip address."
         )
+        return None
 
     if not bobcat.status:
         logger.info("refresh status data")
