@@ -3,6 +3,7 @@
 import backoff
 import base64
 import requests
+import time
 
 
 class Bobcat:
@@ -109,20 +110,19 @@ class Bobcat:
 
     def is_running(self):
         """Check if the bobcat miner is running"""
-        return self.miner.get("miner", {}).get("State") == "running"
+        return self.miner.get("miner", {}).get("State").lower() == "running"
 
     def is_synced(self):
         """Check if the bobcat miner is synced with the Helium blockchain"""
-        return self.status.get("status") == "Synced"
+        return self.status.get("status").lower() == "synced"
 
     def is_temp_safe(self):
         """Check if the bobcat miner is operating within a safe tempurature range"""
         temp0 = int(self.miner.get("temp0").strip(" °C"))
         temp1 = int(self.miner.get("temp1").strip(" °C"))
 
-        # Operating tempuratures from bobcat user manual
-        # https://fccid.io/2AZCK-MINER300/User-Manual/user-manual-5189053.pdf
-        return temp0 >= 0 and temp0 < 60 and temp1 >= 0 and temp1 < 60
+        # https://www.bobcatminer.com/post/bobcat-diagnoser-user-guide
+        return temp0 >= 0 and temp0 < 65 and temp1 >= 0 and temp1 < 65
 
     def has_errors(self):
         """Check for bobcat errors"""
@@ -152,6 +152,9 @@ class Bobcat:
 
     def is_relayed(self):
         """Check if the bobcat is being relayed"""
+
+        # If the listen_addrs is via tcp/44158, it means your hotspot is not relayed.
+        # A relayed hotspot's listen address will be via another hotspot on the network
         public_ip = self.miner.get("public_ip")
         port_44158_is_open = any(
             [f"/ip4/{public_ip}/tcp/44158" in pb.lower() for pb in self.miner.get("peerbook", [])]

@@ -53,7 +53,26 @@ bobcat.should_fastsync()
 bobcat.should_reset()
 ```
 
-:warning: Frequent refreshes may slow down your Bobcat thus negatively effecting rewards.
+:warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+
+# Diagnoser
+
+The diagnoser is meant to automate the adminstration on the bobcat. If the bobcat is in an unhealthy state then the diagnoser will atemmpt to repair it.
+
+```
+from bobcat import Bobcat
+from diagnoser import diagnoser
+
+bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
+
+bobcat.refresh_status()
+logger.info('refresh miner data')
+
+bobcat.refresh_miner()
+logger.info('refresh status data')
+
+diagnoser(bobcat)
+```
 
 # Donations
 

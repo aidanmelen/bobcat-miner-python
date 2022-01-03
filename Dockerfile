@@ -6,10 +6,8 @@ RUN pip install -r /requirements.txt
 
 COPY entrypoint.sh /entrypoint.sh
 
-COPY src /app
-COPY tests /app
-
-WORKDIR /app
+COPY src/bobcat /bobcat
+COPY tests /bobcat
 
 ENTRYPOINT ["/bin/bash"]
 
