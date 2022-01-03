@@ -2,6 +2,7 @@
 from unittest.mock import patch, call
 
 import unittest
+import requests
 
 from bobcat import Bobcat
 
@@ -88,6 +89,17 @@ class TestBobcat(unittest.TestCase):
             "http://" + self.mock_ip_address + "/admin/fastsync",
             header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
+    
+    @patch("requests.get")
+    def test_babcat_can_connect(self, mock_requests_get):
+        b = Bobcat(self.mock_ip_address)
+        b.can_connect()
+        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address)
+    
+    @patch("requests.get", side_effect=Exception)
+    def test_babcat_throws_error_when_cannot_connect(self, mock_requests_get):
+        b = Bobcat(self.mock_ip_address)
+        self.assertRaises(Exception, Bobcat(self.mock_ip_address))
 
 
 class TestSyncedBobcat(unittest.TestCase):

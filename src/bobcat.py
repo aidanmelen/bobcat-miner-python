@@ -1,5 +1,6 @@
 """Bobcat Miner"""
 
+import backoff
 import base64
 import requests
 
@@ -25,24 +26,42 @@ class Bobcat:
         self.basic_auth_token_header = {"Authorization": f"Basic {base64_auth_token}"}
         return None
 
+    @backoff.on_exception(
+        backoff.expo,
+        (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
+        max_time=600,
+    )
+    def _requests_get(self, url):
+        """Requests get call wrapper with exponential backoff annotation."""
+        return requests.get(url)
+
+    @backoff.on_exception(
+        backoff.expo,
+        (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
+        max_time=600,
+    )
+    def _requests_post(self, url, header):
+        """Requests post call wrapper with exponential backoff annotation."""
+        return requests.post(url, header=header)
+
     def refresh_status(self):
         """Refresh data for the bobcat miner status"""
-        self.status = requests.get("http://" + self.ip_address + "/status.json").json()
+        self.status = self._requests_get("http://" + self.ip_address + "/status.json").json()
         return None
 
     def refresh_miner(self):
         """Refresh data for the bobcat miner data"""
-        self.miner = requests.get("http://" + self.ip_address + "/miner.json").json()
+        self.miner = self._requests_get("http://" + self.ip_address + "/miner.json").json()
         return None
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed"""
-        self.speed = requests.get("http://" + self.ip_address + "/speed.json").json()
+        self.speed = self._requests_get("http://" + self.ip_address + "/speed.json").json()
         return None
 
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
-        self.dig = requests.get("http://" + self.ip_address + "/dig.json").json()
+        self.dig = self._requests_get("http://" + self.ip_address + "/dig.json").json()
         return None
 
     def refresh(self, status=True, miner=True, speed=True, dig=True):
@@ -59,32 +78,34 @@ class Bobcat:
 
     def resync(self):
         """Resync the bobcat miner"""
-        return requests.post(
+        return self._requests_post(
             "http://" + self.ip_address + "/admin/resync", header=self.basic_auth_token_header
         )
 
     def reset(self):
         """Reset the bobcat miner"""
-        return requests.post(
+        return self._requests_post(
             "http://" + self.ip_address + "/admin/reset", header=self.basic_auth_token_header
         )
 
     def reboot(self):
         """Reboot the bobcat miner"""
-        return requests.post(
+        return self._requests_post(
             "http://" + self.ip_address + "/admin/reboot", header=self.basic_auth_token_header
         )
 
     def fastsync(self):
         """Fastsync the bobcat miner"""
-        return requests.post(
+        return self._requests_post(
             "http://" + self.ip_address + "/admin/fastsync", header=self.basic_auth_token_header
         )
-    
-    # TODO write unittest
-    def can_connect_to_bobcat(self):
+
+    def can_connect(self):
         """Check local connection to the bobcat miner API"""
-        return requests.get(requests.get("http://" + self.ip_address).ok
+        try:
+            return self._requests_get("http://" + self.ip_address).ok
+        except requests.ConnectionError:
+            return False
 
     def is_running(self):
         """Check if the bobcat miner is running"""
@@ -132,9 +153,11 @@ class Bobcat:
     def is_relayed(self):
         """Check if the bobcat is being relayed"""
         public_ip = self.miner.get("public_ip")
-        port_44158_is_open = any([f"/ip4/{public_ip}/tcp/44158" in pb.lower() for pb in self.miner.get("peerbook", [])])
+        port_44158_is_open = any(
+            [f"/ip4/{public_ip}/tcp/44158" in pb.lower() for pb in self.miner.get("peerbook", [])]
+        )
         return not port_44158_is_open
-    
+
     def is_local_network_slow(self):
         """Check if the local network for slowness and latency"""
         download_speed = int(self.speed.get("DownloadSpeed").strip(" Mbit/s"))
@@ -144,12 +167,8 @@ class Bobcat:
         is_download_speed_slow = download_speed < 5
         is_upload_speed_slow = upload_speed < 5
         is_latency_high = latency > 50
-        
-        return any(
-            is_download_speed_slow,
-            is_upload_speed_slow,
-            is_latency_high
-        )
+
+        return any(is_download_speed_slow, is_upload_speed_slow, is_latency_high)
 
     def should_fastsync(self):
         """Check if the bobcat miner needs a fastsync"""
