@@ -67,10 +67,7 @@ from diagnoser import diagnoser
 bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
 
 bobcat.refresh_status()
-logger.info('refresh status data')
-
 bobcat.refresh_miner()
-logger.info('refresh miner data')
 
 diagnoser(bobcat)
 ```
