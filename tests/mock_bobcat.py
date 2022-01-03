@@ -126,7 +126,7 @@ def mock_unsynced_bobcat(*args, **kwargs):
     request_url = args[0]
     if "/status.json" in request_url:
         response_content = json.dumps({
-            "status": "Not Synced",
+            "status": "Syncing",
             "gap": "8000",
             "miner_height": "1140539",
             "blockchain_height": "1148539",
@@ -243,9 +243,9 @@ def mock_unhealthy_bobcat(*args, **kwargs):
     request_url = args[0]
     if "/status.json" in request_url:
         response_content = json.dumps({
-            "status": "Error",
-            "gap": "15000",
-            "miner_height": "1133539",
+            "status": "Down",
+            "gap": "-",
+            "miner_height": "-",
             "blockchain_height": "1148539",
             "epoch": "Error",
         })

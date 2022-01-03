@@ -12,9 +12,7 @@ import mock_bobcat
 class TestBobcat(unittest.TestCase):
 
     def setUp(self):
-        self.mock_ip_address = "127.0.0.1"
-        self.mock_username = "bobcat"
-        self.mock_password = "miner"
+        self.mock_ip_address = "x.x.x.x"
 
     @patch("requests.get")
     def test_babcat_refresh_status(self, mock_requests_get):
@@ -56,7 +54,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("requests.post")
     def test_babcat_resync(self, mock_requests_post):
-        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        b = Bobcat(self.mock_ip_address)
         _ = b.resync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/resync",
@@ -65,7 +63,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("requests.post")
     def test_babcat_reset(self, mock_requests_post):
-        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        b = Bobcat(self.mock_ip_address)
         _ = b.reset()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reset",
@@ -74,7 +72,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("requests.post")
     def test_babcat_reboot(self, mock_requests_post):
-        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        b = Bobcat(self.mock_ip_address)
         _ = b.reboot()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reboot",
@@ -83,7 +81,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("requests.post")
     def test_babcat_fastsync(self, mock_requests_post):
-        b = Bobcat(self.mock_ip_address, self.mock_username, self.mock_password)
+        b = Bobcat(self.mock_ip_address)
         _ = b.fastsync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/fastsync",
@@ -106,7 +104,7 @@ class TestSyncedBobcat(unittest.TestCase):
 
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
     def setUp(self, mock_requests_get):
-        self.bobcat = Bobcat("127.0.0.1", "bobcat", "miner")
+        self.bobcat = Bobcat("x.x.x.x")
         self.bobcat.refresh()
     
     def test_babcat_is_running(self):
@@ -140,7 +138,7 @@ class TestSyncedBobcat(unittest.TestCase):
 class TestUnsyncedBobcat(unittest.TestCase):
     @patch("requests.get", side_effect=mock_bobcat.mock_unsynced_bobcat)    
     def setUp(self, mock_requests_get):
-        self.bobcat = Bobcat("127.0.0.1", "bobcat", "miner")
+        self.bobcat = Bobcat("x.x.x.x")
         self.bobcat.refresh()
     
     def test_babcat_is_synced(self):
@@ -168,7 +166,7 @@ class TestUnsyncedBobcat(unittest.TestCase):
 class TestUnhealthyBobcat(unittest.TestCase):
     @patch("requests.get", side_effect=mock_bobcat.mock_unhealthy_bobcat)
     def setUp(self, mock_requests_get):
-        self.bobcat = Bobcat("127.0.0.1", "bobcat", "miner")
+        self.bobcat = Bobcat("x.x.x.x")
         self.bobcat.refresh()
     
     def test_babcat_is_running(self):
@@ -196,7 +194,7 @@ class TestUnhealthyBobcat(unittest.TestCase):
         self.assertTrue(self.bobcat.should_resync())
     
     def test_babcat_should_reboot(self):
-        self.assertFalse(self.bobcat.should_reboot())
+        self.assertTrue(self.bobcat.should_reboot())
     
     def test_babcat_should_reset(self):
         self.assertTrue(self.bobcat.should_reset())

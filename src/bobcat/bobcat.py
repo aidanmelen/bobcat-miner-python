@@ -2,30 +2,21 @@
 
 import backoff
 import base64
+import logging
 import requests
 import time
 
 
 class Bobcat:
-    def __init__(self, ip_address, username="bobcat", password="miner"):
+    def __init__(self, ip_address):
         self.ip_address = str(ip_address)
-        self.username = username
-        self.password = password
 
         self.status = {}
         self.miner = {}
         self.speed = {}
         self.dig = {}
 
-        self._set_base64_auth_token()
-
-    def _set_base64_auth_token(self):
-        """Set the base64 auth token used by post calls to the API"""
-        utf8_auth_token = f"{self.username}:{self.password}".encode("utf-8")
-        base64_auth_token_bytes = base64.b64encode(utf8_auth_token)
-        base64_auth_token = str(base64_auth_token_bytes, "utf-8")
-        self.basic_auth_token_header = {"Authorization": f"Basic {base64_auth_token}"}
-        return None
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     @backoff.on_exception(
         backoff.expo,
@@ -41,9 +32,9 @@ class Bobcat:
         (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
         max_time=600,
     )
-    def _requests_post(self, url, header):
+    def _requests_post(self, url):
         """Requests post call wrapper with exponential backoff annotation."""
-        return requests.post(url, header=header)
+        return requests.post(url, header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})
 
     def refresh_status(self):
         """Refresh data for the bobcat miner status"""
@@ -79,32 +70,24 @@ class Bobcat:
 
     def resync(self):
         """Resync the bobcat miner"""
-        return self._requests_post(
-            "http://" + self.ip_address + "/admin/resync", header=self.basic_auth_token_header
-        )
+        return self._requests_post("http://" + self.ip_address + "/admin/resync")
 
     def reset(self):
         """Reset the bobcat miner"""
-        return self._requests_post(
-            "http://" + self.ip_address + "/admin/reset", header=self.basic_auth_token_header
-        )
+        return self._requests_post("http://" + self.ip_address + "/admin/reset")
 
     def reboot(self):
         """Reboot the bobcat miner"""
-        return self._requests_post(
-            "http://" + self.ip_address + "/admin/reboot", header=self.basic_auth_token_header
-        )
+        return self._requests_post("http://" + self.ip_address + "/admin/reboot")
 
     def fastsync(self):
         """Fastsync the bobcat miner"""
-        return self._requests_post(
-            "http://" + self.ip_address + "/admin/fastsync", header=self.basic_auth_token_header
-        )
+        return self._requests_post("http://" + self.ip_address + "/admin/fastsync")
 
     def can_connect(self):
         """Check local connection to the bobcat miner API"""
         try:
-            return self._requests_get("http://" + self.ip_address).ok
+            return requests.get("http://" + self.ip_address).ok
         except requests.ConnectionError:
             return False
 
@@ -175,20 +158,94 @@ class Bobcat:
 
     def should_fastsync(self):
         """Check if the bobcat miner needs a fastsync"""
-        gap = int(self.status["gap"])
+        try:
+            gap = int(self.status["gap"])
+        except:
+            # fastsync will not fix an unhealthy miner
+            return False
         return gap > 400 and gap < 10000
 
     def should_resync(self):
         """Check if the bobcat miner needs a resync"""
-        gap = int(self.status["gap"])
+        try:
+            gap = int(self.status["gap"])
+        except:
+            # resync may fix unhealthy miner
+            return True
         return gap >= 10000
 
     def should_reboot(self):
         """Check if the bobcat miner needs to be reboot"""
-        gap = int(self.status["gap"])
+        try:
+            gap = int(self.status["gap"])
+        except:
+            # reboot may fix unhealthy miner
+            return True
         return not self.has_errors() and gap <= 10000
 
     def should_reset(self):
         """Check if the bobcat miner needs to be reset"""
-        gap = int(self.status["gap"])
+        try:
+            gap = int(self.status["gap"])
+        except:
+            # reset may fix unhealthy miner
+            return True
         return self.has_errors() and gap > 10000
+
+    def autopilot(self):
+        """Diagnose the Bobcat miner and ensure it is healthy"""
+
+        logging.info("running autopilot...")
+
+        if not self.can_connect():
+            logging.error(
+                f"Failed to connect to bobcat at {self.ip_address}. Please check your router for the bobcat's private ip address."
+            )
+            return None
+
+        if not self.status:
+            logging.info("refresh status data")
+            self.refresh_status()
+
+        if not self.miner:
+            logging.info("refresh miner data")
+            self.refresh_miner()
+
+        if self.is_healthy:
+            logging.info("bobcat is healthy")
+
+        else:
+            logging.info("bobcat is unhealthy")
+
+            # Try REBOOT, if not work, try RESET (wait for 30 minutes) -> FAST SYNC  (wait for 30 minutes).
+
+            if self.should_reboot():
+                logging.info("bobcat rebooting...")
+                self.reboot()
+
+            logging.info("refresh status data")
+            self.refresh_status()
+
+            logging.info("refresh miner data")
+            self.refresh_miner()
+
+            if self.should_reset():
+                logging.info("bobcat is still unhealthy after reboot")
+                logging.info("bobcat resetting...")
+                self.reset()
+
+                logging.info("waiting for 30 minutes...")
+                time.sleep(1800)
+
+                logging.info("refresh status data")
+                self.refresh_status()
+
+                while self.should_fastsync():
+
+                    logging.info("bobcat fastsync...")
+                    self.fastsync()
+
+                    logging.info("waiting for 30 minutes...")
+                    time.sleep(1800)
+
+        return None

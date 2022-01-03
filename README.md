@@ -53,26 +53,20 @@ bobcat.should_reset()
 
 :warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
-# Diagnoser Usage
+# Autopilot Usage
 
-The diagnoser is meant to automate bobcat miner adminstration. If the bobcat is unhealthy then the diagnoser will attempt to repair it.
+If the bobcat miner is unhealthy then the autopilot will attempt to repair it.
 
 ```python
 import os
 
-from bobcat.bobcat import Bobcat
-from bobcat.diagnoser import diagnoser
-
+import bobcat
 
 bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-
-bobcat.refresh_status()
-bobcat.refresh_miner()
-
-diagnoser(bobcat)
+bobcat.autopilot()
 ```
 
-# Toubleshooting
+# Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
 
