@@ -8,7 +8,7 @@ A python SDK for interacting with the bobcat miner.
 pip install bobcat-miner-python
 ```
 
-# Usage
+# Bobcat Usage
 
 ```python
 import bobcat_miner
@@ -55,7 +55,7 @@ bobcat.should_reset()
 
 :warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
-# Diagnoser
+# Diagnoser Usage
 
 The diagnoser is meant to automate the adminstration on the bobcat. If the bobcat is in an unhealthy state then the diagnoser will atemmpt to repair it.
 
