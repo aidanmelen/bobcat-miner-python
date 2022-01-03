@@ -57,7 +57,7 @@ bobcat.should_reset()
 
 The diagnoser is meant to automate bobcat miner adminstration. If the bobcat is unhealthy then the diagnoser will attempt to repair it.
 
-```
+```python
 from bobcat import Bobcat
 from diagnoser import diagnoser
 
