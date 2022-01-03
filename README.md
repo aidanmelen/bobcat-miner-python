@@ -2,7 +2,7 @@
 
 A python SDK for interacting with the bobcat miner.
 
-# Quick Start
+# Install
 
 ```bash
 pip install bobcat-miner-python
