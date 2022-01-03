@@ -60,8 +60,8 @@ The diagnoser is meant to automate bobcat miner adminstration. If the bobcat is 
 ```python
 import os
 
-from bobcat import Bobcat
-from diagnoser import diagnoser
+from bobcat.bobcat import Bobcat
+from bobcat.diagnoser import diagnoser
 
 
 bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
