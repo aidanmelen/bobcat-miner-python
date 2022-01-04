@@ -1,4 +1,4 @@
-NAME = bobcat-miner
+NAME = bobcat-miner-python
 
 SHELL := /bin/bash
 
@@ -14,16 +14,16 @@ build: ## Build the container
 	docker build . -t $(NAME)
 
 dev: build ## Get python interepter in the container
-	docker run -v "$$(pwd)/src/bobcat_miner":/bobcat_miner --rm -it --env-file .env --entrypoint /bin/bash $(NAME)
+	docker run -v "$$(pwd)":/bobcat_miner_python --rm -it --env-file .env --entrypoint /bin/bash $(NAME)
 
 run: build ## Run the container
 	docker run --rm -it --env-file .env $(NAME)
 
 quick-run: ## Run the container
-	docker -v "$$(pwd)/src/bobcat_miner":/bobcat_miner --rm -it --env-file .env $(NAME)
+	docker -v "$$(pwd)":/bobcat_miner_python --rm -it --env-file .env $(NAME)
 
 tests: build ## Run the unittests
-	docker run --rm -it --entrypoint='python' $(NAME) /bobcat/tests.py -v
+	docker run --rm -it --entrypoint='/bobcat_miner_python/tests-entrypoint.sh' $(NAME)
 
 lint: ## Run the unittests
 	black --line-length 100 src

@@ -4,7 +4,7 @@ from unittest.mock import patch, call
 import unittest
 import requests
 
-from bobcat import Bobcat
+from bobcat_miner import Bobcat
 
 import mock_bobcat 
 
