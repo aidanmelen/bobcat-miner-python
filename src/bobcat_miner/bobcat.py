@@ -247,5 +247,10 @@ class Bobcat:
 
                     logging.info("waiting for 30 minutes...")
                     time.sleep(1800)
+        
+        if self.is_healthy:
+            logging.info("bobcat is healthy")
+        else:
+            logging.info("bobcat is still unhealthy after reset and fastsync")
 
         return None
