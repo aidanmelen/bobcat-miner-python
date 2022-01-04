@@ -1,3 +1,5 @@
+[![PyPI](https://img.shields.io/pypi/v/bobcat_miner.svg)](https://pypi.org/project/bobcat-miner/)
+
 # bobcat-miner
 
 A python SDK for interacting with the bobcat miner.
