@@ -1,19 +1,31 @@
-# bobcat-miner-python
+# bobcat-miner
 
 A python SDK for interacting with the bobcat miner.
 
-# Install
+## Install
 
 ```bash
-pip install bobcat-miner-python
+pip install bobcat-miner
 ```
 
-# Bobcat Usage
+## Autopilot Usage
+
+Run bobcat autopilot
+
+```bash
+$ BOBCAT_IP_ADDRESS="x.x.x.x" bobcat-autopilot
+2022-01-03 20:26:30,433 INFO starting bobcat autopilot...
+2022-01-03 20:26:33,494 INFO refreshing status data...
+2022-01-03 20:26:34,999 INFO refreshing miner data...
+2022-01-03 20:26:45,749 INFO bobcat is healthy
+```
+
+## Bobcat Usage
 
 ```python
 import bobcat_miner
 
-bobcat = Bobcat(ip_address="192.168.1.10")
+bobcat = bobcat_miner.Bobcat(ip_address="x.x.x.x")
 
 # data refresh
 bobcat.refresh_status()
@@ -49,28 +61,18 @@ bobcat.should_reboot())
 bobcat.should_resync()
 bobcat.should_fastsync()
 bobcat.should_reset()
+
+# autopilot
+bobcat.autopilot()
 ```
 
 :warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
-# Autopilot Usage
-
-If the bobcat miner is unhealthy then the autopilot will attempt to repair it.
-
-```python
-import os
-
-import bobcat
-
-bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-bobcat.autopilot()
-```
-
-# Troubleshooting
+## Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
 
-# Donations
+## Donations
 
 Donations are welcome and appreciated!
 

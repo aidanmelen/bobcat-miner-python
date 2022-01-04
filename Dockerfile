@@ -1,14 +1,13 @@
 FROM python:3.9-slim
 
-COPY requirements.txt /requirements.txt 
+RUN pip install poetry
+COPY pyproject.toml *poetry.lock .
 
-RUN pip install -r /requirements.txt
+COPY src/bobcat_miner /bobcat_miner
+COPY tests /bobcat_miner
 
-COPY entrypoint.sh /entrypoint.sh
+RUN poetry install --no-interaction --no-ansi --no-root
 
-COPY src/bobcat /bobcat
-COPY tests /bobcat
-
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["poetry", "run", "bobcat-autopilot"]
 
 CMD ["/entrypoint.sh"]

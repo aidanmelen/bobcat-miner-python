@@ -193,22 +193,22 @@ class Bobcat:
         return self.has_errors() and gap > 10000
 
     def autopilot(self):
-        """Diagnose the Bobcat miner and ensure it is healthy"""
+        """Diagnose and repair an unhealthy bobcat miner"""
 
-        logging.info("running autopilot...")
+        logging.info("starting bobcat autopilot...")
 
         if not self.can_connect():
             logging.error(
-                f"Failed to connect to bobcat at {self.ip_address}. Please check your router for the bobcat's private ip address."
+                f"Failed to connect to the bobcat at {self.ip_address}. Please check your router for the bobcat's private ip address."
             )
             return None
 
         if not self.status:
-            logging.info("refresh status data")
+            logging.info("refreshing status data...")
             self.refresh_status()
 
         if not self.miner:
-            logging.info("refresh miner data")
+            logging.info("refreshing miner data...")
             self.refresh_miner()
 
         if self.is_healthy:
@@ -223,10 +223,10 @@ class Bobcat:
                 logging.info("bobcat rebooting...")
                 self.reboot()
 
-            logging.info("refresh status data")
+            logging.info("refreshing status data...")
             self.refresh_status()
 
-            logging.info("refresh miner data")
+            logging.info("refreshing miner data...")
             self.refresh_miner()
 
             if self.should_reset():
@@ -237,7 +237,7 @@ class Bobcat:
                 logging.info("waiting for 30 minutes...")
                 time.sleep(1800)
 
-                logging.info("refresh status data")
+                logging.info("refreshing status data...")
                 self.refresh_status()
 
                 while self.should_fastsync():

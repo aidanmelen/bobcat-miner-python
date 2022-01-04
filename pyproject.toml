@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "bobcat-miner"
+version = "0.2.4"
+authors = ["Aidan Melen <aidanmelen@protonmail.com>"]
+license = "MIT"
+description = "A python SDK for interacting with the bobcat miner."
+readme = "README.md"
+homepage = "https://github.com/aidanmelen/bobcat-miner-python"
+repository = "https://github.com/aidanmelen/bobcat-miner-python"
+keywords = ["helium", "bobcat", "miner"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.27.0"
+backoff = "^1.11.1"
+
+[tool.poetry.scripts]
+bobcat-autopilot = "bobcat_miner.cli:autopilot"
+bobcat-status = "bobcat_miner.cli:status"
+bobcat-miner = "bobcat_miner.cli:miner"
+bobcat-speed = "bobcat_miner.cli:speed"
+bobcat-dig = "bobcat_miner.cli:dig"
+bobcat-reboot = "bobcat_miner.cli:reboot"
+bobcat-resync = "bobcat_miner.cli:resync"
+bobcat-fastsync = "bobcat_miner.cli:fastsync"
+bobcat-reset = "bobcat_miner.cli:reset"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -14,13 +14,13 @@ build: ## Build the container
 	docker build . -t $(NAME)
 
 dev: build ## Get python interepter in the container
-	docker run -v "$$(pwd)/src/bobcat":/bobcat --rm -it --env-file .env --entrypoint /bin/bash $(NAME)
+	docker run -v "$$(pwd)/src/bobcat_miner":/bobcat_miner --rm -it --env-file .env --entrypoint /bin/bash $(NAME)
 
 run: build ## Run the container
 	docker run --rm -it --env-file .env $(NAME)
 
 quick-run: ## Run the container
-	docker -v "$$(pwd)/src/bobcat":/bobcat --rm -it --env-file .env $(NAME)
+	docker -v "$$(pwd)/src/bobcat_miner":/bobcat_miner --rm -it --env-file .env $(NAME)
 
 tests: build ## Run the unittests
 	docker run --rm -it --entrypoint='python' $(NAME) /bobcat/tests.py -v
