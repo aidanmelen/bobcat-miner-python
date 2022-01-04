@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bobcat-miner"
-version = "0.2.6"
+version = "0.3.0"
 authors = ["Aidan Melen <aidanmelen@protonmail.com>"]
 license = "MIT"
 description = "A python SDK for interacting with the bobcat miner."
@@ -13,6 +13,7 @@ keywords = ["helium", "bobcat", "miner"]
 python = "^3.9"
 requests = "^2.27.0"
 backoff = "^1.11.1"
+filelock = "^3.4.2"
 
 [tool.poetry.scripts]
 bobcat-autopilot = "bobcat_miner.cli:autopilot"

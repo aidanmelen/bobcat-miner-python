@@ -26,6 +26,18 @@ python-versions = ">=3.5.0"
 unicode_backport = ["unicodedata2"]
 
 [[package]]
+name = "filelock"
+version = "3.4.2"
+description = "A platform independent file lock."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+docs = ["furo (>=2021.8.17b43)", "sphinx (>=4.1)", "sphinx-autodoc-typehints (>=1.12)"]
+testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-cov", "pytest-timeout (>=1.4.2)"]
+
+[[package]]
 name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -67,7 +79,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f21edbe10cbfc9e2b90586b8752e03c82499ed7731949c6e3c294087d679c3b2"
+content-hash = "da7142793a6229f833d42d20f37709d31398721c89e43dd46bf6269ba439b456"
 
 [metadata.files]
 backoff = [
@@ -81,6 +93,10 @@ certifi = [
 charset-normalizer = [
     {file = "charset-normalizer-2.0.9.tar.gz", hash = "sha256:b0b883e8e874edfdece9c28f314e3dd5badf067342e42fb162203335ae61aa2c"},
     {file = "charset_normalizer-2.0.9-py3-none-any.whl", hash = "sha256:1eecaa09422db5be9e29d7fc65664e6c33bd06f9ced7838578ba40d58bdf3721"},
+]
+filelock = [
+    {file = "filelock-3.4.2-py3-none-any.whl", hash = "sha256:cf0fc6a2f8d26bd900f19bf33915ca70ba4dd8c56903eeb14e1e7a2fd7590146"},
+    {file = "filelock-3.4.2.tar.gz", hash = "sha256:38b4f4c989f9d06d44524df1b24bd19e167d851f19b50bf3e3559952dddc5b80"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},

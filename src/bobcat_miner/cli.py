@@ -39,6 +39,7 @@ def reboot():
     """bobcat-reboot"""
     print(Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).reboot())
 
+
 def resync():
     """bobcat-resync"""
     print(Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).resync())

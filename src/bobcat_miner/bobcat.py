@@ -1,5 +1,7 @@
 """Bobcat Miner"""
 
+from filelock import Timeout, FileLock
+
 import backoff
 import base64
 import logging
@@ -88,7 +90,7 @@ class Bobcat:
         """Check local connection to the bobcat miner API"""
         try:
             return requests.get("http://" + self.ip_address).ok
-        except requests.ConnectionError:
+        except Exception:
             return False
 
     def is_running(self):
@@ -195,63 +197,75 @@ class Bobcat:
     def autopilot(self):
         """Diagnose and repair an unhealthy bobcat miner"""
 
-        logging.info("starting bobcat autopilot...")
+        try:
+            lock = FileLock("/tmp/bobcat-autopilot", timeout=1)
 
-        if not self.can_connect():
-            logging.error(
-                f"Failed to connect to the bobcat at {self.ip_address}. Please check your router for the bobcat's private ip address."
-            )
-            return None
+            with lock:
+                logging.info("starting bobcat autopilot...")
 
-        if not self.status:
-            logging.info("refreshing status data...")
-            self.refresh_status()
+                if not self.can_connect():
+                    logging.error(
+                        f"Failed to connect to the bobcat at ({self.ip_address}). Please check your router for the bobcat's private ip address."
+                    )
+                    return None
 
-        if not self.miner:
-            logging.info("refreshing miner data...")
-            self.refresh_miner()
+                try:
+                    if not self.status:
+                        logging.info("refreshing status data...")
+                        self.refresh_status()
 
-        if self.is_healthy:
-            logging.info("bobcat is healthy")
-            return None
+                    if not self.miner:
+                        logging.info("refreshing miner data...")
+                        self.refresh_miner()
 
-        else:
-            logging.info("bobcat is unhealthy")
+                except json.JSONDecodeError:
+                    logging.error(
+                        f"Failed to get status and miner data from the bobcat at ({self.ip_address}). Please check your router for the bobcat's private ip address."
+                    )
 
-            # Try REBOOT, if not work, try RESET (wait for 30 minutes) -> FAST SYNC  (wait for 30 minutes).
+                if self.is_healthy:
+                    logging.info("bobcat is healthy")
+                    return None
 
-            if self.should_reboot():
-                logging.info("bobcat rebooting...")
-                self.reboot()
+                else:
+                    logging.info("bobcat is unhealthy")
 
-            logging.info("refreshing status data...")
-            self.refresh_status()
+                    # Try REBOOT, if not work, try RESET (wait for 30 minutes) -> FAST SYNC  (wait for 30 minutes).
 
-            logging.info("refreshing miner data...")
-            self.refresh_miner()
+                    if self.should_reboot():
+                        logging.info("bobcat rebooting...")
+                        self.reboot()
 
-            if self.should_reset():
-                logging.info("bobcat is still unhealthy after reboot")
-                logging.info("bobcat resetting...")
-                self.reset()
+                    logging.info("refreshing status data...")
+                    self.refresh_status()
 
-                logging.info("waiting for 30 minutes...")
-                time.sleep(1800)
+                    logging.info("refreshing miner data...")
+                    self.refresh_miner()
 
-                logging.info("refreshing status data...")
-                self.refresh_status()
+                    if self.should_reset():
+                        logging.info("bobcat is still unhealthy after reboot")
+                        logging.info("bobcat resetting...")
+                        self.reset()
 
-                while self.should_fastsync():
+                        logging.info("waiting for 30 minutes...")
+                        time.sleep(1800)
 
-                    logging.info("bobcat fastsync...")
-                    self.fastsync()
+                        logging.info("refreshing status data...")
+                        self.refresh_status()
 
-                    logging.info("waiting for 30 minutes...")
-                    time.sleep(1800)
-        
-            if self.is_healthy:
-                logging.info("bobcat is healthy")
-            else:
-                logging.info("bobcat is still unhealthy after reset and fastsync")
+                        while self.should_fastsync():
+
+                            logging.info("bobcat fastsync...")
+                            self.fastsync()
+
+                            logging.info("waiting for 30 minutes...")
+                            time.sleep(1800)
+
+                    if self.is_healthy:
+                        logging.info("bobcat is healthy")
+                    else:
+                        logging.info("bobcat is still unhealthy after reset and fastsync")
+        except Timeout:
+            logging.warn("Do nothing. Another instance of bobcat-autopilot currently running.")
 
         return None
