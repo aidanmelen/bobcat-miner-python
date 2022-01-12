@@ -6,6 +6,11 @@ try:
 except:
     from bobcat import Bobcat
 
+try:
+    from .autopilot import Autopilot
+except:
+    from autopilot import Autopilot
+
 
 def status():
     """bobcat-status"""
@@ -57,7 +62,10 @@ def reset():
 
 def autopilot():
     """bobcat-autopilot"""
-    Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).autopilot()
+    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
+
+    autopilot = Autopilot(bobcat)
+    autopilot.run()
 
 
 if __name__ == "__main__":

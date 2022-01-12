@@ -1,0 +1,168 @@
+"""Bobcat Autopilot"""
+
+import logging
+import json
+import time
+
+from filelock import Timeout, FileLock
+
+try:
+    from .bobcat import Bobcat
+except:
+    from bobcat import Bobcat
+
+
+    # def autopilot(self):
+    #     """Diagnose and repair an unhealthy bobcat miner"""
+
+    #     try:
+    #         lock = FileLock("/tmp/bobcat-autopilot", timeout=1)
+
+    #         with lock:
+    #             logging.info("starting bobcat autopilot...")
+
+    #             if not self.can_connect():
+    #                 logging.error(
+    #                     f"Failed to connect to the bobcat at ({self.ip_address}). Please check your router for the bobcat's private ip address."
+    #                 )
+    #                 return None
+
+    #             try:
+    #                 if not self.status:
+    #                     logging.info("refreshing status data...")
+    #                     self.refresh_status()
+
+    #                 if not self.miner:
+    #                     logging.info("refreshing miner data...")
+    #                     self.refresh_miner()
+
+    #             except json.decoder.JSONDecodeError:
+    #                 logging.error(
+    #                     f"Failed to get status and miner data from the bobcat at ({self.ip_address}). Please check your router for the bobcat's private ip address."
+    #                 )
+    #                 return None
+
+    #             if self.is_healthy:
+    #                 logging.info("bobcat is healthy")
+    #                 return None
+
+    #             else:
+    #                 logging.info("bobcat is unhealthy")
+
+    #                 # Try REBOOT, if not work, try RESET (wait for 30 minutes) -> FAST SYNC  (wait for 30 minutes).
+
+    #                 if self.should_reboot():
+    #                     logging.info("bobcat rebooting...")
+    #                     self.reboot()
+
+    #                 logging.info("refreshing status data...")
+    #                 self.refresh_status()
+
+    #                 logging.info("refreshing miner data...")
+    #                 self.refresh_miner()
+
+    #                 if self.should_reset():
+    #                     logging.info("bobcat is still unhealthy after reboot")
+    #                     logging.info("bobcat resetting...")
+    #                     self.reset()
+
+    #                     logging.info("waiting for 30 minutes...")
+    #                     time.sleep(1800)
+
+    #                     logging.info("refreshing status data...")
+    #                     self.refresh_status()
+
+    #                     while self.should_fastsync():
+
+    #                         logging.info("bobcat fastsync...")
+    #                         self.fastsync()
+
+    #                         logging.info("waiting for 30 minutes...")
+    #                         time.sleep(1800)
+
+    #                 if self.is_healthy:
+    #                     logging.info("bobcat is healthy")
+    #                 else:
+    #                     logging.info("bobcat is still unhealthy after reset and fastsync")
+    #     except Timeout:
+    #         logging.warn("Do nothing. Another instance of bobcat-autopilot currently running.")
+
+    #     return None
+
+
+class Autopilot():
+    def __init__(self, bobcat):
+        assert isinstance(bobcat, Bobcat)
+        self.bobcat = bobcat
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+
+    def run(self):
+        """Diagnose and repair the bobcat miner"""
+        try:
+            lock = FileLock("/tmp/bobcat-autopilot", timeout=1)
+
+            with lock:
+                if "Onboarding Key Not Found This Time".lower() in status.get("status").lower():
+
+                elif "Down".lower() == status.get("status").lower():
+                    # https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-
+
+                elif "Error".lower() == status.get("status").lower():
+                    # https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-
+
+
+                elif "Height API Error".lower() == status.get("status").lower():
+                    # https://bobcatminer.zendesk.com/hc/en-us/articles/4413699665435-API-Error
+
+                elif not self.bobcat.is_synced or not self.bobcat.is_running():
+                    pass
+
+                else:
+
+        except Timeout:
+            logging.warn("Do nothing. Another instance of bobcat-autopilot currently running.")
+
+
+    def reboot_reset_fastsync(self):
+        """Reboot -> Reset -> Fastsync"""
+        logging.info("bobcat rebooting")
+        self.bobcat.reboot()
+
+        logging.info("wait 30 minutes")
+        time.sleep(1800)
+
+        if not self.bobcat.is_synced or not self.bobcat.is_running():
+            logging.info("bobcat resetting")
+            self.bobcat.reset()
+
+            logging.info("wait 30 minutes")
+            time.sleep(1800)
+
+            if not self.bobcat.is_synced or not self.bobcat.is_running():
+                logging.info("bobcat fastsync")
+                self.bobcat.fastsync()
+
+                logging.info("wait 30 minutes")
+                time.sleep(1800)
+
+
+    # def _repair_onboarding_key_not_found(self):
+    #     """Repair onboarding key not found this time"""
+    #     # https://bobcatminer.zendesk.com/hc/en-us/articles/4413692388507-Onboarding-Key-Not-Found-
+    #     pass
+
+    # def _repair_no_activity(self):
+    #     """Repair miner showing no 'Proof of Coverage' activity on the Helium app"""
+    #     # https://bobcatminer.zendesk.com/hc/en-us/articles/4414496658715-No-Activity
+    #     pass
+
+    # def _repair_zero_witness(self):
+    #     """Repair miner flatline in Helium App"""
+    #     # https://bobcatminer.zendesk.com/hc/en-us/articles/4413692547355-Zero-Witness-
+    #     pass
+
+    # def _repair_syncing_issues(self):
+    #     """Repair miner having trouble syncing into the blockchain and the gap keeps getting larger"""
+    #     # https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues
+    #     pass

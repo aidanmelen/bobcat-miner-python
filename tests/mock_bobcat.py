@@ -87,6 +87,13 @@ def mock_synced_bobcat(*args, **kwargs):
             "timestamp": "2021-12-21 18:18:39 +0000 UTC",
             "errors": "",
         })
+    elif "/temp.json" in request_url:
+        response_content = json.dumps({
+            "timestamp": "2021-12-21 18:18:39 +0000 UTC",
+            "temp0": 38,
+            "temp1": 37,
+            "unit": "°C"
+        })
     elif "/speed.json" in request_url:
         response_content = json.dumps({
             "DownloadSpeed": "94 Mbit/s",
@@ -204,6 +211,13 @@ def mock_unsynced_bobcat(*args, **kwargs):
             "timestamp": "2021-12-21 18:18:39 +0000 UTC",
             "errors": "",
         })
+    elif "/temp.json" in request_url:
+        response_content = json.dumps({
+            "timestamp": "2021-12-21 18:18:39 +0000 UTC",
+            "temp0": 38,
+            "temp1": 37,
+            "unit": "°C"
+        })
     elif "/speed.json" in request_url:
         response_content = json.dumps({
             "DownloadSpeed": "5 Mbit/s",
@@ -314,6 +328,13 @@ def mock_unhealthy_bobcat(*args, **kwargs):
             "temp1": "-10 °C",
             "timestamp": "2021-12-21 18:18:39 +0000 UTC",
             "errors": "Error",
+        })
+    elif "/temp.json" in request_url:
+        response_content = json.dumps({
+            "timestamp": "2021-12-21 18:18:39 +0000 UTC",
+            "temp0": 80,
+            "temp1": -10,
+            "unit": "°C"
         })
     elif "/speed.json" in request_url:
         response_content = json.dumps({
