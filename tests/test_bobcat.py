@@ -105,55 +105,55 @@ class TestBobcatProperties(unittest.TestCase):
         self.bobcat.refresh()
     
     def test_status(self):
-        self.assertEquals(self.bobcat.status, "Synced")
+        self.assertEqual(self.bobcat.status, "Synced")
 
     def test_gap(self):
-        self.assertEquals(self.bobcat.gap, 0)
+        self.assertEqual(self.bobcat.gap, 0)
 
     def test_miner_height(self):
-        self.assertEquals(self.bobcat.miner_height, 1148539)
+        self.assertEqual(self.bobcat.miner_height, 1148539)
 
     def test_blockchain_height(self):
-        self.assertEquals(self.bobcat.blockchain_height, 1148539)
+        self.assertEqual(self.bobcat.blockchain_height, 1148539)
 
     def test_epoch(self):
-        self.assertEquals(self.bobcat.epoch, 30157)
+        self.assertEqual(self.bobcat.epoch, 30157)
 
     def test_ota_version(self):
-        self.assertEquals(self.bobcat.ota_version, "1.0.2.66")
+        self.assertEqual(self.bobcat.ota_version, "1.0.2.66")
 
     def test_region(self):
-        self.assertEquals(self.bobcat.region, "region_us915")
+        self.assertEqual(self.bobcat.region, "region_us915")
 
     def test_frequency_plan(self):
-        self.assertEquals(self.bobcat.frequency_plan, "us915")
+        self.assertEqual(self.bobcat.frequency_plan, "us915")
 
     def test_animal(self):
-        self.assertEquals(self.bobcat.animal, "my-mocked-miner")
+        self.assertEqual(self.bobcat.animal, "my-mocked-miner")
 
     def test_name(self):
-        self.assertEquals(self.bobcat.name, "My Mocked Miner")
+        self.assertEqual(self.bobcat.name, "My Mocked Miner")
 
     def test_pubkey(self):
-        self.assertEquals(self.bobcat.pubkey, "112YUf4TUQy4bxXRvGjrj6z7XyiSx8FDudTn6vtRYPgoGPnjBGWW")
+        self.assertEqual(self.bobcat.pubkey, "112YUf4TUQy4bxXRvGjrj6z7XyiSx8FDudTn6vtRYPgoGPnjBGWW")
 
     def test_state(self):
-        self.assertEquals(self.bobcat.state, "running")
+        self.assertEqual(self.bobcat.state, "running")
     
     def test_miner_status(self):
-        self.assertEquals(self.bobcat.miner_status, "Up 36 hours")
+        self.assertEqual(self.bobcat.miner_status, "Up 36 hours")
 
     def test_names(self):
-        self.assertEquals(self.bobcat.names, ["/miner"])
+        self.assertEqual(self.bobcat.names, ["/miner"])
 
     def test_image(self):
-        self.assertEquals(self.bobcat.image, "quay.io/team-helium/miner:miner-arm64_2021.12.14.0_GA")
+        self.assertEqual(self.bobcat.image, "quay.io/team-helium/miner:miner-arm64_2021.12.14.0_GA")
 
     def test_created(self):
-        self.assertEquals(self.bobcat.created, datetime.datetime(2021, 12, 20, 6, 15, 13))
+        self.assertEqual(self.bobcat.created, datetime.datetime(2021, 12, 20, 6, 15, 13))
 
     def test_p2p_status(self):
-        self.assertEquals(
+        self.assertEqual(
             self.bobcat.p2p_status,
             {
                 'connected': 'yes', 
@@ -164,10 +164,10 @@ class TestBobcatProperties(unittest.TestCase):
         )
 
     def test_ports_desc(self):
-        self.assertEquals(self.bobcat.ports_desc, "only need to port forward 44158. For 22, only when need remote support. public port open/close isn't accurate here, if your listen_addr is IP address, it should be OK")
+        self.assertEqual(self.bobcat.ports_desc, "only need to port forward 44158. For 22, only when need remote support. public port open/close isn't accurate here, if your listen_addr is IP address, it should be OK")
 
     def test_ports(self):
-        self.assertEquals(
+        self.assertEqual(
             self.bobcat.ports,
             {
                 "192.168.0.8:22": "open",
@@ -178,13 +178,13 @@ class TestBobcatProperties(unittest.TestCase):
         )
 
     def test_private_ip(self):
-        self.assertEquals(self.bobcat.private_ip, "192.168.0.8")
+        self.assertEqual(self.bobcat.private_ip, "192.168.0.8")
 
     def test_public_ip(self):
-        self.assertEquals(self.bobcat.public_ip, "33.117.96.28")
+        self.assertEqual(self.bobcat.public_ip, "33.117.96.28")
 
     def test_peerbook(self):
-        self.assertEquals(
+        self.assertEqual(
             self.bobcat.peerbook,
             [
                 "+-----------------------------------------------+--------------+----------+---------+---+----------+",
@@ -218,52 +218,52 @@ class TestBobcatProperties(unittest.TestCase):
         )
 
     def test_listen_address(self):
-        self.assertEquals(self.bobcat.listen_address, "/ip4/33.117.96.28/tcp/44158")
+        self.assertEqual(self.bobcat.listen_address, "/ip4/33.117.96.28/tcp/44158")
 
     def test_timestamp(self):
-        self.assertEquals(self.bobcat.timestamp, datetime.datetime(2021, 12, 21, 18, 18, 39, tzinfo=datetime.timezone(datetime.timedelta(0), 'UTC')))
+        self.assertEqual(self.bobcat.timestamp, datetime.datetime(2021, 12, 21, 18, 18, 39, tzinfo=datetime.timezone(datetime.timedelta(0), 'UTC')))
 
     def test_error(self):
-        self.assertEquals(self.bobcat.error, None)
+        self.assertEqual(self.bobcat.error, None)
 
     def test_temp0(self):
-        self.assertEquals(self.bobcat.temp0, 38)
+        self.assertEqual(self.bobcat.temp0, 38)
 
     def test_temp1(self):
-        self.assertEquals(self.bobcat.temp1, 37)
+        self.assertEqual(self.bobcat.temp1, 37)
 
     def test_temp0_c(self):
-        self.assertEquals(self.bobcat.temp0_c, 38)
+        self.assertEqual(self.bobcat.temp0_c, 38)
 
     def test_temp1_c(self):
-        self.assertEquals(self.bobcat.temp1_c, 37)
+        self.assertEqual(self.bobcat.temp1_c, 37)
 
     def test_temp0_f(self):
-        self.assertEquals(self.bobcat.temp0_f, 100.4)
+        self.assertEqual(self.bobcat.temp0_f, 100.4)
 
     def test_temp1_f(self):
-        self.assertEquals(self.bobcat.temp1_f, 98.6)
+        self.assertEqual(self.bobcat.temp1_f, 98.6)
 
     def test_download_speed(self):
-        self.assertEquals(self.bobcat.download_speed, "94 Mbit/s")
+        self.assertEqual(self.bobcat.download_speed, "94 Mbit/s")
 
     def test_upload_speed(self):
-        self.assertEquals(self.bobcat.upload_speed, "57 Mbit/s")
+        self.assertEqual(self.bobcat.upload_speed, "57 Mbit/s")
 
     def test_latency(self):
-        self.assertEquals(self.bobcat.latency, "7.669083ms")
+        self.assertEqual(self.bobcat.latency, "7.669083ms")
 
     def test_dig_name(self):
-        self.assertEquals(self.bobcat.dig_name, "seed.helium.io.")
+        self.assertEqual(self.bobcat.dig_name, "seed.helium.io.")
 
     def test_dig_message(self):
-        self.assertEquals(self.bobcat.dig_message, None)
+        self.assertEqual(self.bobcat.dig_message, None)
 
     def test_dig_dns(self):
-        self.assertEquals(self.bobcat.dig_dns, "Local DNS")
+        self.assertEqual(self.bobcat.dig_dns, "Local DNS")
 
     def test_dig_records(self):
-        self.assertEquals(
+        self.assertEqual(
             self.bobcat.dig_records,
             [
                 {

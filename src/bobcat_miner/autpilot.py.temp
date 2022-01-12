@@ -106,7 +106,7 @@ class Autopilot():
                 if "Onboarding Key Not Found This Time".lower() in status.get("status").lower():
 
                 elif "Down".lower() == status.get("status").lower():
-                    # https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-
+                    # https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-
 
                 elif "Error".lower() == status.get("status").lower():
                     # https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-
