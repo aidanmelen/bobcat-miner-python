@@ -17,10 +17,19 @@ class Bobcat:
         self.speed_data = {}
         self.dig_data = {}
 
-    def ping(self):
-        """Verify connectivity"""
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        return sock.connect_ex((self.ip_address, 80))
+    def can_ping(self, port=80, timeout=5):
+        """Verify network connectivity"""
+        try:
+            socket.setdefaulttimeout(timeout)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((self.ip_address, port))
+        except OSError:
+            result = False
+        else:
+            result = True
+        finally:
+            s.close()
+            return result
 
     @backoff.on_exception(
         backoff.expo,
@@ -232,16 +241,39 @@ class Bobcat:
         """Get peerbook"""
         if not self.miner_data:
             self.refresh_miner()
-        return self.miner_data.get("peerbook", [])
+        return "\n".join(self.miner_data.get("peerbook", []))
 
     @property
-    def listen_address(self):
-        """Get listen address"""
-        for i, e in enumerate(self.peerbook):
-            if "listen_addrs" in e:
-                return self.peerbook[i + 2].strip("|").strip()
-        else:
-            return None
+    def peerbook_miner(self):
+        """Get the peerbook miner information"""
+        if not self.miner_data:
+            self.refresh_miner()
+
+        header = self.miner_data.get("peerbook", [])[1].replace(" ", "").split("|")[1:-1]
+        data = self.miner_data.get("peerbook", [])[3].replace(" ", "").split("|")[1:-1]
+
+        return dict(zip(header, data))
+
+    @property
+    def peerbook_listen_address(self):
+        """Get the peerbook listen address"""
+        if not self.miner_data:
+            self.refresh_miner()
+        return self.miner_data.get("peerbook", [])[9].replace("|", "")
+
+    @property
+    def peerbook_peers(self):
+        """Get the peerbook peer information"""
+        if not self.miner_data:
+            self.refresh_miner()
+
+        header = self.miner_data.get("peerbook", [])[13].replace(" ", "").split("|")[1:-1]
+        data = [
+            record.replace(" ", "").split("|")[1:-1]
+            for record in self.miner_data.get("peerbook", [])[15:-3]
+        ]
+
+        return [dict(zip(header, record)) for record in data]
 
     @property
     def timestamp(self):
@@ -255,7 +287,9 @@ class Bobcat:
         """Get error"""
         if not self.miner_data:
             self.refresh_miner()
+
         _err = self.miner_data.get("error")
+
         return _err if _err else None
 
     @property
@@ -360,17 +394,17 @@ class Bobcat:
     def is_relayed(self):
         """Check if the bobcat is being relayed"""
 
-        # If the listen_addrs is via tcp/44158, it means your hotspot is not relayed.
-        # A relayed hotspot's listen address will be via another hotspot on the network
-        is_port_44158_open = self.public_ip in self.listen_address
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4407611835163-Miner-5s-Miner-Slow-Down-
 
-        return not is_port_44158_open and self.p2p_status.get("nat_type") == "none"
+        listen_address = self.peerbook[1]
+        is_port_44158_open = f"/ip4/{self.public_ip}/tcp/44158" in listen_address
+        return not is_port_44158_open and self.p2p_status.get("nat_type") != "none"
 
     @property
     def is_temp_safe(self):
         """Check for bobcat CPU tempurature outside the normal operating tempurature range."""
         # https://www.bobcatminer.com/post/bobcat-diagnoser-user-guide
-        return self.temp0 >= 0 and self.temp0 < 65 and self.temp1 >= 0 and self.temp1 < 65
+        return self.temp0 >= 0 and self.temp0 < 60 and self.temp1 >= 0 and self.temp1 < 60
 
     @property
     def is_local_network_slow(self):
@@ -387,16 +421,20 @@ class Bobcat:
 
     def reboot(self):
         """Reboot the bobcat miner"""
-        return self._post("http://" + self.ip_address + "/admin/reboot")
+        self._post("http://" + self.ip_address + "/admin/reboot")
+        return None
 
     def reset(self):
         """Reset the bobcat miner"""
-        return self._post("http://" + self.ip_address + "/admin/reset")
+        self._post("http://" + self.ip_address + "/admin/reset")
+        return None
 
     def resync(self):
         """Resync the bobcat miner"""
-        return self._post("http://" + self.ip_address + "/admin/resync")
+        self._post("http://" + self.ip_address + "/admin/resync")
+        return None
 
     def fastsync(self):
         """Fastsync the bobcat miner"""
-        return self._post("http://" + self.ip_address + "/admin/fastsync")
+        self._post("http://" + self.ip_address + "/admin/fastsync")
+        return None
