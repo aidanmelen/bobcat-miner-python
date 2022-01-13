@@ -79,12 +79,9 @@ bobcat.reboot()
 bobcat.resync()
 bobcat.fastsync()
 bobcat.reset()
-
-# autopilot
-bobcat.autopilot()
 ```
 
-:warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+:warning: Both `bobcat.refresh_speed()` and `bobcat.refresh()` may take 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
 ## Troubleshooting
 
