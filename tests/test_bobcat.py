@@ -14,18 +14,6 @@ class TestBobcatAPI(unittest.TestCase):
 
     def setUp(self):
         self.mock_ip_address = "x.x.x.x"
-    
-    @patch("socket.socket.connect")
-    def test_can_ping(self, mock_socket_connect):
-        b = Bobcat(self.mock_ip_address)
-        self.assertTrue(b.can_ping)
-        mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
-    
-    @patch("socket.socket.connect", side_effect=OSError)
-    def test_cannot_ping(self, mock_socket_connect):
-        b = Bobcat(self.mock_ip_address)
-        self.assertFalse(b.can_ping)
-        mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
 
     @patch("requests.get")
     def test_refresh_status(self, mock_requests_get):
@@ -71,6 +59,18 @@ class TestBobcatAPI(unittest.TestCase):
             ],
             any_order=True,
         )
+    
+    @patch("socket.socket.connect")
+    def test_can_ping(self, mock_socket_connect):
+        b = Bobcat(self.mock_ip_address)
+        self.assertTrue(b.ping())
+        mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
+    
+    @patch("socket.socket.connect", side_effect=OSError)
+    def test_cannot_ping(self, mock_socket_connect):
+        b = Bobcat(self.mock_ip_address)
+        self.assertFalse(b.ping())
+        mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
     
     @patch("requests.post")
     def test_reboot(self, mock_requests_post):
@@ -130,6 +130,9 @@ class TestBobcatProperties(unittest.TestCase):
 
     def test_epoch(self):
         self.assertEqual(self.bobcat.epoch, 30157)
+    
+    def test_tip(self):
+        self.assertEqual(self.bobcat.tip, None)
 
     def test_ota_version(self):
         self.assertEqual(self.bobcat.ota_version, "1.0.2.66")

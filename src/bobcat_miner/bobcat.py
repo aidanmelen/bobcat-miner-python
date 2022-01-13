@@ -86,28 +86,39 @@ class Bobcat:
         """Get gap"""
         if not self.status_data:
             self.refresh_status()
-        return int(self.status_data.get("gap"))
+        gap = self.status_data.get("gap")
+        return int(gap) if gap.lstrip('-').isdigit() else None
 
     @property
     def miner_height(self):
         """Get miner height"""
         if not self.status_data:
             self.refresh_status()
-        return int(self.status_data.get("miner_height"))
+        miner_height = self.status_data.get("miner_height")
+        return int(miner_height) if miner_height.lstrip('-').isdigit() else None
 
     @property
     def blockchain_height(self):
         """Get blockchain height"""
         if not self.status_data:
             self.refresh_status()
-        return int(self.status_data.get("blockchain_height"))
+        blockchain_height = self.status_data.get("blockchain_height")
+        return int(blockchain_height) if blockchain_height.lstrip('-').isdigit() else None
 
     @property
     def epoch(self):
         """Get epoch"""
         if not self.status_data:
             self.refresh_status()
-        return int(self.status_data.get("epoch"))
+        epoch = self.status_data.get("epoch")
+        return int(epoch) if epoch.lstrip('-').isdigit() else None
+    
+    @property
+    def tip(self):
+        """Get tip. Only available during error state"""
+        if not self.status_data:
+            self.refresh_status()
+        return self.status_data.get("tip")
 
     @property
     def ota_version(self):
@@ -362,21 +373,6 @@ class Bobcat:
         return self.dig_data.get("records", [])
 
     @property
-    def can_ping(self):
-        """Verify network connectivity"""
-        try:
-            socket.setdefaulttimeout(5)
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.ip_address, 80))
-        except OSError:
-            result = False
-        else:
-            result = True
-        finally:
-            s.close()
-            return result
-
-    @property
     def is_relayed(self):
         """Check if the bobcat is being relayed"""
 
@@ -404,6 +400,20 @@ class Bobcat:
         is_latency_high = latency > 50
 
         return any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
+    
+    def ping(self):
+        """Verify network connectivity"""
+        try:
+            socket.setdefaulttimeout(5)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((self.ip_address, 80))
+        except OSError:
+            result = False
+        else:
+            result = True
+        finally:
+            s.close()
+            return result
 
     def reboot(self):
         """Reboot the bobcat miner"""

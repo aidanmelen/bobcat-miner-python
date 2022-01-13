@@ -32,6 +32,7 @@ bobcat.gap
 bobcat.miner_height
 bobcat.blockchain_height
 bobcat.epoch
+bobcat.tip
 bobcat.ota_version
 bobcat.region
 bobcat.frequency_plan
@@ -69,16 +70,16 @@ bobcat.dig_dns
 bobcat.dig_records
 
 # diagnostics properties
-bobcat.can_ping
 bobcat.is_relayed
 bobcat.is_temp_safe
 bobcat.is_local_network_slow
 
 # actions
+bobcat.ping()
 bobcat.reboot()
+bobcat.reset()
 bobcat.resync()
 bobcat.fastsync()
-bobcat.reset()
 ```
 
 :warning: Both `bobcat.refresh_speed()` and `bobcat.refresh()` may take 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
