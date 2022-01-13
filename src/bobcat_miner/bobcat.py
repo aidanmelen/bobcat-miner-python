@@ -360,7 +360,7 @@ class Bobcat:
         if not self.dig_data:
             self.refresh_dig()
         return self.dig_data.get("records", [])
-    
+
     @property
     def can_ping(self):
         """Verify network connectivity"""
