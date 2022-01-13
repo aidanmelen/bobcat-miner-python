@@ -18,13 +18,13 @@ class TestBobcatAPI(unittest.TestCase):
     @patch("socket.socket.connect")
     def test_can_ping(self, mock_socket_connect):
         b = Bobcat(self.mock_ip_address)
-        self.assertTrue(b.can_ping())
+        self.assertTrue(b.can_ping)
         mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
     
     @patch("socket.socket.connect", side_effect=OSError)
     def test_cannot_ping(self, mock_socket_connect):
         b = Bobcat(self.mock_ip_address)
-        self.assertFalse(b.can_ping())
+        self.assertFalse(b.can_ping)
         mock_socket_connect.assert_called_once_with((self.mock_ip_address, 80))
 
     @patch("requests.get")
@@ -339,15 +339,6 @@ class TestBobcatProperties(unittest.TestCase):
                 }
             ]
         )
-
-    def test_is_running(self):
-        self.assertTrue(self.bobcat.is_running)
-
-    def test_is_synced(self):
-        self.assertTrue(self.bobcat.is_synced)
-
-    def test_is_loading(self):
-        self.assertFalse(self.bobcat.is_loading)
 
     def test_is_relayed(self):
         self.assertFalse(self.bobcat.is_relayed)

@@ -17,20 +17,6 @@ class Bobcat:
         self.speed_data = {}
         self.dig_data = {}
 
-    def can_ping(self, port=80, timeout=5):
-        """Verify network connectivity"""
-        try:
-            socket.setdefaulttimeout(timeout)
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.ip_address, port))
-        except OSError:
-            result = False
-        else:
-            result = True
-        finally:
-            s.close()
-            return result
-
     @backoff.on_exception(
         backoff.expo,
         (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
@@ -374,21 +360,21 @@ class Bobcat:
         if not self.dig_data:
             self.refresh_dig()
         return self.dig_data.get("records", [])
-
+    
     @property
-    def is_running(self):
-        """Check if the bobcat miner is running"""
-        return self.state.lower() == "running"
-
-    @property
-    def is_synced(self):
-        """Check if the bobcat miner is synced with the Helium blockchain"""
-        return self.status.lower() == "synced"
-
-    @property
-    def is_loading(self):
-        """Check if the bobcat miner is loading"""
-        return self.status.lower() == "loading"
+    def can_ping(self):
+        """Verify network connectivity"""
+        try:
+            socket.setdefaulttimeout(5)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((self.ip_address, 80))
+        except OSError:
+            result = False
+        else:
+            result = True
+        finally:
+            s.close()
+            return result
 
     @property
     def is_relayed(self):
