@@ -114,7 +114,7 @@ https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-
 
 ## Donations
 
-Donations are welcome and appreciated!
+Donations are welcome and appreciated! :gift: :tada:
 
 [![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](./images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
 
