@@ -13,6 +13,8 @@ pip install bobcat-miner
 
 ## Autopilot Usage
 
+:info: Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
+
 ```bash
 BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
 ```
@@ -83,7 +85,7 @@ bobcat.resync()
 bobcat.fastsync()
 ```
 
-:warning: Both `bobcat.refresh_speed()` or `bobcat.refresh()` may take 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+:warning: Both `bobcat.refresh_speed()` or `bobcat.refresh()` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
 ## Advanced Usage
 
@@ -99,6 +101,7 @@ autopilot.is_local_network_slow
 autopilot.is_gap_growing
 
 # actions
+autopilot.run()
 autopilot.reboot_reset_fastsync()
 autopilot.wait()
 ```
@@ -106,6 +109,8 @@ autopilot.wait()
 ## Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
+
+https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
 
 ## Donations
 

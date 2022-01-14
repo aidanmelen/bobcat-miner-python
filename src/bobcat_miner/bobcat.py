@@ -47,6 +47,7 @@ class Bobcat:
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed"""
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self.speed_data = self._get("http://" + self.ip_address + "/speed.json")
         return None
 
@@ -184,6 +185,7 @@ class Bobcat:
     @property
     def image(self):
         """Get miner image"""
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4413004080667-Access-Diagnoser-Check-OTA-Version
         if not self.miner_data:
             self.refresh_miner()
         return self.miner_data.get("miner", {}).get("Image")
@@ -388,16 +390,19 @@ class Bobcat:
 
     def reboot(self):
         """Reboot the bobcat miner"""
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self._post("http://" + self.ip_address + "/admin/reboot")
         return None
 
     def reset(self):
         """Reset the bobcat miner"""
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4412997563931-Reset-Miner-Feature
         self._post("http://" + self.ip_address + "/admin/reset")
         return None
 
     def resync(self):
         """Resync the bobcat miner"""
+        # https://bobcatminer.zendesk.com/hc/en-us/articles/4413004114075-Resync-Feature-
         self._post("http://" + self.ip_address + "/admin/resync")
         return None
 
