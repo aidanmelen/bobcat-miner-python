@@ -87,7 +87,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         gap = self.status_data.get("gap")
-        return int(gap) if gap.lstrip('-').isdigit() else None
+        return int(gap) if gap.lstrip("-").isdigit() else None
 
     @property
     def miner_height(self):
@@ -95,7 +95,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         miner_height = self.status_data.get("miner_height")
-        return int(miner_height) if miner_height.lstrip('-').isdigit() else None
+        return int(miner_height) if miner_height.lstrip("-").isdigit() else None
 
     @property
     def blockchain_height(self):
@@ -103,7 +103,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         blockchain_height = self.status_data.get("blockchain_height")
-        return int(blockchain_height) if blockchain_height.lstrip('-').isdigit() else None
+        return int(blockchain_height) if blockchain_height.lstrip("-").isdigit() else None
 
     @property
     def epoch(self):
@@ -111,8 +111,8 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         epoch = self.status_data.get("epoch")
-        return int(epoch) if epoch.lstrip('-').isdigit() else None
-    
+        return int(epoch) if epoch.lstrip("-").isdigit() else None
+
     @property
     def tip(self):
         """Get tip. Only available during error state"""
@@ -372,35 +372,6 @@ class Bobcat:
             self.refresh_dig()
         return self.dig_data.get("records", [])
 
-    @property
-    def is_relayed(self):
-        """Check if the bobcat is being relayed"""
-
-        # https://bobcatminer.zendesk.com/hc/en-us/articles/4407611835163-Miner-5s-Miner-Slow-Down-
-
-        listen_address = self.peerbook[1]
-        is_port_44158_open = f"/ip4/{self.public_ip}/tcp/44158" in listen_address
-        return not is_port_44158_open and self.p2p_status.get("nat_type") != "none"
-
-    @property
-    def is_temp_safe(self):
-        """Check for bobcat CPU tempurature outside the normal operating tempurature range."""
-        # https://www.bobcatminer.com/post/bobcat-diagnoser-user-guide
-        return self.temp0 >= 0 and self.temp0 < 60 and self.temp1 >= 0 and self.temp1 < 60
-
-    @property
-    def is_local_network_slow(self):
-        """Check for slowness and latency on the local network"""
-        download_speed = int(self.download_speed.strip(" Mbit/s"))
-        upload_speed = int(self.upload_speed.strip(" Mbit/s"))
-        latency = float(self.latency.strip("ms"))
-
-        is_download_speed_slow = download_speed < 5
-        is_upload_speed_slow = upload_speed < 5
-        is_latency_high = latency > 50
-
-        return any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
-    
     def ping(self):
         """Verify network connectivity"""
         try:

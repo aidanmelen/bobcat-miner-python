@@ -11,6 +11,12 @@ A python SDK for interacting with the bobcat miner.
 pip install bobcat-miner
 ```
 
+## Autopilot Usage
+
+```bash
+BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
+```
+
 ## Bobcat Usage
 
 ```python
@@ -69,11 +75,6 @@ bobcat.dig_message
 bobcat.dig_dns
 bobcat.dig_records
 
-# diagnostics properties
-bobcat.is_relayed
-bobcat.is_temp_safe
-bobcat.is_local_network_slow
-
 # actions
 bobcat.ping()
 bobcat.reboot()
@@ -82,7 +83,25 @@ bobcat.resync()
 bobcat.fastsync()
 ```
 
-:warning: Both `bobcat.refresh_speed()` and `bobcat.refresh()` may take 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+:warning: Both `bobcat.refresh_speed()` or `bobcat.refresh()` may take 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+
+## Advanced Usage
+
+```python
+import bobcat_miner
+
+autopilot = bobcat_miner.Autopilot(bobcat)
+
+# diagnose
+autopilot.is_relayed
+autopilot.is_temp_safe
+autopilot.is_local_network_slow
+autopilot.is_gap_growing
+
+# actions
+autopilot.reboot_reset_fastsync()
+autopilot.wait()
+```
 
 ## Troubleshooting
 
