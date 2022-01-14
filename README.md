@@ -13,7 +13,7 @@ pip install bobcat-miner
 
 ## Autopilot Usage
 
-:info: Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
+:information_source: Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
 
 ```bash
 BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
