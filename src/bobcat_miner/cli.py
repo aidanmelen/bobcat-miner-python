@@ -7,9 +7,9 @@ except:
     from bobcat import Bobcat
 
 try:
-    from .autopilot import Autopilot
+    from .autopilot import Autopilot, BobcatConnectionError
 except:
-    from autopilot import Autopilot
+    from autopilot import Autopilot, BobcatConnectionError
 
 
 def autopilot():
@@ -56,9 +56,12 @@ def dig():
 
 def ping():
     """bobcat-ping"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    autopilot = Autopilot(bobcat)
-    autopilot.ping()
+    try:
+        bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
+        autopilot = Autopilot(bobcat)
+        autopilot.ping()
+    except BobcatConnectionError:
+        print(f"The Autopilot was unable to connect to the Bobcat ({bobcat.ip_address})")
 
 
 def reboot():
