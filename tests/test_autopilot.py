@@ -32,7 +32,7 @@ class TestAutopilotActions(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat)
+        self.autopilot = Autopilot(bobcat, log_file=None)
 
     @patch("bobcat_miner.Autopilot.wait_loading")
     @patch("bobcat_miner.Bobcat.ping", side_effect=[False, False, True])
