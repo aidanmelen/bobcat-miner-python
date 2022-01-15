@@ -5,6 +5,7 @@ from datetime import datetime
 import socket
 import backoff
 import requests
+import time
 
 
 class Bobcat:
@@ -16,6 +17,8 @@ class Bobcat:
         self.temp_data = {}
         self.speed_data = {}
         self.dig_data = {}
+
+        return None
 
     @backoff.on_exception(
         backoff.expo,
@@ -49,6 +52,11 @@ class Bobcat:
         """Refresh data for the bobcat miner network speed"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self.speed_data = self._get("http://" + self.ip_address + "/speed.json")
+
+        if self.speed_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_speed()
+
         return None
 
     def refresh_temp(self):
@@ -63,14 +71,15 @@ class Bobcat:
 
     def refresh(self, status=True, miner=True, temp=True, speed=True, dig=True):
         """Refresh data for the bobcat miner"""
+        if speed:
+            # refresh the speed endpoint first because it has a rate limit
+            self.refresh_speed()
         if status:
             self.refresh_status()
         if miner:
             self.refresh_miner()
         if temp:
             self.refresh_temp()
-        if speed:
-            self.refresh_speed()
         if dig:
             self.refresh_dig()
         return None
@@ -374,10 +383,10 @@ class Bobcat:
             self.refresh_dig()
         return self.dig_data.get("records", [])
 
-    def ping(self):
+    def ping(self, timeout=5):
         """Verify network connectivity"""
         try:
-            socket.setdefaulttimeout(5)
+            socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip_address, 80))
         except OSError:

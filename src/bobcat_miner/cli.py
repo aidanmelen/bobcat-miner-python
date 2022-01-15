@@ -12,6 +12,13 @@ except:
     from autopilot import Autopilot
 
 
+def autopilot():
+    """bobcat-autopilot"""
+    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
+    autopilot = Autopilot(bobcat)
+    autopilot.run()
+
+
 def status():
     """bobcat-status"""
     bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
@@ -47,6 +54,13 @@ def dig():
     print(json.dumps(bobcat.dig_data, indent=4))
 
 
+def ping():
+    """bobcat-ping"""
+    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
+    autopilot = Autopilot(bobcat)
+    autopilot.ping()
+
+
 def reboot():
     """bobcat-reboot"""
     Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).reboot()
@@ -65,13 +79,6 @@ def fastsync():
 def reset():
     """bobcat-reset"""
     Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).reset()
-
-
-def autopilot():
-    """bobcat-autopilot"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    autopilot = Autopilot(bobcat)
-    autopilot.run()
 
 
 if __name__ == "__main__":

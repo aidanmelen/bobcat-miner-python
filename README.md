@@ -94,17 +94,19 @@ import bobcat_miner
 
 autopilot = bobcat_miner.Autopilot(bobcat)
 
-# diagnose
-autopilot.is_relayed
-autopilot.is_temp_safe
-autopilot.is_local_network_slow
-autopilot.is_gap_growing
+# diagnostics
+autopilot.diagnose_relay()
+autopilot.diagnose_temp()
+autopilot.diagnose_network_speed()
+autopilot.diagnose_sync()
 
 # actions
 autopilot.run()
 autopilot.reboot_reset_fastsync()
 autopilot.wait()
 ```
+
+:warning: Both `autopilot.autopilot.is_local_network_slow` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
 ## Troubleshooting
 
