@@ -19,8 +19,8 @@ dev: build ## Get python interepter in the container
 run: build ## Run the container
 	docker run --rm -it --env-file .env $(NAME)
 
-quick-run: ## Run the container
-	docker -v "$$(pwd)":/bobcat_miner_python --rm -it --env-file .env $(NAME)
+bobcat-autopilot: ## Run the bobcat-auotpilot
+	docker run -v "$$(pwd)":/bobcat_miner_python --rm -it --env-file .env $(NAME) poetry run bobcat-autopilot
 
 tests: build ## Run the unittests
 	docker run --rm -it --entrypoint='/bobcat_miner_python/tests-entrypoint.sh' $(NAME)

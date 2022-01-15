@@ -3,15 +3,21 @@
 
 # bobcat-miner
 
-A python SDK for interacting with the bobcat miner.
+A collection of command line tools to automate the Bobcat miner. The project offers a robust python SDK's for interacting with the Bobcat miner.
 
 ## Install
 
 ```bash
-pip install bobcat-miner
+# install command line tools
+pipx install bobcat-miner
+
+# install SDK
+pip3 install bobcat-miner
 ```
 
-## Autopilot Usage
+Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
+
+## Bobcat Autopilot Usage
 
 Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
 
@@ -19,7 +25,34 @@ Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/44
 BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
 ```
 
-## Bobcat Usage
+## Bobcat Autopilot SDK Usage
+
+```python
+import bobcat_miner
+
+bobcat = bobcat_miner.Bobcat("192.168.1.100")
+autopilot = bobcat_miner.Autopilot(bobcat)
+
+# automatically diagnose and repair the Bobcat
+autopilot.run()
+
+# diagnostics
+autopilot.diagnose_relay()
+autopilot.diagnose_temp()
+autopilot.diagnose_network_speed()
+autopilot.diagnose_sync()
+
+# actions
+autopilot.ping()        # Ping the Bobcat until it connects or attempts are maxed out
+autopilot.reboot()      # Reboot the Bobcat and wait for connection
+autopilot.reset()       # Reset the Bobcat and wait for connection or exceeds max attempts
+autopilot.resync()      # Fastsync the Bobcat and wait for connection
+autopilot.fastsync()    # Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts
+autopilot.autosync()    # Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync
+autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
+```
+
+## Bobcat SDK Usage
 
 ```python
 import bobcat_miner
@@ -85,41 +118,14 @@ bobcat.resync()
 bobcat.fastsync()
 ```
 
-## Advanced Usage
-
-```python
-import bobcat_miner
-
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
-autopilot = bobcat_miner.Autopilot(bobcat)
-
-# diagnostics
-autopilot.diagnose_relay()
-autopilot.diagnose_temp()
-autopilot.diagnose_network_speed()
-autopilot.diagnose_sync()
-
-# actions
-autopilot.ping()        # repeat ping attempts until bobcat is reached or exceeds max attempts
-autopilot.reboot()      # reset and wait for bobcat to connect
-autopilot.reset()       # reset and wait for health check
-autopilot.resync()      # resync and wait for health check
-autopilot.fastsync()    # repeat fastsync attempts until gap is less than 400 or exceeds max attempts
-autopilot.autosync()    # check sync -> reboot -> check sync -> fastsync -> check sync
-autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
-
-autopilot.run()         # reboot -> reset -> fastsync when bobcat is unhealthy and diagnostics
-```
-
 ## Troubleshooting
 
-Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
-
-https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
+Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) and [Troubleshooting your Bobcat hotspot](https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
+) for more information troubleshooting your bobcat miner.
 
 ## Donations
 
-Donations are welcome and appreciated! :gift: :tada:
+Donations are welcome and appreciated! :gift:
 
 [![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](./images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
 

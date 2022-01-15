@@ -34,21 +34,17 @@ class TestAutopilotActions(unittest.TestCase):
         bobcat.refresh()
         self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
 
-    @patch("bobcat_miner.Autopilot._wait_loading")
+    @patch("bobcat_miner.Autopilot._wait_for_loading")
     @patch("bobcat_miner.Bobcat.ping", side_effect=[False, False, True])
     @patch("time.sleep", return_value=None)
-    def test_wait(self, mock_time_sleep, mock_bobcat_ping, mock_autopilot_wait_loading):
+    def test_wait(self, mock_time_sleep, mock_bobcat_ping, mock_autopilot_wait_for_loading):
         self.autopilot.wait()
         mock_time_sleep.assert_has_calls(
             [call(Autopilot.THIRTY_MINUTES), call(Autopilot.FIVE_MINUTES)],
             any_order=False,
         )
         self.assertEqual(mock_bobcat_ping.call_count, 3)
-        self.assertTrue(
-            mock_autopilot_wait_loading.called_once_with(
-                Autopilot.THIRTY_MINUTES, Autopilot.FIVE_MINUTES
-            )
-        )
+        self.assertTrue(mock_autopilot_wait_for_loading.called_once_with(Autopilot.TEN_MINUTES))
 
 
 #     # @patch("bobcat_miner.Bobcat.refresh_status")
