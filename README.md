@@ -13,7 +13,7 @@ pip install bobcat-miner
 
 ## Autopilot Usage
 
-:information_source: Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
 
 ```bash
 BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
@@ -85,8 +85,6 @@ bobcat.resync()
 bobcat.fastsync()
 ```
 
-:warning: Both `bobcat.refresh_speed()` or `bobcat.refresh()` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
-
 ## Advanced Usage
 
 ```python
@@ -101,12 +99,16 @@ autopilot.diagnose_network_speed()
 autopilot.diagnose_sync()
 
 # actions
-autopilot.run()
-autopilot.reboot_reset_fastsync()
-autopilot.wait()
-```
+autopilot.ping()        # repeat ping attempts until bobcat is reached or exceeds max attempts
+autopilot.reboot()      # reset and wait for bobcat to connect
+autopilot.reset()       # reset and wait for health check
+autopilot.resync()      # resync and wait for health check
+autopilot.fastsync()    # repeat fastsync attempts until gap is less than 400 or exceeds max attempts
+autopilot.autosync()    # check sync -> reboot -> check sync -> fastsync -> check sync
+autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
 
-:warning: Both `autopilot.autopilot.is_local_network_slow` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+autopilot.run()         # reboot -> reset -> fastsync when bobcat is unhealthy and diagnostics
+```
 
 ## Troubleshooting
 
