@@ -90,6 +90,7 @@ bobcat.fastsync()
 ```python
 import bobcat_miner
 
+bobcat = bobcat_miner.Bobcat("192.168.1.100")
 autopilot = bobcat_miner.Autopilot(bobcat)
 
 # diagnostics
