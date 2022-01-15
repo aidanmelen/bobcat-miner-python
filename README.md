@@ -13,34 +13,10 @@ pip install bobcat-miner
 
 ## Autopilot Usage
 
-Run autopilot against a healthy bobcat
+:information_source: Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
 
 ```bash
-$ BOBCAT_IP_ADDRESS="x.x.x.x" bobcat-autopilot
-2022-01-03 20:26:30,433 INFO starting bobcat autopilot...
-2022-01-03 20:26:33,494 INFO refreshing status data...
-2022-01-03 20:26:34,999 INFO refreshing miner data...
-2022-01-03 20:26:45,749 INFO bobcat is healthy
-```
-
-Run autopilot against an unhealthy bobcat
-
-```bash
-$ BOBCAT_IP_ADDRESS="x.x.x.x" bobcat-autopilot
-2022-01-03 20:26:30,433 INFO starting bobcat autopilot...
-2022-01-03 20:26:33,494 INFO refreshing status data...
-2022-01-03 20:26:34,999 INFO refreshing miner data...
-2022-01-03 20:26:45,749 INFO bobcat is unhealthy
-2022-01-03 20:26:47,472 INFO bobcat rebooting...
-2022-01-03 20:31:33,594 INFO refreshing status data...
-2022-01-03 20:31:53,989 INFO refreshing miner data...
-2022-01-03 20:39:23,989 INFO bobcat is still unhealthy after reboot
-2022-01-03 20:40:34,712 INFO bobcat resetting...
-2022-01-03 21:10:32,182 INFO waiting for 30 minutes...
-2022-01-03 21:12:54,941 INFO refreshing status data...
-2022-01-03 21:13:47,912 INFO bobcat fastsync...
-2022-01-03 21:14:23,673 INFO waiting for 30 minutes...
-2022-01-03 21:45:12,492 INFO bobcat is healthy
+BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
 ```
 
 ## Bobcat Usage
@@ -48,56 +24,99 @@ $ BOBCAT_IP_ADDRESS="x.x.x.x" bobcat-autopilot
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat(ip_address="x.x.x.x")
+bobcat = bobcat_miner.Bobcat("192.168.1.100")
 
-# data refresh
+# refresh
 bobcat.refresh_status()
-print(bobcat.status)
-# {"status": "Synced", "gap": "0", "miner_height": "1148539", "blockchain_height": "1148539", "epoch": "30157"}
-
 bobcat.refresh_miner()
-print(bobcat.miner)
-# {"ota_version": "1.0.2.66", "region": "region_us915", "frequency_plan": "us915", "animal": "my-mocked-miner", ... }
-
 bobcat.refresh_speed()
-print(bobcat.speed)
-# {"DownloadSpeed": "94 Mbit/s", "UploadSpeed": "57 Mbit/s", "Latency": "7.669083ms"}
-
+bobcat.refresh_temp()
 bobcat.refresh_dig()
-print(bobcat.dig)
-# {"name": "seed.helium.io.", "DNS": "Local DNS", "records": [{"A": "54.232.171.76", ... ]}
+bobcat.refresh()
+
+# properties
+bobcat.status
+bobcat.gap
+bobcat.miner_height
+bobcat.blockchain_height
+bobcat.epoch
+bobcat.tip
+bobcat.ota_version
+bobcat.region
+bobcat.frequency_plan
+bobcat.animal
+bobcat.name
+bobcat.pubkey
+bobcat.state
+bobcat.miner_status
+bobcat.names
+bobcat.image
+bobcat.created
+bobcat.p2p_status
+bobcat.ports_desc
+bobcat.ports
+bobcat.private_ip
+bobcat.public_ip
+bobcat.peerbook
+bobcat.peerbook_miner
+bobcat.peerbook_listen_address
+bobcat.peerbook_peers
+bobcat.timestamp
+bobcat.error
+bobcat.temp0
+bobcat.temp1
+bobcat.temp0_c
+bobcat.temp1_c
+bobcat.temp0_f
+bobcat.temp1_f
+bobcat.download_speed
+bobcat.upload_speed
+bobcat.latency
+bobcat.dig_name
+bobcat.dig_message
+bobcat.dig_dns
+bobcat.dig_records
 
 # actions
+bobcat.ping()
 bobcat.reboot()
+bobcat.reset()
 bobcat.resync()
 bobcat.fastsync()
-bobcat.reset()
-
-# diagnostics
-bobcat.is_healthy()
-bobcat.is_running()
-bobcat.is_synced()
-bobcat.is_temp_safe()
-bobcat.has_errors()
-bobcat.is_relayed()
-bobcat.should_reboot())
-bobcat.should_resync()
-bobcat.should_fastsync()
-bobcat.should_reset()
-
-# autopilot
-bobcat.autopilot()
 ```
 
-:warning: `bobcat.refresh_speed()` takes about 30 seconds to complete and you should not call it repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+:warning: Both `bobcat.refresh_speed()` or `bobcat.refresh()` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
+
+## Advanced Usage
+
+```python
+import bobcat_miner
+
+autopilot = bobcat_miner.Autopilot(bobcat)
+
+# diagnostics
+autopilot.diagnose_relay()
+autopilot.diagnose_temp()
+autopilot.diagnose_network_speed()
+autopilot.diagnose_sync()
+
+# actions
+autopilot.run()
+autopilot.reboot_reset_fastsync()
+autopilot.wait()
+```
+
+:warning: Both `autopilot.autopilot.is_local_network_slow` take about 30 seconds to complete and you should not call them repeatedly. Doing so will slow down your internet speed, which in turn will slow down your miner.
 
 ## Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
 
+https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
+
 ## Donations
 
-Donations are welcome and appreciated!
+Donations are welcome and appreciated! :gift: :tada:
 
 [![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](./images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
 
