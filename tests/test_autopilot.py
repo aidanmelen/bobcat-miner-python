@@ -34,7 +34,7 @@ class TestAutopilotActions(unittest.TestCase):
         bobcat.refresh()
         self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
 
-    @patch("bobcat_miner.Autopilot.wait_loading")
+    @patch("bobcat_miner.Autopilot._wait_loading")
     @patch("bobcat_miner.Bobcat.ping", side_effect=[False, False, True])
     @patch("time.sleep", return_value=None)
     def test_wait(self, mock_time_sleep, mock_bobcat_ping, mock_autopilot_wait_loading):

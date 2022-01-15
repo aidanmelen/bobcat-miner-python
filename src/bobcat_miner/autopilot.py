@@ -149,7 +149,7 @@ class Autopilot:
         self.logger.debug("Successfully connected to the Bobcat")
         return True
 
-    def wait_loading(self, wait_time=THIRTY_MINUTES, backoff_time=FIVE_MINUTES, max_attempts=10):
+    def _wait_loading(self, wait_time=THIRTY_MINUTES, backoff_time=FIVE_MINUTES, max_attempts=10):
         """Wait for bobcat when loading"""
 
         if self.dry_run:
@@ -170,7 +170,7 @@ class Autopilot:
         return None
 
     def wait(self, wait_time=THIRTY_MINUTES, backoff_time=FIVE_MINUTES):
-        """Wait for bobcat"""
+        """Wait for Bobcat"""
 
         if self.dry_run:
             wait_time = 1
@@ -180,7 +180,7 @@ class Autopilot:
 
         self.ping()
 
-        self.wait_loading(wait_time, backoff_time)
+        self._wait_loading(wait_time, backoff_time)
 
         return None
 
@@ -304,27 +304,38 @@ class Autopilot:
             self.logger.debug("Leave the Bobcat alone because it syncing")
             return True
 
-    def catch_up(self):
+    def autosync(self):
         """Catch the Bobcat to the top of the blockchain"""
         self.logger.warning("Attempt to sync the Bobcat")
 
         if self.is_syncing():
-            return None
+            return True
 
         self.reboot()
         self.bobcat.refresh_status()
 
         if self.is_syncing():
-            return None
+            return True
 
         self.logger.info("The reboot did not fix the Bobcat's syncing issue")
         if self.bobcat.gap > 400:
             self.fastsync()
 
-        if not self.is_syncing():
-            self.logger.error("The reboot failed to sync the Bobcat")
+        if self.is_syncing():
+            return True
 
-        return None
+        self.logger.info("The reboot did not fix the Bobcat's syncing issue")
+        self.reboot()
+        self.reset()
+        self.fastsync()
+
+        if not self.is_syncing():
+            self.logger.error("The autosync failed to resolve the sync issue.")
+            self.logger.debug(
+                "Contact Bobcat Support: https://bobcatminer.zendesk.com/hc/en-us/articles/4412998083355-Contact-Support"
+            )
+
+        return False
 
     def run(self):
         """Diagnose and repair bobcat"""
@@ -381,7 +392,7 @@ class Autopilot:
                         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
                     )
 
-                    self.catch_up()
+                    self.autosync()
 
                 # Diagnose
                 self.diagnose_relay()
