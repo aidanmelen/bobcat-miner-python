@@ -15,7 +15,7 @@ class TestAutopilotDiagnose(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat, log_level=logging.NOTSET)
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
 
     def test_diagnose_relay(self):
         self.assertFalse(self.autopilot.diagnose_relay())
@@ -32,7 +32,7 @@ class TestAutopilotActions(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat, log_file=None)
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
 
     @patch("bobcat_miner.Autopilot.wait_loading")
     @patch("bobcat_miner.Bobcat.ping", side_effect=[False, False, True])
