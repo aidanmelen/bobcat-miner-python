@@ -15,6 +15,7 @@ requests = "^2.27.0"
 backoff = "^1.11.1"
 filelock = "^3.4.2"
 discord-lumberjack = "^1.0.3"
+click = "^8.0.3"
 
 [tool.poetry.scripts]
 bobcat-autopilot = "bobcat_miner.cli:autopilot"

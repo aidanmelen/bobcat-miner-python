@@ -13,6 +13,8 @@ try:
 except:
     from autopilot import Autopilot, BobcatConnectionError
 
+# TODO implent click command line interface
+# example: https://github.com/aidanmelen/website-checker/blob/main/src/website_checker/cli.py
 
 def autopilot():
     """bobcat-autopilot"""
