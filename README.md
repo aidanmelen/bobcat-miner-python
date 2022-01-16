@@ -37,10 +37,10 @@ autopilot = bobcat_miner.Autopilot(bobcat)
 autopilot.run()
 
 # diagnostics
-autopilot.diagnose_relay()
-autopilot.diagnose_temp()
-autopilot.diagnose_network_speed()
-autopilot.diagnose_sync()
+autopilot.is_relayed()
+autopilot.is_temp_dangerous()
+autopilot.is_network_speed_slow()
+autopilot.is_syncing()
 
 # actions
 autopilot.ping()        # Ping the Bobcat until it connects or attempts are maxed out
@@ -116,13 +116,14 @@ bobcat.reboot()
 bobcat.reset()
 bobcat.resync()
 bobcat.fastsync()
+
+# diagnostics
+bobcat.is_bobcat()
 ```
 
 ## Troubleshooting
 
-Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) and [Troubleshooting your Bobcat hotspot](https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
-) for more information troubleshooting your bobcat miner.
-
+Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
 ## Donations
 
 Donations are welcome and appreciated! :gift:

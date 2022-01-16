@@ -10,29 +10,55 @@ from bobcat_miner import Bobcat, Autopilot
 import mock_bobcat
 
 
-class TestAutopilotDiagnose(unittest.TestCase):
+class TestAutopilotDiagnoseHealthyBobcat(unittest.TestCase):
+    """Test Autopilot diagnosing an healthy Bobcat"""
+
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
         self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        logging.getLogger("bobcat-autopilot").disabled = True
 
-    def test_diagnose_relay(self):
-        self.assertFalse(self.autopilot.diagnose_relay())
+    def test_is_relayed(self):
+        self.assertFalse(self.autopilot.is_relayed())
 
-    def test_diagnose_temp(self):
-        self.assertTrue(self.autopilot.diagnose_temp())
+    def test_is_temp_dangerous(self):
+        self.assertFalse(self.autopilot.is_temp_dangerous())
 
-    def test_diagnose_network_speed(self):
-        self.assertFalse(self.autopilot.diagnose_network_speed())
+    def test_is_network_speed_slow(self):
+        self.assertFalse(self.autopilot.is_network_speed_slow())
+
+
+class TestAutopilotDiagnoseUnhealthyBobcat(unittest.TestCase):
+    """Test Autopilot diagnosing an unhealthy Bobcat"""
+
+    @patch("requests.get", side_effect=mock_bobcat.mock_unhealthy_bobcat)
+    def setUp(self, mock_requests_get):
+        bobcat = Bobcat("x.x.x.x")
+        bobcat.refresh()
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        logging.getLogger("bobcat-autopilot").disabled = True
+
+    def test_is_relayed(self):
+        self.assertTrue(self.autopilot.is_relayed())
+
+    def test_is_temp_dangerous(self):
+        self.assertTrue(self.autopilot.is_temp_dangerous())
+
+    def test_is_network_speed_slow(self):
+        self.assertTrue(self.autopilot.is_network_speed_slow())
 
 
 class TestAutopilotActions(unittest.TestCase):
+    """Test Autopilot actions"""
+
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
         self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        logging.getLogger("bobcat-autopilot").disabled = True
 
     @patch("bobcat_miner.Autopilot._wait_for_loading")
     @patch("bobcat_miner.Bobcat.ping", side_effect=[False, False, True])
@@ -45,15 +71,6 @@ class TestAutopilotActions(unittest.TestCase):
         )
         self.assertEqual(mock_bobcat_ping.call_count, 3)
         self.assertTrue(mock_autopilot_wait_for_loading.called_once_with(Autopilot.TEN_MINUTES))
-
-
-#     # @patch("bobcat_miner.Bobcat.refresh_status")
-#     # @patch("bobcat_miner.Bobcat.gap")
-#     # @patch("time.sleep", return_value=None)
-#     # def test_is_gap_growing(self, mock_time_sleep, mock_bobcat_gap, mock_bobcat_refresh_status):
-
-#     #     mock_bobcat_gap = PropertyMock(side_effect=[600, 700, 600, 700, 800, 900])
-#     #     self.autopilot.is_gap_growing()
 
 
 if __name__ == "__main__":

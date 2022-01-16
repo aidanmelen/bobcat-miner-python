@@ -25,7 +25,7 @@ class Bobcat:
     )
     def _get(self, url):
         """Requests get call wrapper with exponential backoff."""
-        return requests.get(url).json()
+        return requests.get(url)
 
     @backoff.on_exception(
         backoff.expo,
@@ -38,16 +38,16 @@ class Bobcat:
 
     def refresh_status(self):
         """Refresh data for the bobcat miner status"""
-        self.status_data = self._get("http://" + self.ip_address + "/status.json")
+        self.status_data = self._get("http://" + self.ip_address + "/status.json").json()
 
     def refresh_miner(self):
         """Refresh data for the bobcat miner data"""
-        self.miner_data = self._get("http://" + self.ip_address + "/miner.json")
+        self.miner_data = self._get("http://" + self.ip_address + "/miner.json").json()
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
-        self.speed_data = self._get("http://" + self.ip_address + "/speed.json")
+        self.speed_data = self._get("http://" + self.ip_address + "/speed.json").json()
 
         if self.speed_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -55,11 +55,11 @@ class Bobcat:
 
     def refresh_temp(self):
         """Refresh data for the bobcat miner temp"""
-        self.temp_data = self._get("http://" + self.ip_address + "/temp.json")
+        self.temp_data = self._get("http://" + self.ip_address + "/temp.json").json()
 
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
-        self.dig_data = self._get("http://" + self.ip_address + "/dig.json")
+        self.dig_data = self._get("http://" + self.ip_address + "/dig.json").json()
 
     def refresh(self, status=True, miner=True, temp=True, speed=True, dig=True):
         """Refresh data for the bobcat miner"""
@@ -380,7 +380,7 @@ class Bobcat:
             socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip_address, 80))
-        except OSError:
+        except OSError as err:
             result = False
         else:
             result = True
@@ -406,3 +406,11 @@ class Bobcat:
     def fastsync(self):
         """Fastsync the bobcat miner"""
         self._post("http://" + self.ip_address + "/admin/fastsync")
+    
+    def is_bobcat(self):
+        """Check if IP address is a Bobcat miner"""
+        try:
+            r = self._get("http://" + self.ip_address)
+            return "Diagnoser - Bobcatminer Diagnostic Dashboard" in r.text
+        except requests.RequestException:
+            return False

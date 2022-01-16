@@ -1,4 +1,5 @@
 from logging.handlers import TimedRotatingFileHandler
+# from discord_lumberjack.handlers import DiscordWebhookHandler
 
 import logging
 
@@ -30,7 +31,7 @@ class StdoutColorFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(log_file, log_level):
+def get_logger(log_file, log_level, discord_webhook_url):
     """Get Bobcat Autopilot logger"""
     logger = logging.getLogger("bobcat-autopilot")
     logger.setLevel(log_level)
@@ -45,5 +46,9 @@ def get_logger(log_file, log_level):
             logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
         )
         logger.addHandler(file_handler)
+    
+    # if log_discord_webhook_url:
+    #     discord_handler = DiscordChannelHandler(url=discord_webhook_url, level=log_level)
+    #     logger.addHandler(discord_handler)
 
     return logger

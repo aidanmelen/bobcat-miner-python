@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 
@@ -15,7 +16,12 @@ except:
 def autopilot():
     """bobcat-autopilot"""
     bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    autopilot = Autopilot(bobcat)
+    log_file = os.getenv("BOBCAT_AUTOPILOT_LOG_FILE", "/var/log/bobcat-autopilot.log")
+    log_level = os.getenv("BOBCAT_AUTOPILOT_LOG_LEVEL", logging.DEBUG)
+    discord_webhook_url = os.getenv("BOBCAT_DISCORD_WEBHOOK", None)
+    dry_run = os.getenv("BOBCAT_AUTOPILOT_DRY_RUN", "False").upper() == "TRUE"
+
+    autopilot = Autopilot(bobcat, log_file=log_file, log_level=log_level, discord_webhook_url=discord_webhook_url, dry_run=dry_run)
     autopilot.run()
 
 
@@ -58,10 +64,16 @@ def ping():
     """bobcat-ping"""
     try:
         bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-        autopilot = Autopilot(bobcat)
+        log_file = os.getenv("BOBCAT_AUTOPILOT_LOG_FILE", "/var/log/bobcat-autopilot.log")
+        log_level = os.getenv("BOBCAT_AUTOPILOT_LOG_LEVEL", logging.DEBUG)
+        dry_run = os.getenv("BOBCAT_AUTOPILOT_DRY_RUN", "False").upper() == "TRUE"
+
+        autopilot = Autopilot(bobcat, log_file=log_file, log_level=log_level, dry_run=dry_run)
         autopilot.ping()
     except BobcatConnectionError:
-        print(f"The Autopilot was unable to connect to the Bobcat ({bobcat.ip_address})")
+        autopilot.logger.error(
+            "The Autopilot was unable to connect to the Bobcat ({bobcat.ip_address})"
+        )
 
 
 def reboot():

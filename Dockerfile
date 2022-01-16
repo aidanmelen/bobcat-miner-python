@@ -8,6 +8,4 @@ WORKDIR bobcat_miner_python
 
 RUN poetry install --no-interaction --no-ansi
 
-ENTRYPOINT ["poetry", "run", "bobcat-autopilot"]
-
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["poetry", "run", "/bin/bash"]
