@@ -124,7 +124,7 @@ bobcat.is_bobcat()
 
 ## Troubleshooting
 
-Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
+Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information.
 ## Donations
 
 Donations are welcome and appreciated! :gift:
