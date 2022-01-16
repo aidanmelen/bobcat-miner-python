@@ -41,6 +41,7 @@ autopilot.is_relayed()
 autopilot.is_temp_dangerous()
 autopilot.is_network_speed_slow()
 autopilot.is_syncing()
+autopilot.has_errors()
 
 # actions
 autopilot.ping()        # Ping the Bobcat until it connects or attempts are maxed out

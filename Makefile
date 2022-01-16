@@ -27,4 +27,4 @@ tests: ## Run the unittests
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)
 
 lint: ## Run the linter
-	black --line-length 100 src/bobcat_miner tests
+	black --line-length 100 .

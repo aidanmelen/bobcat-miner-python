@@ -29,6 +29,9 @@ class TestAutopilotDiagnoseHealthyBobcat(unittest.TestCase):
     def test_is_network_speed_slow(self):
         self.assertFalse(self.autopilot.is_network_speed_slow())
 
+    def test_has_errors(self):
+        self.assertFalse(self.autopilot.has_errors())
+
 
 class TestAutopilotDiagnoseUnhealthyBobcat(unittest.TestCase):
     """Test Autopilot diagnosing an unhealthy Bobcat"""
@@ -48,6 +51,9 @@ class TestAutopilotDiagnoseUnhealthyBobcat(unittest.TestCase):
 
     def test_is_network_speed_slow(self):
         self.assertTrue(self.autopilot.is_network_speed_slow())
+
+    def test_has_errors(self):
+        self.assertTrue(self.autopilot.has_errors())
 
 
 class TestAutopilotActions(unittest.TestCase):

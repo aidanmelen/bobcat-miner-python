@@ -406,7 +406,7 @@ class Bobcat:
     def fastsync(self):
         """Fastsync the bobcat miner"""
         self._post("http://" + self.ip_address + "/admin/fastsync")
-    
+
     def is_bobcat(self):
         """Check if IP address is a Bobcat miner"""
         try:

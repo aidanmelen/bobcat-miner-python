@@ -1,5 +1,5 @@
 from logging.handlers import TimedRotatingFileHandler
-# from discord_lumberjack.handlers import DiscordWebhookHandler
+from discord_lumberjack.handlers import DiscordWebhookHandler
 
 import logging
 
@@ -31,7 +31,7 @@ class StdoutColorFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(log_file, log_level, discord_webhook_url):
+def get_logger(log_file, log_level, log_discord_webhook_url, log_discord_log_level):
     """Get Bobcat Autopilot logger"""
     logger = logging.getLogger("bobcat-autopilot")
     logger.setLevel(log_level)
@@ -46,9 +46,32 @@ def get_logger(log_file, log_level, discord_webhook_url):
             logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
         )
         logger.addHandler(file_handler)
-    
-    # if log_discord_webhook_url:
-    #     discord_handler = DiscordChannelHandler(url=discord_webhook_url, level=log_level)
-    #     logger.addHandler(discord_handler)
+
+    if log_discord_webhook_url:
+        discord_webhook_handler = DiscordWebhookHandler(
+            url=log_discord_webhook_url, level=log_discord_log_level
+        )
+        logger.addHandler(discord_webhook_handler)
 
     return logger
+
+
+if __name__ == "__main__":
+    import os
+    import requests
+    import time
+
+    log_file = os.getenv("BOBCAT_LOG_FILE", "/var/log/bobcat-autopilot.log")
+    log_level = os.getenv("BOBCAT_LOG_LEVEL", logging.DEBUG)
+    log_discord_webhook_url = os.getenv("BOBCAT_LOG_DISCORD_WEBHOOK_URL")
+
+    logger = get_logger(
+        log_file=log_file, log_level=log_level, log_discord_webhook_url=log_discord_webhook_url
+    )
+
+    logger.info("i am a bobcat info")
+    logger.warning("i am a bobcat warning")
+    logger.error("i am a sad bobcat error")
+
+    # requests.post(log_discord_webhook_url, { "content": "post command" })
+    time.sleep(1)
