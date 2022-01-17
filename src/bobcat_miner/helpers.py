@@ -1,5 +1,6 @@
 from logging.handlers import TimedRotatingFileHandler
 from discord_lumberjack.handlers import DiscordWebhookHandler
+from discord_lumberjack.message_creators import BasicMessageCreator
 
 import logging
 import os
@@ -59,20 +60,10 @@ class LogStreamFormatter(logging.Formatter):
 
 class LogDiscordFormatter(logging.Formatter):
 
-    # TODO multiline log message not rendering properly
-    # FORMATS = {
-    #     logging_trace: f"{LogLevelEmoji.TRACE}%(msg)s",
-    #     logging.DEBUG: f"{LogLevelEmoji.DEBUG}%(msg)s",
-    #     logging.INFO: f"```diff\n+ {LogLevelEmoji.INFO} %(msg)s\n```",
-    #     logging.WARNING: f"```fix\n{LogLevelEmoji.WARNING} %(msg)s\n```",
-    #     logging.ERROR: f"```diff\n- {LogLevelEmoji.ERROR} %(msg)s\n```",
-    #     logging.CRITICAL: f"```diff\n- {LogLevelEmoji.CRITICAL} %(msg)s\n```",
-    # }
     logging_trace = logging.DEBUG - 5
-
     FORMATS = {
-        logging_trace: f"%(msg)s",
-        logging.DEBUG: f"%(msg)s",
+        logging_trace: f"{LogLevelEmoji.TRACE}%(msg)s",
+        logging.DEBUG: f"{LogLevelEmoji.DEBUG}%(msg)s",
         logging.INFO: f"{LogLevelEmoji.INFO} %(msg)s",
         logging.WARNING: f"{LogLevelEmoji.WARNING} %(msg)s",
         logging.ERROR: f"{LogLevelEmoji.ERROR} %(msg)s",
@@ -137,7 +128,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     setattr(logging, methodName, logToRoot)
 
 
-def get_logger(log_level, log_file, discord_webhook_url):
+def get_logger(log_level, log_file, discord_webhook_url, discord_message_monospace):
     """Get Bobcat Autopilot logger"""
 
     try:
@@ -174,7 +165,11 @@ def get_logger(log_level, log_file, discord_webhook_url):
 
     # for sending to Discord channel
     if discord_webhook_url:
-        discord_webhook_handler = DiscordWebhookHandler(url=discord_webhook_url, level=log_level)
+        discord_webhook_handler = DiscordWebhookHandler(
+            url=discord_webhook_url,
+            level=log_level,
+            message_creator=BasicMessageCreator(monospace=discord_message_monospace),
+        )
         discord_webhook_handler.setFormatter(LogDiscordFormatter())
         logger.addHandler(discord_webhook_handler)
 

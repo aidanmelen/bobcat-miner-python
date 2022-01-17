@@ -15,10 +15,13 @@ build: ## Build the container
 	docker build . -t $(NAME)
 
 dev: ## Get python interepter in the container
-	docker run -v "$$(pwd)":/bobcat_miner_python --rm -it --entrypoint=/bobcat_miner_python/entrypoint-dev.sh --env-file .env $(NAME)
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-dev.sh --env-file .env $(NAME)
 
 run: ## Run the container
-	docker run --rm -it --env-file .env $(NAME)
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME)
+
+bobcat-ping: ## Run the bobcat-autopilot
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME) ping
 
 bobcat-autopilot: ## Run the bobcat-autopilot
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME) autopilot

@@ -9,6 +9,9 @@ import time
 
 
 class Bobcat:
+
+    TEN_MINUTES = 600
+
     def __init__(self, ip_address):
         self.ip_address = str(ip_address)
 
@@ -21,7 +24,7 @@ class Bobcat:
     @backoff.on_exception(
         backoff.expo,
         (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
-        max_time=600,
+        max_time=TEN_MINUTES,
     )
     def _get(self, url):
         """Requests get call wrapper with exponential backoff."""
@@ -30,7 +33,7 @@ class Bobcat:
     @backoff.on_exception(
         backoff.expo,
         (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
-        max_time=600,
+        max_time=TEN_MINUTES,
     )
     def _post(self, url):
         """Requests post call wrapper with exponential backoff."""

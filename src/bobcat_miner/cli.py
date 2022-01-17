@@ -3,6 +3,7 @@ import logging
 import os
 import json
 import time
+import requests
 
 try:
     from .bobcat import Bobcat
@@ -13,6 +14,15 @@ try:
     from .autopilot import Autopilot, BobcatConnectionError
 except:
     from autopilot import Autopilot, BobcatConnectionError
+
+
+def _network_handler(bobcat, autopilot):
+    """Log network issue"""
+    autopilot.logger.critical(f"Failed to refresh the Bobcat ({bobcat.ip_address})")
+    autopilot.logger.debug("Please verify the IP address and network connection")
+    autopilot.logger.debug(
+        "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
+    )
 
 
 @click.group(name="bobcat")
@@ -28,7 +38,7 @@ except:
 )
 @click.option(
     "--dry-run",
-    "-D",
+    "-d",
     is_flag=True,
     envvar="BOBCAT_DRY_RUN",
     show_envvar=True,
@@ -36,10 +46,19 @@ except:
 )
 @click.option(
     "--discord-webhook-url",
-    "-d",
+    "-w",
     required=False,
     type=str,
     envvar="BOBCAT_DISCORD_WEBHOOK_URL",
+    show_envvar=True,
+    help="The Discord webhook url where log events will be sent.",
+)
+@click.option(
+    "--discord-message-monospace/--discord-message-no-monospace",
+    "-m/",
+    required=False,
+    default=True,
+    envvar="BOBCAT_DISCORD_MESSAGE_MONOSPACE",
     show_envvar=True,
     help="The Discord webhook url where log events will be sent.",
 )
@@ -63,13 +82,16 @@ except:
     show_envvar=True,
     help="The log level.",
 )
-def cli(ctx, ip_address, dry_run, discord_webhook_url, log_file, log_level):
+def cli(
+    ctx, ip_address, dry_run, discord_webhook_url, discord_message_monospace, log_file, log_level
+):
     """Bobcat miner command line tools"""
     bobcat = Bobcat(ip_address)
     autopilot = Autopilot(
         bobcat,
         dry_run=dry_run,
         discord_webhook_url=discord_webhook_url,
+        discord_message_monospace=discord_message_monospace,
         log_file=log_file,
         log_level=log_level,
     )
@@ -85,9 +107,9 @@ def ping(ctx):
     try:
         ctx.obj["AUTOPILOT"].ping()
     except BobcatConnectionError:
-        ctx.obj["AUTOPILOT"].logger.error(
-            f"Failed to connect to the Bobcat ({ctx.obj['IP_ADDRESS']})"
-        )
+        _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
+    except Exception as err:
+        autopilot.logger.exception("Failed to ping the Bobcat")
 
 
 @cli.command()
@@ -104,7 +126,7 @@ def autopilot(ctx):
 @click.pass_context
 @click.option(
     "--pprint/--no-pprint",
-    " /-P",
+    "-p/",
     default=True,
     help="Pretty print the Bobcat endpoint JSON data.",
 )
@@ -116,6 +138,8 @@ def status(ctx, pprint):
         bobcat.refresh_status()
         data = json.dumps(bobcat.status_data, indent=4) if pprint else bobcat.status_data
         autopilot.logger.debug(data)
+    except requests.RequestException:
+        _network_handler(bobcat, autopilot)
     except Exception as err:
         autopilot.logger.exception("Failed to get the Bobcat status data")
 
@@ -124,7 +148,7 @@ def status(ctx, pprint):
 @click.pass_context
 @click.option(
     "--pprint/--no-pprint",
-    " /-P",
+    "-p/",
     default=True,
     help="Pretty print the Bobcat endpoint JSON data.",
 )
@@ -136,6 +160,8 @@ def miner(ctx, pprint):
         bobcat.refresh_miner()
         data = json.dumps(bobcat.miner_data, indent=4) if pprint else bobcat.miner_data
         autopilot.logger.debug(data)
+    except requests.RequestException:
+        _network_handler(bobcat, autopilot)
     except Exception as err:
         autopilot.logger.exception("Failed to get the Bobcat miner data")
 
@@ -144,7 +170,7 @@ def miner(ctx, pprint):
 @click.pass_context
 @click.option(
     "--pprint/--no-pprint",
-    " /-P",
+    "-p/",
     default=True,
     help="Pretty print the Bobcat endpoint JSON data.",
 )
@@ -156,6 +182,8 @@ def speed(ctx, pprint):
         bobcat.refresh_speed()
         data = json.dumps(bobcat.speed_data, indent=4) if pprint else bobcat.speed_data
         autopilot.logger.debug(data)
+    except requests.RequestException:
+        _network_handler(bobcat, autopilot)
     except Exception as err:
         autopilot.logger.exception("Failed to get the Bobcat speed data")
 
@@ -164,7 +192,7 @@ def speed(ctx, pprint):
 @click.pass_context
 @click.option(
     "--pprint/--no-pprint",
-    " /-P",
+    "-p/",
     default=True,
     help="Pretty print the Bobcat endpoint JSON data.",
 )
@@ -176,6 +204,8 @@ def temp(ctx, pprint):
         bobcat.refresh_temp()
         data = json.dumps(bobcat.temp_data, indent=4) if pprint else bobcat.temp_data
         autopilot.logger.debug(data)
+    except requests.RequestException:
+        _network_handler(bobcat, autopilot)
     except Exception as err:
         autopilot.logger.exception("Failed to get the Bobcat tempurature data")
 
@@ -184,7 +214,7 @@ def temp(ctx, pprint):
 @click.pass_context
 @click.option(
     "--pprint/--no-pprint",
-    " /-P",
+    "-p/",
     default=True,
     help="Pretty print the Bobcat endpoint JSON data.",
 )
@@ -196,6 +226,8 @@ def dig(ctx, pprint):
         bobcat.refresh_dig()
         data = json.dumps(bobcat.dig_data, indent=4) if pprint else bobcat.dig_data
         autopilot.logger.debug(data)
+    except requests.RequestException:
+        _network_handler(bobcat, autopilot)
     except Exception as err:
         autopilot.logger.exception("Failed to get the Bobcat dig data")
 
@@ -206,6 +238,8 @@ def reboot(ctx):
     """Reboot the Bobcat and wait for connection"""
     try:
         ctx.obj["AUTOPILOT"].reboot()
+    except BobcatConnectionError:
+        _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
     except Exception as err:
         ctx.obj["AUTOPILOT"].logger.exception("Failed to reboot the Bobcat")
 
@@ -223,6 +257,8 @@ def reset(ctx, max_attempts):
     """Reset the Bobcat and wait for connection or exceeds max attempts"""
     try:
         ctx.obj["AUTOPILOT"].reset(max_attempts)
+    except BobcatConnectionError:
+        _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
     except Exception as err:
         ctx.obj["AUTOPILOT"].logger.exception("Failed to reset the Bobcat")
 
@@ -233,6 +269,8 @@ def resync(ctx):
     """Resync the Bobcat and wait for connection"""
     try:
         ctx.obj["AUTOPILOT"].resync()
+    except BobcatConnectionError:
+        _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
     except Exception as err:
         ctx.obj["AUTOPILOT"].logger.exception("Failed to resync the Bobcat")
 
@@ -250,6 +288,8 @@ def fastsync(ctx, max_attempts):
     """Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts"""
     try:
         ctx.obj["AUTOPILOT"].fastsync(max_attempts)
+    except BobcatConnectionError:
+        _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
     except Exception as err:
         ctx.obj["AUTOPILOT"].logger.exception("Failed to fastsync the Bobcat")
 
@@ -261,8 +301,10 @@ def fastsync(ctx, max_attempts):
 #     """Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync"""
 #     try:
 #         ctx.obj['AUTOPILOT'].autosync()
+#     except requests.RequestException:
+#         _network_handler(ctx.obj["BOBCAT"], ctx.obj["AUTOPILOT"])
 #     except Exception as err:
-#        ctx.obj["AUTOPILOT"].logger.exception("Failed to autosync the Bobcat")
+#         ctx.obj["AUTOPILOT"].logger.exception("Failed to autosync the Bobcat")
 
 
 if __name__ == "__main__":

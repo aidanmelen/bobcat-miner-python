@@ -44,12 +44,15 @@ class Autopilot:
         bobcat,
         dry_run=False,
         discord_webhook_url=None,
+        discord_message_monospace=True,
         log_file=None,
         log_level="DEBUG",
     ):
         assert isinstance(bobcat, Bobcat)
         self.bobcat = bobcat
-        self.logger = get_logger(log_level, log_file, discord_webhook_url)
+        self.logger = get_logger(
+            log_level, log_file, discord_webhook_url, discord_message_monospace
+        )
         self.dry_run = dry_run
 
         if self.dry_run:
@@ -315,7 +318,7 @@ class Autopilot:
 
         if not self.dry_run:
             self.bobcat.reboot()
-        self.wait(wait_time=THREE_MINUTES)
+        self.wait(wait_time=self.THREE_MINUTES)
 
         self.logger.debug("Finished rebooting the Bobcat")
 
