@@ -19,11 +19,11 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 ## Bobcat Autopilot Usage
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set `BOBCAT_IP_ADDRESS` environment variable or using the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set the `BOBCAT_IP_ADDRESS` environment variable or the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
 
 ![Bobcat Autopilot Term](./images/bobcat-autopilot-term.png)
 
-The Bobcat Autopilot will stream events to a Discord channel when the the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
+The Bobcat Autopilot will stream events to a Discord channel when the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
 
 ![Bobcat Autopilot Discord](./images/bobcat-autopilot-discord.png)
 
