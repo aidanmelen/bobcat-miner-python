@@ -1,7 +1,9 @@
 [![PyPI](https://img.shields.io/pypi/v/bobcat_miner.svg)](https://pypi.org/project/bobcat-miner/)
-[![Dockerhub](https://img.shields.io/docker/automated/aidanmelen/bobcat)](https://hub.docker.com/r/aidanmelen/bobcat)
+[![Dockerhub](https://img.shields.io/docker/v/aidanmelen/bobcat?color=blue&label=docker%20build)](https://hub.docker.com/r/aidanmelen/bobcat)
 [![Release](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml)
 [![Tests](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 # bobcat miner python
 
@@ -23,11 +25,11 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set the `BOBCAT_IP_ADDRESS` environment variable or the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
 
-![Bobcat Autopilot Term](./images/bobcat-autopilot-term.png)
+![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord.png)
 
 The Bobcat Autopilot will stream events to a Discord channel when the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
 
-![Bobcat Autopilot Discord](./images/bobcat-autopilot-discord.png)
+![Bobcat Autopilot Discord](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
 
 ## Bobcat Autopilot SDK Usage
 
@@ -133,6 +135,6 @@ Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubl
 
 Donations are welcome and appreciated! :gift:
 
-[![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](./images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
+[![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
 
 HNT: [14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
