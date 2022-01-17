@@ -17,7 +17,7 @@ class TestAutopilotDiagnoseHealthyBobcat(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level="NOTSET")
         logging.getLogger("bobcat-autopilot").disabled = True
 
     def test_is_relayed(self):
@@ -40,7 +40,7 @@ class TestAutopilotDiagnoseUnhealthyBobcat(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level="NOTSET")
         logging.getLogger("bobcat-autopilot").disabled = True
 
     def test_is_relayed(self):
@@ -63,7 +63,7 @@ class TestAutopilotActions(unittest.TestCase):
     def setUp(self, mock_requests_get):
         bobcat = Bobcat("x.x.x.x")
         bobcat.refresh()
-        self.autopilot = Autopilot(bobcat, log_file=None, log_level=logging.NOTSET)
+        self.autopilot = Autopilot(bobcat, log_file=None, log_level="NOTSET")
         logging.getLogger("bobcat-autopilot").disabled = True
 
     @patch("bobcat_miner.Autopilot._wait_for_loading")

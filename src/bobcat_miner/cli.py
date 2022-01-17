@@ -46,7 +46,7 @@ except:
 @click.option(
     "--log-file",
     "-f",
-    default="/var/log/bobcat-autopilot.log",
+    required=False,
     type=click.Path(writable=True),
     envvar="BOBCAT_LOG_FILE",
     show_envvar=True,

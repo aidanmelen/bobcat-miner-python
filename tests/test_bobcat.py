@@ -327,7 +327,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.reboot()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reboot",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -336,7 +336,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.reset()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reset",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -345,7 +345,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.resync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/resync",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -354,7 +354,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.fastsync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/fastsync",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
 

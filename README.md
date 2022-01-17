@@ -19,53 +19,20 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 ## Bobcat Autopilot Usage
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set `BOBCAT_IP_ADDRESS` environment variable or using the command line option e.g. `bobcat --ip-address 192.168.1.100 autopilot`.
 
-```bash
-BOBCAT_IP_ADDRESS=192.168.1.100 bobcat autopilot
-🚀 The Bobcat Autopilot is starting
-Ping the Bobcat (192.168.1.100)
-🔔 Successfully pinged the Bobcat
-Refreshing Bobcat endpoints
-🔔 Successfully refreshed Bobcat endpoints
-👀 Checking Bobcat relay
-🔔 The Bobcat's activity is not relayed
-👀 Checking Bobcat CPU tempurature
-🔔 The Bobcat's CPU tempurature is good
-👀 Checking Bobcat network speed
-🔔 The Bobcat's network speed is good
-👀 Checking Bobcat miner API data for errors
-🔔 The Bobcat is healthy
-🏁 The Bobcat Autopilot is finished
-```
+![Bobcat Autopilot Term](./images/bobcat-autopilot-term.png)
 
-The Bobcat Autopilot can also stream events to a Discord channel for monitoring
+The Bobcat Autopilot will stream events to a Discord channel when the the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
 
-```
-export BOBCAT_IP_ADDRESS="192.168.1.100"
-export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
-
-bobcat autopilot
-🚀 The Bobcat Autopilot is starting
-...
-🏁 The Bobcat Autopilot is finished
-```
-
-and check out Discord...
-
-![Discord](./images/bobcat-autopilot-discord-logs.png)
-<style type="text/css">
-    img {
-        width: 700px;
-    }
-</style>
+![Bobcat Autopilot Discord](./images/bobcat-autopilot-discord.png)
 
 ## Bobcat Autopilot SDK Usage
 
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
+bobcat = bobcat_miner.Bobcat("192.168.1.10")
 autopilot = bobcat_miner.Autopilot(bobcat)
 
 # Automatically diagnose and repair the Bobcat
@@ -92,7 +59,7 @@ autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over tim
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
+bobcat = bobcat_miner.Bobcat("192.168.1.10")
 
 # refresh
 bobcat.refresh_status()

@@ -44,7 +44,7 @@ class Autopilot:
         bobcat,
         dry_run=False,
         discord_webhook_url=None,
-        log_file="/var/log/bobcat-autopilot.log",
+        log_file=None,
         log_level="DEBUG",
     ):
         assert isinstance(bobcat, Bobcat)
