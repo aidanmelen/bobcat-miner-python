@@ -1,30 +1,65 @@
 [![PyPI](https://img.shields.io/pypi/v/bobcat_miner.svg)](https://pypi.org/project/bobcat-miner/)
 [![Tests](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml)
 
-# bobcat-miner
+# bobcat miner python
 
-A python SDK for interacting with the bobcat miner.
+A collection of command line tools to automate the Bobcat miner. The project offers a robust python SDK's for interacting with the Bobcat miner.
 
 ## Install
 
 ```bash
-pip install bobcat-miner
+# install command line tools
+pipx install bobcat-miner
+
+# install SDK
+pip3 install bobcat-miner
 ```
 
-## Autopilot Usage
+Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
+## Bobcat Autopilot Usage
 
-```bash
-BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
-```
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set `BOBCAT_IP_ADDRESS` environment variable or using the command line option e.g. `bobcat --ip-address 192.168.1.100 autopilot`.
 
-## Bobcat Usage
+![Bobcat Autopilot Term](./images/bobcat-autopilot-term.png)
+
+The Bobcat Autopilot will stream events to a Discord channel when the the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
+
+![Bobcat Autopilot Discord](./images/bobcat-autopilot-discord.png)
+
+## Bobcat Autopilot SDK Usage
 
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
+bobcat = bobcat_miner.Bobcat("192.168.1.10")
+autopilot = bobcat_miner.Autopilot(bobcat)
+
+# Automatically diagnose and repair the Bobcat
+autopilot.run()
+
+# diagnostics
+autopilot.is_relayed()
+autopilot.is_temp_dangerous()
+autopilot.is_network_speed_slow()
+autopilot.is_syncing()
+autopilot.has_errors()
+
+# actions
+autopilot.ping()        # Ping the Bobcat until it connects or attempts are maxed out
+autopilot.reboot()      # Reboot the Bobcat and wait for connection
+autopilot.reset()       # Reset the Bobcat and wait for connection or exceeds max attempts
+autopilot.resync()      # Fastsync the Bobcat and wait for connection
+autopilot.fastsync()    # Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts
+autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
+```
+
+## Bobcat SDK Usage
+
+```python
+import bobcat_miner
+
+bobcat = bobcat_miner.Bobcat("192.168.1.10")
 
 # refresh
 bobcat.refresh_status()
@@ -83,43 +118,18 @@ bobcat.reboot()
 bobcat.reset()
 bobcat.resync()
 bobcat.fastsync()
-```
-
-## Advanced Usage
-
-```python
-import bobcat_miner
-
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
-autopilot = bobcat_miner.Autopilot(bobcat)
 
 # diagnostics
-autopilot.diagnose_relay()
-autopilot.diagnose_temp()
-autopilot.diagnose_network_speed()
-autopilot.diagnose_sync()
-
-# actions
-autopilot.ping()        # repeat ping attempts until bobcat is reached or exceeds max attempts
-autopilot.reboot()      # reset and wait for bobcat to connect
-autopilot.reset()       # reset and wait for health check
-autopilot.resync()      # resync and wait for health check
-autopilot.fastsync()    # repeat fastsync attempts until gap is less than 400 or exceeds max attempts
-autopilot.autosync()    # check sync -> reboot -> check sync -> fastsync -> check sync
-autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
-
-autopilot.run()         # reboot -> reset -> fastsync when bobcat is unhealthy and diagnostics
+bobcat.is_bobcat()
 ```
 
 ## Troubleshooting
 
-Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information troubleshooting your bobcat miner.
-
-https://bobcatminer.zendesk.com/hc/en-us/articles/4408443160347-Troubleshooting-your-Bobcat-hotspot
+Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information.
 
 ## Donations
 
-Donations are welcome and appreciated! :gift: :tada:
+Donations are welcome and appreciated! :gift:
 
 [![HNT: 14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR](./images/wallet.jpg)](https://explorer-v1.helium.com/accounts/14HmckNU4WHDDtGH29FMqVENzZAYh5a9XRiLfY2AN6ghfHMvAuR)
 

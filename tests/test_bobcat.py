@@ -100,7 +100,10 @@ class TestBobcatProperties(unittest.TestCase):
         self.assertEqual(self.bobcat.name, "My Mocked Miner")
 
     def test_pubkey(self):
-        self.assertEqual(self.bobcat.pubkey, "112YUf4TUQy4bxXRvGjrj6z7XyiSx8FDudTn6vtRYPgoGPnjBGWW")
+        self.assertEqual(
+            self.bobcat.pubkey,
+            "112YUf4TUQy4bxXRvGjrj6z7XyiSx8FDudTn6vtRYPgoGPnjBGWW",
+        )
 
     def test_state(self):
         self.assertEqual(self.bobcat.state, "running")
@@ -112,7 +115,10 @@ class TestBobcatProperties(unittest.TestCase):
         self.assertEqual(self.bobcat.names, ["/miner"])
 
     def test_image(self):
-        self.assertEqual(self.bobcat.image, "quay.io/team-helium/miner:miner-arm64_2021.12.14.0_GA")
+        self.assertEqual(
+            self.bobcat.image,
+            "quay.io/team-helium/miner:miner-arm64_2021.12.14.0_GA",
+        )
 
     def test_created(self):
         self.assertEqual(self.bobcat.created, datetime.datetime(2021, 12, 20, 6, 15, 13))
@@ -120,7 +126,12 @@ class TestBobcatProperties(unittest.TestCase):
     def test_p2p_status(self):
         self.assertEqual(
             self.bobcat.p2p_status,
-            {"connected": "yes", "dialable": "yes", "nat_type": "none", "height": "1148539"},
+            {
+                "connected": "yes",
+                "dialable": "yes",
+                "nat_type": "none",
+                "height": "1148539",
+            },
         )
 
     def test_ports_desc(self):
@@ -234,7 +245,13 @@ class TestBobcatProperties(unittest.TestCase):
         self.assertEqual(
             self.bobcat.timestamp,
             datetime.datetime(
-                2021, 12, 21, 18, 18, 39, tzinfo=datetime.timezone(datetime.timedelta(0), "UTC")
+                2021,
+                12,
+                21,
+                18,
+                18,
+                39,
+                tzinfo=datetime.timezone(datetime.timedelta(0), "UTC"),
             ),
         )
 
@@ -310,7 +327,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.reboot()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reboot",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -319,7 +336,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.reset()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/reset",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -328,7 +345,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.resync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/resync",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
@@ -337,7 +354,7 @@ class TestBobcatActions(unittest.TestCase):
         _ = b.fastsync()
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_ip_address + "/admin/fastsync",
-            header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
+            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
 

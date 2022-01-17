@@ -18,8 +18,6 @@ class Bobcat:
         self.speed_data = {}
         self.dig_data = {}
 
-        return None
-
     @backoff.on_exception(
         backoff.expo,
         (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
@@ -27,7 +25,7 @@ class Bobcat:
     )
     def _get(self, url):
         """Requests get call wrapper with exponential backoff."""
-        return requests.get(url).json()
+        return requests.get(url)
 
     @backoff.on_exception(
         backoff.expo,
@@ -36,38 +34,36 @@ class Bobcat:
     )
     def _post(self, url):
         """Requests post call wrapper with exponential backoff."""
-        return requests.post(url, header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})
+        return requests.post(url, headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})
 
     def refresh_status(self):
         """Refresh data for the bobcat miner status"""
-        self.status_data = self._get("http://" + self.ip_address + "/status.json")
-        return None
+        self.status_data = self._get("http://" + self.ip_address + "/status.json").json()
 
     def refresh_miner(self):
         """Refresh data for the bobcat miner data"""
-        self.miner_data = self._get("http://" + self.ip_address + "/miner.json")
-        return None
+        self.miner_data = self._get("http://" + self.ip_address + "/miner.json").json()
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
-        self.speed_data = self._get("http://" + self.ip_address + "/speed.json")
+        self.speed_data = self._get("http://" + self.ip_address + "/speed.json").json()
 
         if self.speed_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.refresh_speed()
 
-        return None
-
     def refresh_temp(self):
         """Refresh data for the bobcat miner temp"""
-        self.temp_data = self._get("http://" + self.ip_address + "/temp.json")
-        return None
+        self.temp_data = self._get("http://" + self.ip_address + "/temp.json").json()
 
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
-        self.dig_data = self._get("http://" + self.ip_address + "/dig.json")
-        return None
+        self.dig_data = self._get("http://" + self.ip_address + "/dig.json").json()
+
+        if self.dig_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_dig()
 
     def refresh(self, status=True, miner=True, temp=True, speed=True, dig=True):
         """Refresh data for the bobcat miner"""
@@ -82,7 +78,6 @@ class Bobcat:
             self.refresh_temp()
         if dig:
             self.refresh_dig()
-        return None
 
     @property
     def status(self):
@@ -97,7 +92,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         gap = self.status_data.get("gap")
-        return int(gap) if gap.lstrip("-").isdigit() else None
+        return int(gap) if gap.lstrip("-").isdigit() else 1000000000
 
     @property
     def miner_height(self):
@@ -389,7 +384,7 @@ class Bobcat:
             socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip_address, 80))
-        except OSError:
+        except OSError as err:
             result = False
         else:
             result = True
@@ -401,21 +396,25 @@ class Bobcat:
         """Reboot the bobcat miner"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self._post("http://" + self.ip_address + "/admin/reboot")
-        return None
 
     def reset(self):
         """Reset the bobcat miner"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4412997563931-Reset-Miner-Feature
         self._post("http://" + self.ip_address + "/admin/reset")
-        return None
 
     def resync(self):
         """Resync the bobcat miner"""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4413004114075-Resync-Feature-
         self._post("http://" + self.ip_address + "/admin/resync")
-        return None
 
     def fastsync(self):
         """Fastsync the bobcat miner"""
         self._post("http://" + self.ip_address + "/admin/fastsync")
-        return None
+
+    def is_bobcat(self):
+        """Check if IP address is a Bobcat miner"""
+        try:
+            r = self._get("http://" + self.ip_address)
+            return "Diagnoser - Bobcatminer Diagnostic Dashboard" in r.text
+        except requests.RequestException:
+            return False
