@@ -10,7 +10,7 @@ repository = "https://github.com/aidanmelen/bobcat-miner-python"
 keywords = ["helium", "bobcat", "miner"]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<4.0"
+python = "^3.6"
 requests = "^2.27.0"
 backoff = "^1.11.1"
 filelock = "^3.4.2"
