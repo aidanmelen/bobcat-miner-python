@@ -1,4 +1,5 @@
-FROM python:3.7-slim
+ARG PYTHON_VERSION=3.10
+FROM python:${PYTHON_VERSION}-slim
 
 RUN pip install poetry
 

@@ -26,5 +26,13 @@ bobcat-autopilot: ## Run the bobcat-autopilot
 tests: ## Run the unittests
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)
 
+tests-all: ## Run the unittests
+	docker build . --build-arg PYTHON_VERSION=3.8 -t $(NAME)
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)
+	docker build . --build-arg PYTHON_VERSION=3.9 -t $(NAME)
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)
+	docker build . --build-arg PYTHON_VERSION=3.10 -t $(NAME)
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)
+
 lint: ## Run the linter
 	black --line-length 100 .
