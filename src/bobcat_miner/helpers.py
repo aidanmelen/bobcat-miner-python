@@ -1,3 +1,5 @@
+"""Bobcat Miner Helpers"""
+
 from logging.handlers import TimedRotatingFileHandler
 from discord_lumberjack.handlers import DiscordWebhookHandler
 from discord_lumberjack.message_creators import BasicMessageCreator
