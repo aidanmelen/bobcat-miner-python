@@ -14,10 +14,10 @@ A command line tool used to automate the Bobcat miner. This project also offers 
 
 ```bash
 # install command line tools
-pipx install bobcat-miner
+$ pipx install bobcat-miner
 
 # install SDK
-pip3 install bobcat-miner
+$ pip3 install bobcat-miner
 ```
 
 Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
@@ -26,11 +26,56 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set the `BOBCAT_IP_ADDRESS` environment variable or the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
 
-![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord.png)
+![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
 
-The Bobcat Autopilot will stream events to a Discord channel when the `BOBCAT_DISCORD_WEBHOOK_URL` environment variable is provided.
+### Bobcat Dry Run
 
-![Bobcat Autopilot Discord](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
+Diagnostics checks will run and all actions will be skipped during a Bobcat dry run.
+
+```bash
+$ bobcat -i 192.168.0.8 --dry-run autopilot
+🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second.
+🚀 The Bobcat Autopilot is starting
+```
+
+### Discord Monitoring
+
+The `bobcat` command line tool supports sending logs to a Discord channel using a [webhook url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+
+```bash
+$ export BOBCAT_IP_ADDRESS=192.168.0.10
+$ export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
+$ bobcat autopilot
+...
+```
+
+and check Discord
+
+![Bobcat Autopilot Discord](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord.png)
+
+### File Log
+
+The `bobcat` command line tool supports sedning logs to a file
+
+```bash
+$ bobcat --ip-address 192.168.0.8 --log-file bobcat-autopilot.log autopilot
+🚀 The Bobcat Autopilot is starting
+```
+
+### Bobcat Docker Container
+
+Run the `bobcat` command line tool as a docker container.
+
+```bash
+$ docker run --rm -it aidanmelen/bobcat -i 192.168.0.10 status
+{
+    "status": "Synced",
+    "gap": "-2",
+    "miner_height": "1185959",
+    "blockchain_height": "1185957",
+    "epoch": "31260"
+}
+```
 
 ## Bobcat Autopilot SDK Usage
 
