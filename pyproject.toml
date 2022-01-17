@@ -14,20 +14,11 @@ python = "^3.9"
 requests = "^2.27.0"
 backoff = "^1.11.1"
 filelock = "^3.4.2"
-discord-lumberjack = "^1.0.3"
+discord-lumberjack = "^1.0.4"
 click = "^8.0.3"
 
 [tool.poetry.scripts]
-bobcat-autopilot = "bobcat_miner.cli:autopilot"
-bobcat-status = "bobcat_miner.cli:status"
-bobcat-miner = "bobcat_miner.cli:miner"
-bobcat-speed = "bobcat_miner.cli:speed"
-bobcat-dig = "bobcat_miner.cli:dig"
-bobcat-ping = "bobcat_miner.cli:ping"
-bobcat-reboot = "bobcat_miner.cli:reboot"
-bobcat-resync = "bobcat_miner.cli:resync"
-bobcat-fastsync = "bobcat_miner.cli:fastsync"
-bobcat-reset = "bobcat_miner.cli:reset"
+bobcat = "bobcat_miner.cli:cli"
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"

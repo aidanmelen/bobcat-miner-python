@@ -34,7 +34,7 @@ class Bobcat:
     )
     def _post(self, url):
         """Requests post call wrapper with exponential backoff."""
-        return requests.post(url, header={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})
+        return requests.post(url, headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})
 
     def refresh_status(self):
         """Refresh data for the bobcat miner status"""
@@ -60,6 +60,10 @@ class Bobcat:
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
         self.dig_data = self._get("http://" + self.ip_address + "/dig.json").json()
+
+        if self.dig_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_dig()
 
     def refresh(self, status=True, miner=True, temp=True, speed=True, dig=True):
         """Refresh data for the bobcat miner"""

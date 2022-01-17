@@ -1,3 +1,4 @@
+import click
 import logging
 import os
 import json
@@ -13,129 +14,216 @@ try:
 except:
     from autopilot import Autopilot, BobcatConnectionError
 
-# TODO implent click command line interface
-# example: https://github.com/aidanmelen/website-checker/blob/main/src/website_checker/cli.py
 
-def autopilot():
-    """bobcat-autopilot"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    log_file = os.getenv("BOBCAT_LOG_FILE", "/var/log/bobcat-autopilot.log")
-    log_level = os.getenv("BOBCAT_LOG_LEVEL", "DEBUG")
-    log_discord_webhook_url = os.getenv("BOBCAT_LOG_DISCORD_WEBHOOK_URL")
-    log_discord_log_level = os.getenv("BOBCAT_LOG_DISCORD_LOG_LEVEL", "DEBUG")
-    dry_run = os.getenv("BOBCAT_AUTOPILOT_DRY_RUN", "False").upper() == "TRUE"
-
-    log_levels = {
-        "NOTSET": logging.NOTSET,
-        "DEBUG": logging.DEBUG,
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL,
-    }
-
+@click.group(name="bobcat")
+@click.version_option()
+@click.pass_context
+@click.option(
+    "--ip-address",
+    "-i",
+    required=True,
+    envvar="BOBCAT_IP_ADDRESS",
+    show_envvar=True,
+    help="The Bobcat IP address.",
+)
+@click.option(
+    "--dry-run",
+    "-D",
+    is_flag=True,
+    envvar="BOBCAT_DRY_RUN",
+    show_envvar=True,
+    help="Dry run where actions are skipped and wait times are 1 second long.",
+)
+@click.option(
+    "--discord-webhook-url",
+    "-d",
+    required=False,
+    type=str,
+    envvar="BOBCAT_DISCORD_WEBHOOK_URL",
+    show_envvar=True,
+    help="The Discord webhook url where log events will be sent.",
+)
+@click.option(
+    "--log-file",
+    "-f",
+    default="/var/log/bobcat-autopilot.log",
+    type=click.Path(writable=True),
+    envvar="BOBCAT_LOG_FILE",
+    show_envvar=True,
+    help="The log file path.",
+)
+@click.option(
+    "--log-level",
+    "-l",
+    default="DEBUG",
+    type=click.Choice(
+        ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
+    ),
+    envvar="BOBCAT_LOG_LEVEL",
+    show_envvar=True,
+    help="The log level.",
+)
+def cli(ctx, ip_address, dry_run, discord_webhook_url, log_file, log_level):
+    """Bobcat command line tools"""
+    bobcat = Bobcat(ip_address)
     autopilot = Autopilot(
         bobcat,
-        log_file=log_file,
-        log_level=log_levels[log_level],
-        log_discord_webhook_url=log_discord_webhook_url,
-        log_discord_log_level=log_levels[log_discord_log_level],
         dry_run=dry_run,
+        discord_webhook_url=discord_webhook_url,
+        log_file=log_file,
+        log_level=log_level,
     )
-    autopilot.run()
+    ctx.ensure_object(dict)
+    ctx.obj["BOBCAT"] = bobcat
+    ctx.obj["AUTOPILOT"] = autopilot
 
 
-def status():
-    """bobcat-status"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    bobcat.refresh_status()
-    print(json.dumps(bobcat.status_data, indent=4))
-
-
-def miner():
-    """bobcat-miner"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    bobcat.refresh_miner()
-    print(json.dumps(bobcat.miner_data, indent=4))
-
-
-def temp():
-    """bobcat-temp"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    bobcat.refresh_temp()
-    print(json.dumps(bobcat.temp_data, indent=4))
-
-
-def speed():
-    """bobcat-speed"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    bobcat.refresh_speed()
-    print(json.dumps(bobcat.speed_data, indent=4))
-
-
-def dig():
-    """bobcat-dig"""
-    bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-    bobcat.refresh_dig()
-    print(json.dumps(bobcat.dig_data, indent=4))
-
-
-def ping():
-    """bobcat-ping"""
+@cli.command()
+@click.pass_context
+def ping(ctx):
+    """Verify Bobcat network connectively"""
     try:
-        bobcat = Bobcat(os.getenv("BOBCAT_IP_ADDRESS"))
-        log_file = os.getenv("BOBCAT_LOG_FILE", "/var/log/bobcat-autopilot.log")
-        log_level = os.getenv("BOBCAT_LOG_LEVEL", "DEBUG")
-        log_discord_webhook_url = os.getenv("BOBCAT_LOG_DISCORD_WEBHOOK_URL")
-        log_discord_log_level = os.getenv("BOBCAT_LOG_DISCORD_LOG_LEVEL", "DEBUG")
-        dry_run = os.getenv("BOBCAT_AUTOPILOT_DRY_RUN", "False").upper() == "TRUE"
-
-        log_levels = {
-            "NOTSET": logging.NOTSET,
-            "DEBUG": logging.DEBUG,
-            "INFO": logging.INFO,
-            "WARNING": logging.WARNING,
-            "ERROR": logging.ERROR,
-            "CRITICAL": logging.CRITICAL,
-        }
-
-        autopilot = Autopilot(
-            bobcat,
-            log_file=log_file,
-            log_level=log_levels[log_level],
-            log_discord_webhook_url=log_discord_webhook_url,
-            log_discord_log_level=log_levels[log_discord_log_level],
-            dry_run=dry_run,
-        )
-        autopilot.ping()
+        ctx.obj["AUTOPILOT"].ping()
     except BobcatConnectionError:
-        autopilot.logger.error(
-            "The Autopilot was unable to connect to the Bobcat ({bobcat.ip_address})"
+        ctx.obj["AUTOPILOT"].logger.error(
+            f"The Autopilot was unable to connect to the Bobcat ({ctx.obj['IP_ADDRESS']})"
         )
-    finally:
-        if autopilot.log_discord_webhook_url:
-            time.sleep(5)  # wait for discord logs to flush
 
 
-def reboot():
-    """bobcat-reboot"""
-    Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).reboot()
+@cli.command()
+@click.pass_context
+def autopilot(ctx):
+    """Automatically diagnose and repair the Bobcat"""
+    try:
+        ctx.obj["AUTOPILOT"].run()
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
 
 
-def resync():
-    """bobcat-resync"""
-    Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).resync()
+@cli.command()
+@click.pass_context
+def status(ctx):
+    """Print the bobcat miner status data"""
+    try:
+        bobcat = ctx.obj["BOBCAT"]
+        bobcat.refresh_status()
+        click.echo(json.dumps(bobcat.status_data, indent=4))
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
 
 
-def fastsync():
-    """bobcat-fastsync"""
-    Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).fastsync()
+@cli.command()
+@click.pass_context
+def miner(ctx):
+    """Print the bobcat miner data"""
+    try:
+        bobcat = ctx.obj["BOBCAT"]
+        bobcat.refresh_miner()
+        click.echo(json.dumps(bobcat.miner_data, indent=4))
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
 
 
-def reset():
-    """bobcat-reset"""
-    Bobcat(os.getenv("BOBCAT_IP_ADDRESS")).reset()
+@cli.command()
+@click.pass_context
+def speed(ctx):
+    """Print the bobcat miner network speed"""
+    try:
+        bobcat = ctx.obj["BOBCAT"]
+        bobcat.refresh_speed()
+        click.echo(json.dumps(bobcat.speed_data, indent=4))
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+def temp(ctx):
+    """Print the bobcat miner temp"""
+    try:
+        bobcat = ctx.obj["BOBCAT"]
+        bobcat.refresh_temp()
+        click.echo(json.dumps(bobcat.temp_data, indent=4))
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+def dig(ctx):
+    """Print the bobcat miner DNS data"""
+    try:
+        bobcat = ctx.obj["BOBCAT"]
+        bobcat.refresh_dig()
+        click.echo(json.dumps(bobcat.dig_data, indent=4))
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+def reboot(ctx):
+    """Reboot the Bobcat and wait for connection"""
+    try:
+        ctx.obj["AUTOPILOT"].reboot()
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    "--max-attempts",
+    "-m",
+    default=3,
+    type=int,
+    help="The maximun number of attempts before giving up.",
+)
+def reset(ctx, max_attempts):
+    """Reset the Bobcat and wait for connection or exceeds max attempts"""
+    try:
+        ctx.obj["AUTOPILOT"].reset(max_attempts)
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+def resync(ctx):
+    """Resync the Bobcat and wait for connection"""
+    try:
+        ctx.obj["AUTOPILOT"].resync()
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    "--max-attempts",
+    "-m",
+    default=3,
+    type=int,
+    help="The maximun number of attempts before giving up.",
+)
+def fastsync(ctx, max_attempts):
+    """Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts"""
+    try:
+        ctx.obj["AUTOPILOT"].fastsync(max_attempts)
+    except Exception as err:
+        click.echo(click.style(err, fg="red"))
+
+
+# TODO autosync
+# @cli.command()
+# @click.pass_context
+# def autosync(ctx):
+#     """Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync"""
+#     try:
+#         ctx.obj['AUTOPILOT'].autosync()
+#     except Exception as err:
+#         click.echo(click.style(err, fg='red'))
 
 
 if __name__ == "__main__":
-    autopilot()
+    cli(obj={})

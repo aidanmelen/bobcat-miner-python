@@ -1,7 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/bobcat_miner.svg)](https://pypi.org/project/bobcat-miner/)
 [![Tests](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml)
 
-# bobcat-miner
+# bobcat miner python
 
 A collection of command line tools to automate the Bobcat miner. The project offers a robust python SDK's for interacting with the Bobcat miner.
 
@@ -22,8 +22,43 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find the bobcat miner's ip address.
 
 ```bash
-BOBCAT_IP_ADDRESS="192.168.1.100" bobcat-autopilot
+BOBCAT_IP_ADDRESS=192.168.1.100 bobcat autopilot
+🚀 The Bobcat Autopilot is starting
+Ping the Bobcat (192.168.1.100)
+🔔 Successfully pinged the Bobcat
+Refreshing Bobcat endpoints
+🔔 Successfully refreshed Bobcat endpoints
+👀 Checking Bobcat relay
+🔔 The Bobcat's activity is not relayed
+👀 Checking Bobcat CPU tempurature
+🔔 The Bobcat's CPU tempurature is good
+👀 Checking Bobcat network speed
+🔔 The Bobcat's network speed is good
+👀 Checking Bobcat miner API data for errors
+🔔 The Bobcat is healthy
+🏁 The Bobcat Autopilot is finished
 ```
+
+The Bobcat Autopilot can also stream events to a Discord channel for monitoring
+
+```
+export BOBCAT_IP_ADDRESS="192.168.1.100"
+export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
+
+bobcat autopilot
+🚀 The Bobcat Autopilot is starting
+...
+🏁 The Bobcat Autopilot is finished
+```
+
+and check out Discord...
+
+![Discord](./images/bobcat-autopilot-discord-logs.png)
+<style type="text/css">
+    img {
+        width: 700px;
+    }
+</style>
 
 ## Bobcat Autopilot SDK Usage
 
@@ -33,7 +68,7 @@ import bobcat_miner
 bobcat = bobcat_miner.Bobcat("192.168.1.100")
 autopilot = bobcat_miner.Autopilot(bobcat)
 
-# automatically diagnose and repair the Bobcat
+# Automatically diagnose and repair the Bobcat
 autopilot.run()
 
 # diagnostics
@@ -49,7 +84,6 @@ autopilot.reboot()      # Reboot the Bobcat and wait for connection
 autopilot.reset()       # Reset the Bobcat and wait for connection or exceeds max attempts
 autopilot.resync()      # Fastsync the Bobcat and wait for connection
 autopilot.fastsync()    # Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts
-autopilot.autosync()    # Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync
 autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
 ```
 
@@ -125,6 +159,7 @@ bobcat.is_bobcat()
 ## Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information.
+
 ## Donations
 
 Donations are welcome and appreciated! :gift:

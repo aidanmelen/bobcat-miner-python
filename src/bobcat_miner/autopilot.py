@@ -24,15 +24,17 @@ class BobcatConnectionError(Exception):
     pass
 
 
-class BobcatIsNotABobcatError(Exception):
-    """The provied IP address is not a Bobcat"""
+class NotABobcatError(Exception):
+    """The provided IP address is not a Bobcat"""
 
     pass
 
 
 class Autopilot:
+    """Bobcat Autopilot"""
 
     ONE_MINUTE = 60
+    THREE_MINUTES = 180
     FIVE_MINUTES = 300
     TEN_MINUTES = 600
     THIRTY_MINUTES = 1800
@@ -40,22 +42,20 @@ class Autopilot:
     def __init__(
         self,
         bobcat,
-        log_file="/var/log/bobcat-autopilot.log",
-        log_level=logging.DEBUG,
-        log_discord_webhook_url=None,
-        log_discord_log_level=logging.DEBUG,
         dry_run=False,
+        discord_webhook_url=None,
+        log_file="/var/log/bobcat-autopilot.log",
+        log_level="DEBUG",
     ):
         assert isinstance(bobcat, Bobcat)
         self.bobcat = bobcat
-        self.log_file = log_file
-        self.log_level = log_level
-        self.log_discord_webhook_url = log_discord_webhook_url
-        self.log_discord_log_level = log_discord_log_level
-        self.logger = get_logger(
-            log_file, log_level, log_discord_webhook_url, log_discord_log_level
-        )
+        self.logger = get_logger(log_level, log_file, discord_webhook_url)
         self.dry_run = dry_run
+
+        if self.dry_run:
+            self.logger.debug(
+                "🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second."
+            )
 
     def is_relayed(self):
         """Diagnose the Bobcat's relay"""
@@ -68,7 +68,7 @@ class Autopilot:
         is_relayed = not is_port_44158_open and self.bobcat.p2p_status.get("nat_type") != "none"
 
         if is_relayed:
-            self.logger.warning(f"⚠️ The Bobcat is relayed via {listen_address}")
+            self.logger.warning(f"The Bobcat is relayed via {listen_address}")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser"
             )
@@ -89,13 +89,13 @@ class Autopilot:
         is_hot_error = self.bobcat.temp0 >= 70 or self.bobcat.temp1 >= 70
 
         if is_too_cold:
-            self.logger.error("💥 The Bobcat is too cold ⛄")
+            self.logger.error("The Bobcat is too cold ❄️")
 
         if is_hot_warning:
-            self.logger.warning("⚠️ The Bobcat is getting hot 🔥")
+            self.logger.warning("The Bobcat is getting hot 🔥")
 
         if is_hot_error:
-            self.logger.error("💥 The Bobcat is too hot 🔥")
+            self.logger.error("The Bobcat is too hot 🔥")
 
         is_temp_dangerous = is_too_cold and (is_hot_warning or is_hot_error)
 
@@ -104,7 +104,7 @@ class Autopilot:
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring"
             )
         else:
-            self.logger.info("🔔 The Bobcat's CPU tempurature is good")
+            self.logger.info("The Bobcat's CPU tempurature is good")
 
         return is_temp_dangerous
 
@@ -123,14 +123,14 @@ class Autopilot:
 
         if is_download_speed_slow:
             self.logger.warning(
-                f"⚠️ The Bobcat's download speed is slow: {self.bobcat.download_speed}"
+                f"The Bobcat's download speed is slow: {self.bobcat.download_speed}"
             )
 
         if is_upload_speed_slow:
-            self.logger.warning(f"⚠️ The Bobcat's upload speed is slow: {self.bobcat.upload_speed}")
+            self.logger.warning(f"The Bobcat's upload speed is slow: {self.bobcat.upload_speed}")
 
         if is_latency_high:
-            self.logger.warning(f"⚠️ The Bobcat's lag is high: {self.bobcat.latency}")
+            self.logger.warning(f"The Bobcat's lag is high: {self.bobcat.latency}")
 
         is_network_speed_slow = any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
 
@@ -148,7 +148,7 @@ class Autopilot:
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412906643867-Yellow-Light"
             )
         else:
-            self.logger.info("🔔 The Bobcat's network speed is good")
+            self.logger.info("The Bobcat's network speed is good")
 
         return is_network_speed_slow
 
@@ -162,7 +162,7 @@ class Autopilot:
 
         gap_polls = []
 
-        self.logger.debug("🚀 Start polling the Bobcat's blockchain gap")
+        self.logger.debug("✏️ Start polling the Bobcat's blockchain gap")
 
         for _ in range(poll_total):
             self.bobcat.refresh_status()
@@ -171,7 +171,7 @@ class Autopilot:
 
             self.logger.debug(f"Polled gap: {gap}")
 
-            self.logger.debug(f"⏳ Waiting {int(wait_time / 60)} Minutes")
+            self.logger.debug(f"⏳ Waiting {int(poll_rate / 60)} Minutes")
             if self.dry_run:
                 time.sleep(1)
             else:
@@ -190,14 +190,14 @@ class Autopilot:
         is_gap_growing = gap_growth_count > poll_total / 2
 
         if is_gap_growing:
-            self.logger.error("💥 The Bobcat is not syncing")
+            self.logger.error("The Bobcat is not syncing")
         else:
             self.logger.debug("Leave the Bobcat alone because it syncing")
 
         return not is_gap_growing
 
     def has_errors(self):
-        """Check for Bobcat errors"""
+        """Diagnose Bobcat errors"""
         has_error = self.bobcat.miner_data.get("errors") != ""
         has_status_error = self.bobcat.status.upper() in ["ERROR", "DOWN"]
         has_miner_region = "ERROR" in self.bobcat.miner_data.get("region").upper()
@@ -226,9 +226,9 @@ class Autopilot:
         )
 
         if has_errors:
-            self.logger.error("💥 The Bobcat has errors")
+            self.logger.error("The Bobcat has errors")
         else:
-            self.logger.info("🔔 The Bobcat does not have errors")
+            self.logger.info("The Bobcat is healthy")
 
         return has_errors
 
@@ -236,10 +236,6 @@ class Autopilot:
         """Ping the Bobcat until it connects or attempts are maxed out"""
 
         if self.dry_run:
-            self.logger.warning("🚧 Bobcat Autopilot Dry Run Enabled")
-            self.logger.warning(
-                "🚧 Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second"
-            )
             backoff_time = 1
 
         self.logger.debug(f"Ping the Bobcat ({self.bobcat.ip_address})")
@@ -247,7 +243,7 @@ class Autopilot:
         attempt_count = 0
         while not self.bobcat.ping():
 
-            self.logger.warning("⚠️ The Bobcat is unreachable")
+            self.logger.warning("The Bobcat is unreachable")
 
             self.logger.debug(f"⏳ Waiting {int(backoff_time / 60)} Minutes")
             time.sleep(backoff_time)
@@ -256,7 +252,7 @@ class Autopilot:
             if attempt_count >= max_attempts:
                 raise BobcatConnectionError()
 
-        self.logger.info("🔔 Successfully pinged the Bobcat")
+        self.logger.info("Successfully pinged the Bobcat")
 
     def _wait_for_loading(self, backoff_time=TEN_MINUTES, max_attempts=6):
         """Wait for the Bobcat when loading"""
@@ -269,7 +265,7 @@ class Autopilot:
         attempt_count = 0
         while self.bobcat.status.upper() == "LOADING":
 
-            self.logger.info("🔔 The Bobcat is still loading")
+            self.logger.info("The Bobcat is still loading")
 
             self.logger.debug(f"⏳ Waiting {int(backoff_time / 60)} Minutes")
             time.sleep(backoff_time)
@@ -308,7 +304,7 @@ class Autopilot:
 
         if not self.dry_run:
             self.bobcat.reboot()
-            self.wait()
+        self.wait(wait_time=THREE_MINUTES)
 
         self.logger.debug("Finished rebooting the Bobcat")
 
@@ -317,19 +313,23 @@ class Autopilot:
 
         self.logger.debug("Resetting the Bobcat")
 
-        attempt_count = 0
+        if not self.dry_run:
+            self.bobcat.reset()
+        self.wait()
+
+        attempt_count = 1
         while self.bobcat.status.upper() in ["ERROR", "DOWN"]:
 
             if not self.dry_run:
                 self.bobcat.reset()
-                self.wait()
+            self.wait()
 
             attempt_count += 1
             if attempt_count >= max_attempts:
                 self.logger.critical(
-                    f"🚨 The Bobcat is still down despite {max_attempts} reset attempts"
+                    f"The Bobcat is still down despite {max_attempts} reset attempts"
                 )
-                self.logger.critical("🚨 Manual intervention is required")
+                self.logger.critical("Manual intervention is required")
                 self.logger.debug(
                     "Contact Bobcat Support: https://bobcatminer.zendesk.com/hc/en-us/articles/4412998083355-Contact-Support"
                 )
@@ -342,15 +342,13 @@ class Autopilot:
 
         self.logger.debug("Resyncing the Bobcat")
 
-        self.bobcat.refresh_status()
-
         if not self.dry_run:
             self.bobcat.resync()
-            self.wait()
+        self.wait()
 
         self.logger.debug("Finished resyncing the Bobcat")
 
-    def fastsync(self):
+    def fastsync(self, max_attempts=3):
         """Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts"""
 
         if self.bobcat.gap < 400:
@@ -360,7 +358,13 @@ class Autopilot:
             return
 
         if self.bobcat.status.upper() in ["ERROR", "DOWN"] or self.bobcat.error:
-            self.logger.warning("⚠️ Cancel fastsync because it only works on a healthly Bobcat")
+            self.logger.warning("Cancel fastsync because it only works on a healthly Bobcat")
+            return
+
+        if self.bobcat.gap <= 400:
+            self.logger.debug(
+                "Cancel fastsync because it only works when the gap is larger than 400"
+            )
             return
 
         self.logger.debug("Fastsyncing the Bobcat")
@@ -372,7 +376,7 @@ class Autopilot:
 
             if not self.dry_run:
                 self.bobcat.fastsync()
-                self.wait()
+            self.wait()
 
             self.bobcat.refresh_status()
 
@@ -386,37 +390,38 @@ class Autopilot:
         else:
             self.logger.debug("Finished fastsyncing the Bobcat")
 
-    def autosync(self):
-        """Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync"""
-        self.logger.warning("⚠️ Attempt to sync the Bobcat")
+    # TODO autosync
+    # def autosync(self):
+    #     """Automatically sync the Bobcat by monitoring the gap during the proscribed reboot -> fastsync - > reset -> fastsync"""
+    #     self.logger.debug("Attempt to sync the Bobcat")
 
-        if self.bobcat.status.upper() == "SYNCING":
-            if self.is_syncing():
-                return
+    #     if self.bobcat.status.upper() == "SYNCING":
+    #         if self.is_syncing():
+    #             return
 
-        self.reboot()
-        self.bobcat.refresh_status()
+    #     self.reboot()
+    #     self.bobcat.refresh_status()
 
-        if self.is_syncing():
-            return
+    #     if self.is_syncing():
+    #         return
 
-        self.logger.info("🔔 The reboot did not fix the Bobcat's syncing issue")
-        if self.bobcat.gap > 400:
-            self.fastsync()
+    #     self.logger.info("The reboot did not fix the Bobcat's syncing issue")
+    #     if self.bobcat.gap > 400:
+    #         self.fastsync()
 
-        if self.is_syncing():
-            return
+    #     if self.is_syncing():
+    #         return
 
-        self.logger.info("🔔 The reboot did not fix the Bobcat's syncing issue")
-        self.reset()
-        self.fastsync()
+    #     self.logger.info("The reboot did not fix the Bobcat's syncing issue")
+    #     self.reset()
+    #     self.fastsync()
 
-        if not self.is_syncing():
-            self.logger.critical("🚨 The autosync failed")
-            self.logger.critical("🚨 Manual intervention is required")
-            self.logger.debug(
-                "Contact Bobcat Support: https://bobcatminer.zendesk.com/hc/en-us/articles/4412998083355-Contact-Support"
-            )
+    #     if not self.is_syncing():
+    #         self.logger.critical("The autosync failed")
+    #         self.logger.critical("Manual intervention is required")
+    #         self.logger.debug(
+    #             "Contact Bobcat Support: https://bobcatminer.zendesk.com/hc/en-us/articles/4412998083355-Contact-Support"
+    #         )
 
     def run(self):
         """Diagnose and repair the Bobcat"""
@@ -433,11 +438,11 @@ class Autopilot:
 
                 # Check bobcat
                 if not self.bobcat.is_bobcat():
-                    raise BobcatIsNotABobcatError()
+                    raise NotABobcatError()
 
                 self.logger.debug("Refreshing Bobcat endpoints")
                 self.bobcat.refresh()
-                self.logger.info("🔔 Successfully refreshed Bobcat endpoints")
+                self.logger.info("Successfully refreshed Bobcat endpoints")
 
                 # Diagnose
                 self.is_relayed()
@@ -447,7 +452,7 @@ class Autopilot:
                 # Repair
                 if self.bobcat.status.upper() in ["ERROR", "DOWN"]:
 
-                    self.logger.error("💥 The Bobcat is down")
+                    self.logger.error("The Bobcat is down")
                     self.logger.debug(
                         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-"
                     )
@@ -461,7 +466,7 @@ class Autopilot:
 
                 if self.bobcat.status.upper() == "HEIGHT API ERROR":
 
-                    self.logger.error("💥 The Bobcat is down")
+                    self.logger.error("The Bobcat is down")
                     self.logger.debug(
                         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4413699665435-API-Error"
                     )
@@ -476,7 +481,7 @@ class Autopilot:
                 self.logger.debug("👀 Checking Bobcat miner API data for errors")
                 if self.has_errors():
 
-                    self.logger.error("💥 The Bobcat is down")
+                    self.logger.error("The Bobcat is down")
                     self.logger.debug(
                         "Troubleshooting Guide: https://www.nowitness.org/troubleshooting/"
                     )
@@ -487,35 +492,32 @@ class Autopilot:
                     self.reboot()
                     self.reset()
                     self.fastsync()
-                else:
-                    self.logger.info("🔔 The Bobcat is healthy")
 
-                self.logger.debug("👀 Checking Bobcat sync status")
-                if self.bobcat.gap > 400:
+                # TODO autosync
+                # self.logger.debug("👀 Checking Bobcat sync status")
+                # if self.bobcat.gap > 400:
 
-                    self.logger.error("💥 The Bobcat is not synced")
-                    self.logger.debug(
-                        "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
-                    )
-                    self.autosync()
-                else:
-                    self.logger.info("🔔 The Bobcat is synced")
+                #     self.logger.error("The Bobcat is not synced")
+                #     self.logger.debug(
+                #         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
+                #     )
+                #     self.autosync()
+                # else:
+                #     self.logger.info("The Bobcat is synced")
 
         except Timeout:
-            self.logger.warning(
-                "⚠️ Stopping. Another instance of bobcat-autopilot currently running"
-            )
+            self.logger.warning("Stopping. Another instance of bobcat-autopilot currently running")
 
         except BobcatConnectionError:
-            self.logger.critical(f"🚨 Failed to ping the Bobcat ({self.bobcat.ip_address})")
+            self.logger.critical(f"Failed to ping the Bobcat ({self.bobcat.ip_address})")
             self.logger.debug("Please verify the IP address and network connection")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
             )
 
-        except BobcatIsNotABobcatError:
+        except NotABobcatError:
             self.logger.critical(
-                f"🚨 The IP address ({self.bobcat.ip_address}) provided is not a Bobcat miner"
+                f"The IP address ({self.bobcat.ip_address}) provided is not a Bobcat miner"
             )
             self.logger.debug("Please verify the IP address is a Bobcat miner")
             self.logger.debug(
@@ -523,16 +525,14 @@ class Autopilot:
             )
 
         except requests.RequestException:
-            self.logger.critical(f"🚨 Failed to refresh the Bobcat ({self.bobcat.ip_address})")
+            self.logger.critical(f"Failed to refresh the Bobcat ({self.bobcat.ip_address})")
             self.logger.debug("Please verify the IP address and network connection")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
             )
 
         except Exception as err:
-            self.logger.exception(f"🚨 An unexpected error has occured: {str(err)}")
+            self.logger.exception(f"An unexpected error has occured: {str(err)}")
+
         finally:
             self.logger.debug("🏁 The Bobcat Autopilot is finished")
-
-            if self.log_discord_webhook_url:
-                time.sleep(10)  # wait for discord logs to flush
