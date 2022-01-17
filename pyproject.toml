@@ -14,7 +14,7 @@ python = "^3.8"
 requests = "^2.27.0"
 backoff = "^1.11.1"
 filelock = "^3.4.2"
-discord-lumberjack = {version = "^1.0.4", python = ">=3.8,<4.0"}
+discord-lumberjack = "^1.0.4"
 click = "^8.0.3"
 
 [tool.poetry.scripts]
