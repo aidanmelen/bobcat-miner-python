@@ -9,4 +9,4 @@ WORKDIR bobcat_miner_python
 
 RUN poetry install --no-interaction --no-ansi 
 
-ENTRYPOINT ["poetry", "run", "/bin/bash"]
+ENTRYPOINT ["poetry", "run", "bobcat"]
