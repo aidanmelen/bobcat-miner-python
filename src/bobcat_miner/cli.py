@@ -93,7 +93,14 @@ def _network_handler(bobcat, autopilot):
     help="The lock file path.",
 )
 def cli(
-    ctx, ip_address, dry_run, discord_webhook_url, discord_message_monospace, log_file, log_level, lock_file
+    ctx,
+    ip_address,
+    dry_run,
+    discord_webhook_url,
+    discord_message_monospace,
+    log_file,
+    log_level,
+    lock_file,
 ):
     """Bobcat miner command line tools"""
     bobcat = Bobcat(ip_address)

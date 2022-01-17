@@ -48,7 +48,7 @@ class Autopilot:
         discord_message_monospace=True,
         log_file=None,
         log_level="DEBUG",
-        lock_file=".bobcat-autopilot.lock"
+        lock_file=".bobcat-autopilot.lock",
     ):
         assert isinstance(bobcat, Bobcat)
         self.bobcat = bobcat
@@ -64,7 +64,6 @@ class Autopilot:
             self.logger.debug(
                 "🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second."
             )
-
 
     def _trace(self):
         """Log Bobcat diagnoser data"""
@@ -527,12 +526,14 @@ class Autopilot:
                 #     self.autosync()
                 # else:
                 #     self.logger.info("The Bobcat is synced")
-            
+
             if os.path.exists(self.lock_file):
                 os.remove(self.lock_file)
 
         except Timeout:
-            self.logger.warning("Stopping. Another instance of 'bobcat autopilot' currently running")
+            self.logger.warning(
+                "Stopping. Another instance of 'bobcat autopilot' currently running"
+            )
 
         except BobcatConnectionError:
             self.logger.critical(f"Failed to ping the Bobcat ({self.bobcat.ip_address})")
