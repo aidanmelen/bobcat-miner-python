@@ -15,4 +15,4 @@ jobs:
         architecture: x64
     - run: pip install poetry==1.1.4
     - run: poetry install
-    - run: cd tests && poetry run python -m unittest -v
+    - run: poetry run python -m unittest discover -s tests -v
