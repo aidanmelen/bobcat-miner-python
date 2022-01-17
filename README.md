@@ -19,7 +19,7 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 ## Bobcat Autopilot Usage
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set `BOBCAT_IP_ADDRESS` environment variable or using the command line option e.g. `bobcat --ip-address 192.168.1.100 autopilot`.
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set `BOBCAT_IP_ADDRESS` environment variable or using the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
 
 ![Bobcat Autopilot Term](./images/bobcat-autopilot-term.png)
 
