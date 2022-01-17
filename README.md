@@ -24,16 +24,20 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 ## Bobcat Autopilot Usage
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you bobcat miner's ip address. Then either set the `BOBCAT_IP_ADDRESS` environment variable or the command line option e.g. `bobcat --ip-address 192.168.1.10 autopilot`.
+The `bobcat autopilot` command will automatically diagnose and repair the Bobcat!
+
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you Bobcats's ip address.
 
 ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
+
+The `bobcat` command line tool accepts both command line options and environment variables. Please see the `bobcat --help` for more information.
 
 ### Bobcat Dry Run
 
 Diagnostics checks will run and all actions will be skipped during a Bobcat dry run.
 
 ```bash
-$ bobcat -i 192.168.0.8 --dry-run autopilot
+$ bobcat -i 192.168.0.10 --dry-run autopilot
 🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second.
 🚀 The Bobcat Autopilot is starting
 ```
@@ -58,7 +62,7 @@ and check Discord
 Send logs to a file with
 
 ```bash
-$ bobcat --ip-address 192.168.0.8 --log-file bobcat-autopilot.log autopilot
+$ bobcat --ip-address 192.168.0.10 --log-file bobcat-autopilot.log autopilot
 🚀 The Bobcat Autopilot is starting
 ```
 

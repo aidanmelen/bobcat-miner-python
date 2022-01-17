@@ -82,8 +82,18 @@ def _network_handler(bobcat, autopilot):
     show_envvar=True,
     help="The log level.",
 )
+@click.option(
+    "--lock-file",
+    "-L",
+    required=False,
+    default=".bobcat-autopilot.log",
+    type=click.Path(writable=True),
+    envvar="BOBCAT_LOCK_FILE",
+    show_envvar=True,
+    help="The lock file path.",
+)
 def cli(
-    ctx, ip_address, dry_run, discord_webhook_url, discord_message_monospace, log_file, log_level
+    ctx, ip_address, dry_run, discord_webhook_url, discord_message_monospace, log_file, log_level, lock_file
 ):
     """Bobcat miner command line tools"""
     bobcat = Bobcat(ip_address)
@@ -94,6 +104,7 @@ def cli(
         discord_message_monospace=discord_message_monospace,
         log_file=log_file,
         log_level=log_level,
+        lock_file=lock_file,
     )
     ctx.ensure_object(dict)
     ctx.obj["BOBCAT"] = bobcat
