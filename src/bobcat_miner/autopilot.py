@@ -57,6 +57,14 @@ class Autopilot:
                 "🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second."
             )
 
+    def _trace(self):
+        """Log Bobcat diagnoser data"""
+        self.logger.trace(self.bobcat.status_data)
+        self.logger.trace(self.bobcat.miner_data)
+        self.logger.trace(self.bobcat.temp_data)
+        self.logger.trace(self.bobcat.speed_data)
+        self.logger.trace(self.bobcat.dig_data)
+
     def is_relayed(self):
         """Diagnose the Bobcat's relay"""
 
@@ -166,6 +174,7 @@ class Autopilot:
 
         for _ in range(poll_total):
             self.bobcat.refresh_status()
+            self._trace()
             gap = self.bobcat.gap
             gap_polls.append(gap)
 
@@ -261,6 +270,7 @@ class Autopilot:
             backoff_time = 1
 
         self.bobcat.refresh_status()
+        self._trace()
 
         attempt_count = 0
         while self.bobcat.status.upper() == "LOADING":
@@ -271,6 +281,7 @@ class Autopilot:
             time.sleep(backoff_time)
 
             self.bobcat.refresh_status()  # get new status after waiting
+            self._trace()
 
             attempt_count += 1
             if attempt_count >= max_attempts:
@@ -379,6 +390,7 @@ class Autopilot:
             self.wait()
 
             self.bobcat.refresh_status()
+            self._trace()
 
             attempt_count += 1
             if attempt_count >= max_attempts:
@@ -401,6 +413,7 @@ class Autopilot:
 
     #     self.reboot()
     #     self.bobcat.refresh_status()
+    #     self._trace()
 
     #     if self.is_syncing():
     #         return
@@ -442,6 +455,7 @@ class Autopilot:
 
                 self.logger.debug("Refreshing Bobcat endpoints")
                 self.bobcat.refresh()
+                self._trace()
                 self.logger.info("Successfully refreshed Bobcat endpoints")
 
                 # Diagnose

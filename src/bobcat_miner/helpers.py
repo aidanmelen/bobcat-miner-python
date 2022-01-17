@@ -5,16 +5,6 @@ import logging
 import os
 
 
-LOG_LEVELS = {
-    "NOTSET": logging.NOTSET,
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-    "CRITICAL": logging.CRITICAL,
-}
-
-
 class Color:
     BOLD = "\033[1m"
     BLUE = "\033[94m"
@@ -31,6 +21,7 @@ class Color:
 
 
 class LogLevelColor:
+    TRACE = Color.WHITE
     DEBUG = Color.WHITE
     INFO = Color.BOLD_GREEN
     WARNING = Color.BOLD_YELLOW
@@ -39,6 +30,7 @@ class LogLevelColor:
 
 
 class LogLevelEmoji:
+    TRACE = ""
     DEBUG = ""
     INFO = "🔔"
     WARNING = "⚠️"
@@ -48,7 +40,10 @@ class LogLevelEmoji:
 
 class LogStreamFormatter(logging.Formatter):
 
+    logging_trace = logging.DEBUG - 5
+
     FORMATS = {
+        logging_trace: f"{LogLevelColor.TRACE}%(msg)s{Color.END}",
         logging.DEBUG: f"{LogLevelColor.DEBUG}%(msg)s{Color.END}",
         logging.INFO: f"{LogLevelColor.INFO}{LogLevelEmoji.INFO} %(msg)s{Color.END}",
         logging.WARNING: f"{LogLevelColor.WARNING}{LogLevelEmoji.WARNING} %(msg)s{Color.END}",
@@ -66,13 +61,17 @@ class LogDiscordFormatter(logging.Formatter):
 
     # TODO multiline log message not rendering properly
     # FORMATS = {
+    #     logging_trace: f"{LogLevelEmoji.TRACE}%(msg)s",
     #     logging.DEBUG: f"{LogLevelEmoji.DEBUG}%(msg)s",
     #     logging.INFO: f"```diff\n+ {LogLevelEmoji.INFO} %(msg)s\n```",
     #     logging.WARNING: f"```fix\n{LogLevelEmoji.WARNING} %(msg)s\n```",
     #     logging.ERROR: f"```diff\n- {LogLevelEmoji.ERROR} %(msg)s\n```",
     #     logging.CRITICAL: f"```diff\n- {LogLevelEmoji.CRITICAL} %(msg)s\n```",
     # }
+    logging_trace = logging.DEBUG - 5
+
     FORMATS = {
+        logging_trace: f"%(msg)s",
         logging.DEBUG: f"%(msg)s",
         logging.INFO: f"{LogLevelEmoji.INFO} %(msg)s",
         logging.WARNING: f"{LogLevelEmoji.WARNING} %(msg)s",
@@ -86,8 +85,77 @@ class LogDiscordFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+# https://stackoverflow.com/a/35804945/3894599
+def addLoggingLevel(levelName, levelNum, methodName=None):
+    """
+    Comprehensively adds a new logging level to the `logging` module and the
+    currently configured logging class.
+
+    `levelName` becomes an attribute of the `logging` module with the value
+    `levelNum`. `methodName` becomes a convenience method for both `logging`
+    itself and the class returned by `logging.getLoggerClass()` (usually just
+    `logging.Logger`). If `methodName` is not specified, `levelName.lower()` is
+    used.
+
+    To avoid accidental clobberings of existing attributes, this method will
+    raise an `AttributeError` if the level name is already an attribute of the
+    `logging` module or if the method name is already present
+
+    Example
+    -------
+    >>> addLoggingLevel('TRACE', logging.DEBUG - 5)
+    >>> logging.getLogger(__name__).setLevel("TRACE")
+    >>> logging.getLogger(__name__).trace('that worked')
+    >>> logging.trace('so did this')
+    >>> logging.TRACE
+    5
+
+    """
+    if not methodName:
+        methodName = levelName.lower()
+
+    if hasattr(logging, levelName):
+        raise AttributeError("{} already defined in logging module".format(levelName))
+    if hasattr(logging, methodName):
+        raise AttributeError("{} already defined in logging module".format(methodName))
+    if hasattr(logging.getLoggerClass(), methodName):
+        raise AttributeError("{} already defined in logger class".format(methodName))
+
+    # This method was inspired by the answers to Stack Overflow post
+    # http://stackoverflow.com/q/2183233/2988730, especially
+    # http://stackoverflow.com/a/13638084/2988730
+    def logForLevel(self, message, *args, **kwargs):
+        if self.isEnabledFor(levelNum):
+            self._log(levelNum, message, args, **kwargs)
+
+    def logToRoot(message, *args, **kwargs):
+        logging.log(levelNum, message, *args, **kwargs)
+
+    logging.addLevelName(levelNum, levelName)
+    setattr(logging, levelName, levelNum)
+    setattr(logging.getLoggerClass(), methodName, logForLevel)
+    setattr(logging, methodName, logToRoot)
+
+
 def get_logger(log_level, log_file, discord_webhook_url):
     """Get Bobcat Autopilot logger"""
+
+    try:
+        addLoggingLevel("TRACE", logging.DEBUG - 5)
+    except AttributeError:
+        # so unittests do not break
+        pass
+
+    LOG_LEVELS = {
+        "NOTSET": logging.NOTSET,
+        "TRACE": logging.TRACE,
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+    }
+
     logger = logging.getLogger("bobcat-autopilot")
     logger.setLevel(LOG_LEVELS[log_level])
 
@@ -113,19 +181,19 @@ def get_logger(log_level, log_file, discord_webhook_url):
     return logger
 
 
-# if __name__ == "__main__":
-#     logger = get_logger("DEBUG", None, os.getenv("BOBCAT_DISCORD_WEBHOOK_URL"))
-#     logger.debug("🚀 The Bobcat Autopilot is starting")
-#     logger.debug("Ping the Bobcat (192.168.0.10)")
-#     logger.info("Successfully pinged the Bobcat")
-#     logger.debug("Refreshing Bobcat endpoints")
-#     logger.info("Successfully refreshed Bobcat endpoints")
-#     logger.debug("👀 Checking Bobcat relay")
-#     logger.info("The Bobcat's activity is not relayed")
-#     logger.debug("👀 Checking Bobcat CPU tempurature")
-#     logger.info("The Bobcat's CPU tempurature is good")
-#     logger.debug("👀 Checking Bobcat network speed")
-#     logger.info("The Bobcat's network speed is good")
-#     logger.debug("👀 Checking Bobcat miner API data for errors")
-#     logger.info("The Bobcat is healthy")
-#     logger.debug("🏁 The Bobcat Autopilot is finished")
+if __name__ == "__main__":
+    logger = get_logger("TRACE", None, os.getenv("BOBCAT_DISCORD_WEBHOOK_URL"))
+    logger.debug("🚀 The Bobcat Autopilot is starting")
+    logger.debug("Ping the Bobcat (192.168.0.10)")
+    logger.info("Successfully pinged the Bobcat")
+    logger.debug("Refreshing Bobcat endpoints")
+    logger.info("Successfully refreshed Bobcat endpoints")
+    logger.debug("👀 Checking Bobcat relay")
+    logger.info("The Bobcat's activity is not relayed")
+    logger.debug("👀 Checking Bobcat CPU tempurature")
+    logger.info("The Bobcat's CPU tempurature is good")
+    logger.debug("👀 Checking Bobcat network speed")
+    logger.info("The Bobcat's network speed is good")
+    logger.debug("👀 Checking Bobcat miner API data for errors")
+    logger.info("The Bobcat is healthy")
+    logger.debug("🏁 The Bobcat Autopilot is finished")

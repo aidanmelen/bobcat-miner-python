@@ -55,16 +55,16 @@ except:
 @click.option(
     "--log-level",
     "-l",
-    default="DEBUG",
+    default="TRACE",
     type=click.Choice(
-        ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
+        ["NOTSET", "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
     envvar="BOBCAT_LOG_LEVEL",
     show_envvar=True,
     help="The log level.",
 )
 def cli(ctx, ip_address, dry_run, discord_webhook_url, log_file, log_level):
-    """Bobcat command line tools"""
+    """Bobcat miner command line tools"""
     bobcat = Bobcat(ip_address)
     autopilot = Autopilot(
         bobcat,
@@ -86,7 +86,7 @@ def ping(ctx):
         ctx.obj["AUTOPILOT"].ping()
     except BobcatConnectionError:
         ctx.obj["AUTOPILOT"].logger.error(
-            f"The Autopilot was unable to connect to the Bobcat ({ctx.obj['IP_ADDRESS']})"
+            f"Failed to connect to the Bobcat ({ctx.obj['IP_ADDRESS']})"
         )
 
 
@@ -97,67 +97,107 @@ def autopilot(ctx):
     try:
         ctx.obj["AUTOPILOT"].run()
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("The Autopilot failed")
 
 
 @cli.command()
 @click.pass_context
-def status(ctx):
+@click.option(
+    "--pprint/--no-pprint",
+    " /-P",
+    default=True,
+    help="Pretty print the Bobcat endpoint JSON data.",
+)
+def status(ctx, pprint):
     """Print the bobcat miner status data"""
     try:
+        autopilot = ctx.obj["AUTOPILOT"]
         bobcat = ctx.obj["BOBCAT"]
         bobcat.refresh_status()
-        click.echo(json.dumps(bobcat.status_data, indent=4))
+        data = json.dumps(bobcat.status_data, indent=4) if pprint else bobcat.status_data
+        autopilot.logger.debug(data)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("Failed to get the Bobcat status data")
 
 
 @cli.command()
 @click.pass_context
-def miner(ctx):
+@click.option(
+    "--pprint/--no-pprint",
+    " /-P",
+    default=True,
+    help="Pretty print the Bobcat endpoint JSON data.",
+)
+def miner(ctx, pprint):
     """Print the bobcat miner data"""
     try:
+        autopilot = ctx.obj["AUTOPILOT"]
         bobcat = ctx.obj["BOBCAT"]
         bobcat.refresh_miner()
-        click.echo(json.dumps(bobcat.miner_data, indent=4))
+        data = json.dumps(bobcat.miner_data, indent=4) if pprint else bobcat.miner_data
+        autopilot.logger.debug(data)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("Failed to get the Bobcat miner data")
 
 
 @cli.command()
 @click.pass_context
-def speed(ctx):
+@click.option(
+    "--pprint/--no-pprint",
+    " /-P",
+    default=True,
+    help="Pretty print the Bobcat endpoint JSON data.",
+)
+def speed(ctx, pprint):
     """Print the bobcat miner network speed"""
     try:
+        autopilot = ctx.obj["AUTOPILOT"]
         bobcat = ctx.obj["BOBCAT"]
         bobcat.refresh_speed()
-        click.echo(json.dumps(bobcat.speed_data, indent=4))
+        data = json.dumps(bobcat.speed_data, indent=4) if pprint else bobcat.speed_data
+        autopilot.logger.debug(data)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("Failed to get the Bobcat speed data")
 
 
 @cli.command()
 @click.pass_context
-def temp(ctx):
+@click.option(
+    "--pprint/--no-pprint",
+    " /-P",
+    default=True,
+    help="Pretty print the Bobcat endpoint JSON data.",
+)
+def temp(ctx, pprint):
     """Print the bobcat miner temp"""
     try:
+        autopilot = ctx.obj["AUTOPILOT"]
         bobcat = ctx.obj["BOBCAT"]
         bobcat.refresh_temp()
-        click.echo(json.dumps(bobcat.temp_data, indent=4))
+        data = json.dumps(bobcat.temp_data, indent=4) if pprint else bobcat.temp_data
+        autopilot.logger.debug(data)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("Failed to get the Bobcat tempurature data")
 
 
 @cli.command()
 @click.pass_context
-def dig(ctx):
+@click.option(
+    "--pprint/--no-pprint",
+    " /-P",
+    default=True,
+    help="Pretty print the Bobcat endpoint JSON data.",
+)
+def dig(ctx, pprint):
     """Print the bobcat miner DNS data"""
     try:
+        autopilot = ctx.obj["AUTOPILOT"]
         bobcat = ctx.obj["BOBCAT"]
         bobcat.refresh_dig()
-        click.echo(json.dumps(bobcat.dig_data, indent=4))
+        data = json.dumps(bobcat.dig_data, indent=4) if pprint else bobcat.dig_data
+        autopilot.logger.debug(data)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        autopilot.logger.exception("Failed to get the Bobcat dig data")
 
 
 @cli.command()
@@ -167,7 +207,7 @@ def reboot(ctx):
     try:
         ctx.obj["AUTOPILOT"].reboot()
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        ctx.obj["AUTOPILOT"].logger.exception("Failed to reboot the Bobcat")
 
 
 @cli.command()
@@ -184,7 +224,7 @@ def reset(ctx, max_attempts):
     try:
         ctx.obj["AUTOPILOT"].reset(max_attempts)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        ctx.obj["AUTOPILOT"].logger.exception("Failed to reset the Bobcat")
 
 
 @cli.command()
@@ -194,7 +234,7 @@ def resync(ctx):
     try:
         ctx.obj["AUTOPILOT"].resync()
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        ctx.obj["AUTOPILOT"].logger.exception("Failed to resync the Bobcat")
 
 
 @cli.command()
@@ -211,7 +251,7 @@ def fastsync(ctx, max_attempts):
     try:
         ctx.obj["AUTOPILOT"].fastsync(max_attempts)
     except Exception as err:
-        click.echo(click.style(err, fg="red"))
+        ctx.obj["AUTOPILOT"].logger.exception("Failed to fastsync the Bobcat")
 
 
 # TODO autosync
@@ -222,7 +262,7 @@ def fastsync(ctx, max_attempts):
 #     try:
 #         ctx.obj['AUTOPILOT'].autosync()
 #     except Exception as err:
-#         click.echo(click.style(err, fg='red'))
+#        ctx.obj["AUTOPILOT"].logger.exception("Failed to autosync the Bobcat")
 
 
 if __name__ == "__main__":

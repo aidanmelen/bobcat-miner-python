@@ -132,3 +132,4 @@ dmypy.json
 # Bobcat
 .env
 bobcat-autopilot.log
+scratch.py
