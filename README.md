@@ -46,7 +46,7 @@ The `bobcat` command line tool supports sending logs to a Discord channel using 
 $ export BOBCAT_IP_ADDRESS=192.168.0.10
 $ export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
 $ bobcat autopilot
-...
+🚀 The Bobcat Autopilot is starting
 ```
 
 and check Discord
@@ -55,7 +55,7 @@ and check Discord
 
 ### File Log
 
-The `bobcat` command line tool supports sedning logs to a file
+Send logs to a file with
 
 ```bash
 $ bobcat --ip-address 192.168.0.8 --log-file bobcat-autopilot.log autopilot
