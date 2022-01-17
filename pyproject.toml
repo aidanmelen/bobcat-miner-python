@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bobcat-miner"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Aidan Melen <aidanmelen@protonmail.com>"]
 license = "MIT"
 description = "A collection of command line tools to automate the Bobcat miner. The project offers a robust python SDK's for interacting with the Bobcat miner."
