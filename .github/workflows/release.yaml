@@ -38,5 +38,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/website-checker:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/website-checker:${{ steps.get_tag.outputs.TAG }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/bobcat:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/bobcat:${{ steps.get_tag.outputs.TAG }}
