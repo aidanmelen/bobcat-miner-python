@@ -78,13 +78,18 @@ class Autopilot:
 
         self.logger.debug("👀 Checking Bobcat relay")
 
-        listen_address = self.bobcat.peerbook_listen_address
-        is_port_44158_open = f"/ip4/{self.bobcat.public_ip}/tcp/44158" in listen_address
+        is_port_44158_open = f"/ip4/{self.bobcat.public_ip}/tcp/44158" in self.bobcat.peerbook_listen_address
 
-        is_relayed = not is_port_44158_open and self.bobcat.p2p_status.get("nat_type") != "none"
+        is_nat_type_none = None
+        if isinstance(self.bobcat.p2p_status, dict) 
+            is_nat_type_none = self.bobcat.p2p_status.get("nat_type") != "none"
+        else:
+            is_nat_type_none = "|nat_type | none  |".upper() in self.bobcat.p2p_status.upper()
+
+        is_relayed = not is_port_44158_open and is_nat_type_none
 
         if is_relayed:
-            self.logger.warning(f"The Bobcat is relayed via {listen_address}")
+            self.logger.warning(f"The Bobcat is relayed via {self.bobcat.peerbook_listen_address}")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser"
             )
@@ -170,6 +175,14 @@ class Autopilot:
 
     def is_syncing(self, poll_rate=TEN_MINUTES, poll_total=6):
         """Diagnose the Bobcat's sync status by measuring the blockchain gap over time"""
+        self.logger.debug("✏️ Start polling the Bobcat's blockchain gap")
+
+        if not self.bobcat.gap or isinstance(self.bobcat.gap, str):
+            self.logger.error(
+                f"Cancelling the sync check. Unable to read the blockchain gap ({self.bobcat.gap})"
+            )
+            return
+
         if poll_total < 2:
             self.logger.warning(
                 "Not polling the Bobcat's blockchain gap because the poll_total is too small"
@@ -178,11 +191,10 @@ class Autopilot:
 
         gap_polls = []
 
-        self.logger.debug("✏️ Start polling the Bobcat's blockchain gap")
-
         for _ in range(poll_total):
             self.bobcat.refresh_status()
             self._trace()
+            
             gap = self.bobcat.gap
             gap_polls.append(gap)
 
@@ -375,6 +387,12 @@ class Autopilot:
 
     def fastsync(self, max_attempts=3):
         """Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts"""
+
+        if not self.bobcat.gap or isinstance(self.bobcat.gap, str):
+            self.logger.error(
+                f"Cancelling the fastsync. Unable to read the blockchain gap ({self.bobcat.gap})"
+            )
+            return
 
         if self.bobcat.gap < 400:
             self.logger.debug(

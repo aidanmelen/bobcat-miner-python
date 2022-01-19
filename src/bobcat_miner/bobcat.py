@@ -228,7 +228,7 @@ class Bobcat:
                 for x in p2p_status[3:-3]
             }
         except Exception:
-            return p2p_status
+            return "\n".join(self.miner_data.get("p2p_status", []))
 
     @property
     def ports_desc(self):
