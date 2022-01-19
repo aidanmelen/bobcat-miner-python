@@ -119,7 +119,9 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         blockchain_height = self.status_data.get("blockchain_height")
-        return int(blockchain_height) if blockchain_height.lstrip("-").isdigit() else blockchain_height
+        return (
+            int(blockchain_height) if blockchain_height.lstrip("-").isdigit() else blockchain_height
+        )
 
     @property
     def epoch(self):
@@ -211,7 +213,8 @@ class Bobcat:
         if not self.miner_data:
             self.refresh_miner()
         created = self.miner_data.get("miner", {}).get("Created")
-        if created.lstrip("-").isdigit():
+
+        if isinstance(created, int):
             return datetime.fromtimestamp(int(created))
         else:
             return created
@@ -223,10 +226,7 @@ class Bobcat:
             self.refresh_miner()
         p2p_status = self.miner_data.get("p2p_status", [])
         try:
-            return {
-                x.split("|")[1].strip(): x.split("|")[2].strip()
-                for x in p2p_status[3:-3]
-            }
+            return {x.split("|")[1].strip(): x.split("|")[2].strip() for x in p2p_status[3:-3]}
         except Exception:
             return "\n".join(self.miner_data.get("p2p_status", []))
 

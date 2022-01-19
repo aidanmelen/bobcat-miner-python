@@ -78,10 +78,12 @@ class Autopilot:
 
         self.logger.debug("👀 Checking Bobcat relay")
 
-        is_port_44158_open = f"/ip4/{self.bobcat.public_ip}/tcp/44158" in self.bobcat.peerbook_listen_address
+        is_port_44158_open = (
+            f"/ip4/{self.bobcat.public_ip}/tcp/44158" in self.bobcat.peerbook_listen_address
+        )
 
         is_nat_type_none = None
-        if isinstance(self.bobcat.p2p_status, dict) 
+        if isinstance(self.bobcat.p2p_status, dict):
             is_nat_type_none = self.bobcat.p2p_status.get("nat_type") != "none"
         else:
             is_nat_type_none = "|nat_type | none  |".upper() in self.bobcat.p2p_status.upper()
@@ -194,7 +196,7 @@ class Autopilot:
         for _ in range(poll_total):
             self.bobcat.refresh_status()
             self._trace()
-            
+
             gap = self.bobcat.gap
             gap_polls.append(gap)
 
@@ -259,9 +261,7 @@ class Autopilot:
 
         if has_errors:
             self.logger.error("The Bobcat has errors")
-            self.logger.debug(
-                "Troubleshooting Guide: https://www.nowitness.org/troubleshooting/"
-            )
+            self.logger.debug("Troubleshooting Guide: https://www.nowitness.org/troubleshooting/")
         else:
             self.logger.info("The Bobcat is healthy")
 
