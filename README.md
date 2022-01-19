@@ -26,7 +26,7 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 The `bobcat autopilot` command will automatically diagnose and repair the Bobcat!
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find you Bobcats's ip address.
+Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address.
 
 ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
 
