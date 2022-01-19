@@ -467,10 +467,10 @@ class Autopilot:
                 if not self.bobcat.is_bobcat():
                     raise NotABobcatError()
 
-                self.logger.debug("Refreshing Bobcat endpoints")
+                self.logger.debug("Refreshing Bobcat")
                 self.bobcat.refresh()
                 self._trace()
-                self.logger.info("Successfully refreshed Bobcat endpoints")
+                self.logger.info("Successfully refreshed Bobcat")
 
                 # Diagnose
                 self.is_relayed()
