@@ -225,7 +225,7 @@ def temp(ctx, pprint):
     except requests.RequestException:
         _network_handler(bobcat, autopilot)
     except Exception as err:
-        autopilot.logger.exception("Failed to get the Bobcat tempurature data")
+        autopilot.logger.exception("Failed to get the Bobcat temperature data")
 
 
 @cli.command()

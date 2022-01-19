@@ -133,3 +133,7 @@ dmypy.json
 .env
 bobcat-autopilot.log
 scratch.py
+
+
+# Apple
+.DS_Store

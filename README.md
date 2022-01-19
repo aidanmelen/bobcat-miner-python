@@ -44,7 +44,7 @@ $ bobcat -i 192.168.0.10 --dry-run autopilot
 
 ### Discord Monitoring
 
-The `bobcat` command line tool supports sending logs to a Discord channel using a [webhook url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+Send `bobcat` logs to a Discord channel using a [webhook url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
 ```bash
 $ export BOBCAT_IP_ADDRESS=192.168.0.10
@@ -53,13 +53,13 @@ $ bobcat autopilot
 🚀 The Bobcat Autopilot is starting
 ```
 
-and check Discord
+and watch your logs stream your Discord channel!
 
 ![Bobcat Autopilot Discord](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord.png)
 
-### File Log
+### Log File
 
-Send logs to a file with
+Send logs to a file
 
 ```bash
 $ bobcat --ip-address 192.168.0.10 --log-file bobcat-autopilot.log autopilot
@@ -86,7 +86,7 @@ $ docker run --rm -it aidanmelen/bobcat -i 192.168.0.10 status
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.10")
+bobcat = bobcat_miner.Bobcat("192.168.1.100")
 autopilot = bobcat_miner.Autopilot(bobcat)
 
 # Automatically diagnose and repair the Bobcat
@@ -113,7 +113,7 @@ autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over tim
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.10")
+bobcat = bobcat_miner.Bobcat("192.168.1.100")
 
 # refresh
 bobcat.refresh_status()
