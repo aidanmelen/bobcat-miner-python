@@ -43,9 +43,17 @@ class Bobcat:
         """Refresh data for the bobcat miner status"""
         self.status_data = self._get("http://" + self.ip_address + "/status.json").json()
 
+        if self.status_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_status()
+
     def refresh_miner(self):
         """Refresh data for the bobcat miner data"""
         self.miner_data = self._get("http://" + self.ip_address + "/miner.json").json()
+
+        if self.miner_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_miner()
 
     def refresh_speed(self):
         """Refresh data for the bobcat miner network speed"""
@@ -59,6 +67,10 @@ class Bobcat:
     def refresh_temp(self):
         """Refresh data for the bobcat miner temp"""
         self.temp_data = self._get("http://" + self.ip_address + "/temp.json").json()
+
+        if self.temp_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_temp()
 
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
@@ -95,7 +107,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         gap = self.status_data.get("gap")
-        return int(gap) if gap.lstrip("-").isdigit() else 1000000000
+        return int(gap) if gap.lstrip("-").isdigit() else gap
 
     @property
     def miner_height(self):
@@ -103,7 +115,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         miner_height = self.status_data.get("miner_height")
-        return int(miner_height) if miner_height.lstrip("-").isdigit() else None
+        return int(miner_height) if miner_height.lstrip("-").isdigit() else miner_height
 
     @property
     def blockchain_height(self):
@@ -111,7 +123,9 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         blockchain_height = self.status_data.get("blockchain_height")
-        return int(blockchain_height) if blockchain_height.lstrip("-").isdigit() else None
+        return (
+            int(blockchain_height) if blockchain_height.lstrip("-").isdigit() else blockchain_height
+        )
 
     @property
     def epoch(self):
@@ -119,7 +133,7 @@ class Bobcat:
         if not self.status_data:
             self.refresh_status()
         epoch = self.status_data.get("epoch")
-        return int(epoch) if epoch.lstrip("-").isdigit() else None
+        return int(epoch) if epoch.lstrip("-").isdigit() else epoch
 
     @property
     def tip(self):
@@ -202,17 +216,23 @@ class Bobcat:
         """Get miner created"""
         if not self.miner_data:
             self.refresh_miner()
-        return datetime.fromtimestamp(int(self.miner_data.get("miner", {}).get("Created")))
+        created = self.miner_data.get("miner", {}).get("Created")
+
+        if isinstance(created, int):
+            return datetime.fromtimestamp(int(created))
+        else:
+            return created
 
     @property
     def p2p_status(self):
         """Get p2p status"""
         if not self.miner_data:
             self.refresh_miner()
-        return {
-            x.split("|")[1].strip(): x.split("|")[2].strip()
-            for x in self.miner_data.get("p2p_status", [])[3:-3]
-        }
+        p2p_status = self.miner_data.get("p2p_status", [])
+        try:
+            return {x.split("|")[1].strip(): x.split("|")[2].strip() for x in p2p_status[3:-3]}
+        except Exception:
+            return "\n".join(self.miner_data.get("p2p_status", []))
 
     @property
     def ports_desc(self):

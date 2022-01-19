@@ -26,19 +26,19 @@ bobcat-ping: ## Run the bobcat-autopilot
 bobcat-autopilot: ## Run the bobcat-autopilot
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME) autopilot
 
-tests-py3.8: ## Run the unittests on py38
+tests-py3.8: ## Run the unittests on python3.8
 	docker build . --build-arg PYTHON_VERSION=3.8 -t $(NAME)-3.8
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.8
 
-tests-py3.9: ## Run the unittests on py39
+tests-py3.9: ## Run the unittests on python3.9
 	docker build . --build-arg PYTHON_VERSION=3.9 -t $(NAME)-3.9
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.9
 
-tests-py3.10: ## Run the unittests on py310
+tests-py3.10: ## Run the unittests on python3.10
 	docker build . --build-arg PYTHON_VERSION=3.10 -t $(NAME)-3.10
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
 
-tests: tests-py3.8 tests-py3.9 test-py3.10	## Run the unittests
+tests: tests-py3.8 tests-py3.9 tests-py3.10	## Run the unittests
 
 lint: ## Run the linter
 	black --line-length 100 .
