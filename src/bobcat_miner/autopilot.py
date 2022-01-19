@@ -101,9 +101,9 @@ class Autopilot:
         return is_relayed
 
     def is_temp_dangerous(self):
-        """Diagnosing the Bobcat's CPU tempurature"""
+        """Diagnosing the Bobcat's CPU temperature"""
 
-        self.logger.debug("👀 Checking Bobcat CPU tempurature")
+        self.logger.debug("👀 Checking Bobcat CPU temperature")
 
         is_too_cold = self.bobcat.temp0 < 0 or self.bobcat.temp1 < 0
         is_hot_warning = (self.bobcat.temp0 >= 65 and self.bobcat.temp0 < 70) or (
@@ -127,7 +127,7 @@ class Autopilot:
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring"
             )
         else:
-            self.logger.info("The Bobcat's CPU tempurature is good")
+            self.logger.info("The Bobcat's CPU temperature is good")
 
         return is_temp_dangerous
 
@@ -401,7 +401,7 @@ class Autopilot:
             return
 
         if self.bobcat.status.upper() in ["ERROR", "DOWN"] or self.bobcat.error:
-            self.logger.warning("Cancel fastsync because it only works on a healthly Bobcat")
+            self.logger.warning("Cancel fastsync because it only works on a healthy Bobcat")
             return
 
         if self.bobcat.gap <= 400:
@@ -576,7 +576,7 @@ class Autopilot:
             )
 
         except Exception as err:
-            self.logger.exception(f"An unexpected error has occured: {str(err)}")
+            self.logger.exception(f"An unexpected error has occurred: {str(err)}")
 
         finally:
             self.logger.debug("🏁 The Bobcat Autopilot is finished")
