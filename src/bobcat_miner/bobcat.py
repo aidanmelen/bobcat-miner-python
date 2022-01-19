@@ -68,6 +68,10 @@ class Bobcat:
         """Refresh data for the bobcat miner temp"""
         self.temp_data = self._get("http://" + self.ip_address + "/temp.json").json()
 
+        if self.temp_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.refresh_temp()
+
     def refresh_dig(self):
         """Refresh data for the bobcat miner DNS data"""
         self.dig_data = self._get("http://" + self.ip_address + "/dig.json").json()
