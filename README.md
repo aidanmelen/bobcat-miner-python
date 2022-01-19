@@ -37,9 +37,8 @@ The `bobcat` command line tool accepts both command line options and environment
 Diagnostics checks will run and all actions will be skipped during a Bobcat dry run.
 
 ```bash
-$ bobcat -i 192.168.0.10 --dry-run autopilot
+$ bobcat -i 192.168.0.10 -l DEBUG --dry-run autopilot
 🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second.
-🚀 The Bobcat Autopilot is starting
 ```
 
 ### Discord Monitoring
@@ -47,6 +46,7 @@ $ bobcat -i 192.168.0.10 --dry-run autopilot
 Send `bobcat` logs to a Discord channel using a [webhook url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
 ```bash
+$ export BOBCAT_LOG_LEVEL=DEBUG
 $ export BOBCAT_IP_ADDRESS=192.168.0.10
 $ export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
 $ bobcat autopilot
