@@ -74,7 +74,7 @@ def _network_handler(bobcat, autopilot):
 @click.option(
     "--log-level",
     "-l",
-    default="TRACE",
+    default="INFO",
     type=click.Choice(
         ["NOTSET", "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),

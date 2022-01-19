@@ -215,6 +215,9 @@ class Autopilot:
 
     def has_errors(self):
         """Diagnose Bobcat errors"""
+
+        self.logger.debug("👀 Checking Bobcat miner API data for errors")
+
         has_error = self.bobcat.miner_data.get("errors") != ""
         has_status_error = self.bobcat.status.upper() in ["ERROR", "DOWN"]
         has_miner_region = "ERROR" in self.bobcat.miner_data.get("region").upper()
@@ -244,6 +247,9 @@ class Autopilot:
 
         if has_errors:
             self.logger.error("The Bobcat has errors")
+            self.logger.debug(
+                "Troubleshooting Guide: https://www.nowitness.org/troubleshooting/"
+            )
         else:
             self.logger.info("The Bobcat is healthy")
 
@@ -480,7 +486,7 @@ class Autopilot:
                     )
 
                     if self.bobcat.tip:
-                        self.logger.debug(f"tip: {self.bobcat.tip}")
+                        self.logger.debug(f"Tip: {self.bobcat.tip}")
 
                     self.reboot()
                     self.reset()
@@ -494,22 +500,15 @@ class Autopilot:
                     )
 
                     if self.bobcat.tip:
-                        self.logger.debug(f"tip: {self.bobcat.tip}")
+                        self.logger.debug(f"Tip: {self.bobcat.tip}")
 
                     self.reboot()
                     self.reset()
                     self.fastsync()
 
-                self.logger.debug("👀 Checking Bobcat miner API data for errors")
                 if self.has_errors():
-
-                    self.logger.error("The Bobcat is down")
-                    self.logger.debug(
-                        "Troubleshooting Guide: https://www.nowitness.org/troubleshooting/"
-                    )
-
                     if self.bobcat.tip:
-                        self.logger.debug(f"tip: {self.bobcat.tip}")
+                        self.logger.debug(f"Tip: {self.bobcat.tip}")
 
                     self.reboot()
                     self.reset()
