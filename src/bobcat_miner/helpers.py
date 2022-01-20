@@ -130,7 +130,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     setattr(logging, methodName, logToRoot)
 
 
-def get_logger(log_level, log_file, discord_webhook_url, discord_message_monospace):
+def get_logger(log_level, log_file, discord_webhook_url):
     """Get Bobcat Autopilot logger"""
 
     try:
@@ -170,7 +170,7 @@ def get_logger(log_level, log_file, discord_webhook_url, discord_message_monospa
         discord_webhook_handler = DiscordWebhookHandler(
             url=discord_webhook_url,
             level=log_level,
-            message_creator=BasicMessageCreator(monospace=discord_message_monospace),
+            message_creator=BasicMessageCreator(monospace=False),
         )
         discord_webhook_handler.setFormatter(LogDiscordFormatter())
         logger.addHandler(discord_webhook_handler)
