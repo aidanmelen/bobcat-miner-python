@@ -61,7 +61,12 @@ class Bobcat:
         self.speed_data = self._get("http://" + self.ip_address + "/speed.json").json()
 
         if (self.speed_data == {"message": "rate limit exceeded"}) or (
-            self.speed_data == {"DownloadSpeed": "", "UploadSpeed": "", "Latency": ""}  # https://github.com/aidanmelen/bobcat-miner-python/issues/6
+            self.speed_data
+            == {
+                "DownloadSpeed": "",
+                "UploadSpeed": "",
+                "Latency": "",
+            }  # https://github.com/aidanmelen/bobcat-miner-python/issues/6
         ):
             time.sleep(30)
             self.refresh_speed()
