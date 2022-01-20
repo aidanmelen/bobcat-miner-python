@@ -54,15 +54,6 @@ def _network_handler(bobcat, autopilot):
     help="The Discord webhook url where log events will be sent.",
 )
 @click.option(
-    "--discord-message-monospace/--discord-message-no-monospace",
-    "-m/",
-    required=False,
-    default=True,
-    envvar="BOBCAT_DISCORD_MESSAGE_MONOSPACE",
-    show_envvar=True,
-    help="The Discord webhook url where log events will be sent.",
-)
-@click.option(
     "--log-file",
     "-f",
     required=False,
@@ -86,7 +77,7 @@ def _network_handler(bobcat, autopilot):
     "--lock-file",
     "-L",
     required=False,
-    default=".bobcat-autopilot.log",
+    default=".bobcat.lock",
     type=click.Path(writable=True),
     envvar="BOBCAT_LOCK_FILE",
     show_envvar=True,
@@ -97,7 +88,6 @@ def cli(
     ip_address,
     dry_run,
     discord_webhook_url,
-    discord_message_monospace,
     log_file,
     log_level,
     lock_file,
@@ -108,7 +98,6 @@ def cli(
         bobcat,
         dry_run=dry_run,
         discord_webhook_url=discord_webhook_url,
-        discord_message_monospace=discord_message_monospace,
         log_file=log_file,
         log_level=log_level,
         lock_file=lock_file,

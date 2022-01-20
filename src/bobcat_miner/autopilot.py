@@ -45,7 +45,6 @@ class Autopilot:
         bobcat,
         dry_run=False,
         discord_webhook_url=None,
-        discord_message_monospace=True,
         log_file=None,
         log_level="DEBUG",
         lock_file=".bobcat-autopilot.lock",
@@ -55,9 +54,7 @@ class Autopilot:
 
         self.lock_file = lock_file
 
-        self.logger = get_logger(
-            log_level, log_file, discord_webhook_url, discord_message_monospace
-        )
+        self.logger = get_logger(log_level, log_file, discord_webhook_url)
 
         self.dry_run = dry_run
         if self.dry_run:
