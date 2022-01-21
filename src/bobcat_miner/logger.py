@@ -83,4 +83,36 @@ class BobcatEmbedMessageCreator(EmbedMessageCreator):
             return record.description
         else:
             return ""
+        
+
+
+if __name__ == "__main__":
+    import os
+    import json
+
+    discord_webhook_url = os.getenv("BOBCAT_DISCORD_WEBHOOK_URL")
+
+    logger = logging.getLogger('bobcat')
+    logger.setLevel('DEBUG')
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(BobcatColorLogFormatter())
+    logger.addHandler(stream_handler)
+
+    discord_webhook_handler = DiscordWebhookHandler(
+        url=discord_webhook_url,
+        level="DEBUG",
+        message_creator=BobcatEmbedMessageCreator(),
+    )
+    logger.addHandler(discord_webhook_handler)
+
+
+    logger.debug("This is debug")
+    logger.info("This is info")
+    logger.info("This is a green info", extra={'prefix': Color.GREEN, 'suffix': Color.END})
+    logger.warning("This is warning")
+    dump = json.dumps({'status': 'Synced', 'gap': '-1', 'miner_height': '1191069', 'blockchain_height': '1191068', 'epoch': '31417'})
+    logger.error("This is error", extra={"description": f"```{dump}```"})
+    logger.critical("This is critical")
+
     
