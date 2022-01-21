@@ -23,6 +23,7 @@ class Color:
     END = "\033[0m"
 
 
+# https://stackoverflow.com/a/70796089/3894599
 class BobcatColorLogFormatter(logging.Formatter):
     """A class for formatting colored logs."""
 
