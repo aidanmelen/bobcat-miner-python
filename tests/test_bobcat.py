@@ -144,22 +144,22 @@ class TestBobcatProperties(unittest.TestCase):
         self.assertEqual(
             self.bobcat.ports,
             {
-                "192.168.0.8:22": "open",
-                "192.168.0.8:44158": "open",
+                "192.168.0.10:22": "open",
+                "192.168.0.10:44158": "open",
                 "33.117.96.28:22": "closed/timeout",
                 "33.117.96.28:44158": "closed/timeout",
             },
         )
 
     def test_private_ip(self):
-        self.assertEqual(self.bobcat.private_ip, "192.168.0.8")
+        self.assertEqual(self.bobcat.private_ip, "192.168.0.10")
 
     def test_public_ip(self):
         self.assertEqual(self.bobcat.public_ip, "33.117.96.28")
 
     def test_peerbook(self):
         self.assertTrue(
-            "|/p2p/332YUS4TUQy4boXRvGjrj6z7XyiSx8FDxmTn6vtRYP|my-mock-miner |    1     |    7    |non| 293.353s |"
+            "|/p2p/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|fancy-awesome-|    1     |    7    |non| 293.353s |"
             in self.bobcat.peerbook
         )
         self.assertTrue("/ip4/33.117.96.28/tcp/44158" in self.bobcat.peerbook)
@@ -168,7 +168,7 @@ class TestBobcatProperties(unittest.TestCase):
         self.assertEqual(
             self.bobcat.peerbook_miner,
             {
-                "address": "/p2p/332YUS4TUQy4boXRvGjrj6z7XyiSx8FDxmTn6vtRYP",
+                "address": "/p2p/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 "name": "my-mock-miner",
                 "listen_add": "1",
                 "connectio": "7",

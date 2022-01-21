@@ -176,21 +176,3 @@ def get_logger(log_level, log_file, discord_webhook_url):
         logger.addHandler(discord_webhook_handler)
 
     return logger
-
-
-# if __name__ == "__main__":
-#     logger = get_logger("TRACE", None, os.getenv("BOBCAT_DISCORD_WEBHOOK_URL"))
-#     logger.debug("🚀 The Bobcat Autopilot is starting")
-#     logger.debug("Ping the Bobcat (192.168.0.10)")
-#     logger.info("Successfully pinged the Bobcat")
-#     logger.debug("Refreshing Bobcat endpoints")
-#     logger.info("Successfully refreshed Bobcat endpoints")
-#     logger.debug("👀 Checking Bobcat relay")
-#     logger.info("The Bobcat's activity is not relayed")
-#     logger.debug("👀 Checking Bobcat CPU temperature")
-#     logger.info("The Bobcat's CPU temperature is good")
-#     logger.debug("👀 Checking Bobcat network speed")
-#     logger.info("The Bobcat's network speed is good")
-#     logger.debug("👀 Checking Bobcat miner API data for errors")
-#     logger.info("The Bobcat is healthy")
-#     logger.debug("🏁 The Bobcat Autopilot is finished")
