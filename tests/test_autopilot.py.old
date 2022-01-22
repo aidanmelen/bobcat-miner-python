@@ -5,7 +5,7 @@ import logging
 import unittest
 import requests
 
-from bobcat_miner import Bobcat, Autopilot
+miner import Bobcat, Autopilot
 
 import mock_bobcat
 

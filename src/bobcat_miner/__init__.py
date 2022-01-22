@@ -1,9 +1,21 @@
 """Bobcat Miner"""
 
-from .bobcat_errors import BobcatIpAddressDiscoveryError
-from .bobcat_base import BobcatBase
-from .bobcat_connection import BobcatConnection
-from .bobcat_api import BobcatAPI
 from .bobcat import Bobcat
+from .api import BobcatAPI
+from .connection import BobcatConnection
+from .base import BobcatBase
+from .logger import BobcatLogger
+from .errors import BobcatIpAddressNotValidError
+from .errors import BobcatConnectionError
+from .errors import BobcatIpAddressNotFoundError
 
-__all__ = ("BobcatIpAddressDiscoveryError", "BobcatBase", "BobcatConnection", "BobcatAPI", "Bobcat")
+__all__ = (
+    "Bobcat",
+    "BobcatAPI",
+    "BobcatConnection",
+    "BobcatBase",
+    "BobcatLogger",
+    "BobcatIpAddressNotValidError",
+    "BobcatConnectionError",
+    "BobcatIpAddressNotFoundError",
+)
