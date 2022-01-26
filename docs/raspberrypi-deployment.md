@@ -39,14 +39,14 @@ Then schedule Bobcat Autopilot with Cron
 crontab -l > mycron 2>/dev/null
 
 # echo new cron into cron file
-BOBCAT_IP_ADDRESS=192.168.0.10
+BOBCAT_HOSTNAME=192.168.0.10
 BOBCAT_DRY_RUN=TRUE
 BOBCAT_LOG_LEVEL=TRACE
 BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
 BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
 BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
 BOBCAT_CMD=$(which bobcat)
-BOBCAT_OPTIONS="-i $BOBCAT_IP_ADDRESS \
+BOBCAT_OPTIONS="-i $BOBCAT_HOSTNAME \
 --log-level $BOBCAT_LOG_LEVEL \
 --log-file $BOBCAT_LOG_FILE \
 --lock-file $BOBCAT_LOCK_FILE \

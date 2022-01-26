@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from logging import LogRecord
 from logging.handlers import TimedRotatingFileHandler
 from discord_lumberjack.handlers import DiscordWebhookHandler
@@ -18,6 +19,7 @@ class BobcatLogger:
         log_level_file: str = "DEBUG",
         log_level_discord: str = "INFO",
     ) -> None:
+
         self.logger = logging.getLogger("bobcat")
         self.logger.setLevel(log_level)
 
@@ -32,14 +34,14 @@ class BobcatLogger:
     def add_log_stream_handler(self, log_level: str) -> None:
         """Add the log stream handler to the logger."""
         stream_handler = logging.StreamHandler()
-        stream_handler.setLevel(log_level)
+        stream_handler.setLevel(log_level.upper())
         stream_handler.setFormatter(BobcatLogStreamFormatter())
         self.logger.addHandler(stream_handler)
 
     def add_log_file_handler(self, log_file: str, log_level: str) -> None:
         """Add the log file handler to the logger."""
         file_handler = TimedRotatingFileHandler(log_file, when="midnight", backupCount=7)
-        file_handler.setLevel(log_level)
+        file_handler.setLevel(log_level.upper())
         file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)s %(levelname)s %(msg)s"))
         self.logger.addHandler(file_handler)
 
@@ -47,12 +49,13 @@ class BobcatLogger:
         """Add the log Discord handler to the logger."""
         discord_webhook_handler = DiscordWebhookHandler(
             url=discord_webhook_url,
-            level=log_level,
+            level=log_level.upper(),
             message_creator=BobcatEmbedMessageCreator(),
         )
         self.logger.addHandler(discord_webhook_handler)
 
 
+@dataclass
 class Color:
     """A class for terminal color codes."""
 
@@ -76,19 +79,19 @@ LOG_LEVEL_EMOJI = {
         "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/bug_1f41b.png",
     },
     "INFO": {
-        "emoji": "🔔",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/bell_1f514.png",
+        "emoji": "✅",
+        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/check-mark-button_2705.png",
     },
     "WARNING": {
         "emoji": "⚠️",
         "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/warning_26a0-fe0f.png",
     },
     "ERROR": {
-        "emoji": "💥",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/police-car-light_1f6a8.png",
+        "emoji": "❌",
+        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/cross-mark_274c.png",
     },
     "CRITICAL": {
-        "emoji": "🚨",
+        "emoji": "💥",
         "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/collision_1f4a5.png",
     },
 }

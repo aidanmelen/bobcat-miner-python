@@ -270,7 +270,7 @@ class Autopilot:
         if self.dry_run:
             backoff_time = 1
 
-        self.logger.debug(f"Ping the Bobcat ({self.bobcat.ip_address})")
+        self.logger.debug(f"Ping the Bobcat ({self.bobcat.hostname})")
 
         attempt_count = 0
         while not self.bobcat.ping():
@@ -550,7 +550,7 @@ class Autopilot:
             )
 
         except BobcatConnectionError:
-            self.logger.critical(f"Failed to ping the Bobcat ({self.bobcat.ip_address})")
+            self.logger.critical(f"Failed to ping the Bobcat ({self.bobcat.hostname})")
             self.logger.debug("Please verify the IP address and network connection")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
@@ -558,7 +558,7 @@ class Autopilot:
 
         except NotABobcatError:
             self.logger.critical(
-                f"The IP address ({self.bobcat.ip_address}) provided is not a Bobcat miner"
+                f"The IP address ({self.bobcat.hostname}) provided is not a Bobcat miner"
             )
             self.logger.debug("Please verify the IP address is a Bobcat miner")
             self.logger.debug(
@@ -566,7 +566,7 @@ class Autopilot:
             )
 
         except requests.RequestException:
-            self.logger.critical(f"Failed to refresh the Bobcat ({self.bobcat.ip_address})")
+            self.logger.critical(f"Failed to refresh the Bobcat ({self.bobcat.hostname})")
             self.logger.debug("Please verify the IP address and network connection")
             self.logger.debug(
                 "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"

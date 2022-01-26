@@ -1,5 +1,5 @@
-from multiprocessing import Pool
-from functools import partial
+from typing import List
+from bs4 import BeautifulSoup
 
 try:
     from base import BobcatBase
@@ -9,117 +9,157 @@ try:
     from errors import *
 except:
     from .errors import *
+try:
+    from constants import *
+except:
+    from .constants import *
 
+import aiohttp
+import asyncio
 import backoff
 import ipaddress
+import re
 import requests
-import socket
 
 
 class BobcatConnection(BobcatBase):
     """A class for Bobcat Connection."""
 
-    FIVE_MINUTES = 300
-
-    def __init__(self, ip_address: str = None, logger: str = None) -> None:
+    def __init__(
+        self,
+        hostname: str = None,
+        animal: str = None,
+        networks: List[str] = ["192.168.0.0/24", "10.0.0.0/24"],
+        logger: str = None,
+    ) -> None:
         super().__init__(logger)
 
-        if ip_address:
-            # An ip address was passed to the constructor and now we need to validate it.
-            if not self.validate_ip_address(ip_address):
-                raise BobcatIpAddressNotValidError(ip_address)
+        # normalize Helium animal name format (Fancy Awesome Bobcat) to the Bobcat animal name format (fancy-awesome-bobcat)
+        normalized_animal = (
+            str(animal).strip().strip("'").strip('"').lower().replace(" ", "-") if animal else None
+        )
 
-            if not self.can_connect(ip_address, port=44158) or not self.can_connect(
-                ip_address, port=80
-            ):
-                raise BobcatConnectionError(ip_address)
-
-            self.ip_address = ip_address
+        if hostname:
+            self.hostname = asyncio.run(self.is_a_bobcat(hostname, normalized_animal))
         else:
-            # The ip address was not passes to the constructor so we need to find one and set it
-            self.ip_address = self.find_bobcat_ip_address()
+            self.hostname = self.search(networks, normalized_animal)
 
-    def validate_ip_address(self, ip_addr: str = None) -> bool:
-        """Validate ip address."""
-        if not ip_addr:
-            ip_addr = self.ip_address
-
+    def can_connect(self, port=80, timeout=3):
+        """Verify network connectivity"""
         try:
-            _ = ipaddress.ip_address(ip_addr)
-            self.logger.debug(f"The ip address is valid ({ip_addr})")
-            return True
-        except ValueError:
-            self.logger.debug(f"The ip address is invalid ({ip_addr})")
-            return False
-
-    def has_bobcat_webpage(self, ip_addr: str) -> bool:
-        """Check that the ip address is running the bobcat web page."""
-        try:
-            r = self.__get(f"http://{ip_addr}")
-            return "Diagnoser - Bobcatminer Diagnostic Dashboard" in r.text
-        except requests.RequestException:
-            return False
-
-    def can_connect(
-        self, ip_addr: str = None, port: int = 44158, timeout: int = 5, find_mode: bool = False
-    ) -> bool:
-        """Connect to the Bobcat socket (ip_addr:port)."""
-        if not ip_addr:
-            ip_addr = self.ip_address
-
-        try:
-            socket.setdefaulttimeout(timeout)
+            socket.setdefaulttimeout(timeout)  # minutes
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((ip_addr, port))
-            self.logger.debug(f"Connected to ({ip_addr}:{port})")
-        except OSError:
+            s.connect((self.hostname, port))
+        except OSError as err:
             result = False
-            # do not log in 'find mode' where connect is executed 65280 times.
-            if not find_mode:
-                self.logger.error(f"Failed to connect ({ip_addr}:{port})")
         else:
             result = True
         finally:
             s.close()
             return result
 
-    def find_bobcat_ip_address(
-        self, first_ip_addr: str = "192.168.0.0", processes: int = 100
-    ) -> str:
-        """Scan the local network for the Bobcat miner ip address. If multiple Bobcats are found then the first ip address will be returned."""
+    async def is_a_bobcat(self, host, animal=None, search_mode=False):
+        """Connect to the host and check that it is a Bobcat and or matches the specified animal name.
+
+        Args:
+            host (str): The host to check.
+            animal (str, optional): The animal name to check if connected to a bobcat. Defaults to None
+            search_mode (bool, optional): Running is search mode e.g. return False instead of raising BobcatConnectionError. Defaults to False
+        """
+
+        # The host is not the bobcat if we cannot connect
+        html = None
+        try:
+            timeout = aiohttp.ClientTimeout(sock_connect=1, sock_read=5)
+
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+
+                async with session.get(f"http://{host}/") as response:
+
+                    html = await response.text()
+
+        except Exception as err:
+            if search_mode:
+                return False
+            else:
+                raise BobcatConnectionError(f"Cannot connect to {host}: {err}")
+
+        # The host is not the bobcat if it does not have an animal name
+        soup = BeautifulSoup(html, "html.parser")
+
+        # The host is not a bobcat if it does not have a bobcat diagnoser page
+        if "Diagnoser - Bobcatminer Diagnostic Dashboard" in soup.title:
+            self.logger.debug(f"Connected to Bobcat: {host}")
+        else:
+            if search_mode:
+                return False
+            else:
+                raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
+
+        # The host is not the bobcat if the animal name does not match
+        if animal:
+
+            try:
+                bobcat_animal = requests.get(f"http://{host}/miner.json").json()["animal"]
+            except Exception as err:
+                bobcat_animal = None
+            finally:
+                if animal != bobcat_animal:
+                    if search_mode:
+                        return False
+                    else:
+                        raise BobcatConnectionError(
+                            f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({animal})"
+                        )
+
+        # This is the bobcat we are looking for ✨ 🍰 ✨
+        return host
+
+    def search(self, networks=["192.168.0.0/24", "10.0.0.0/24"], animal=None):
+        """Search for the Bobcat in a network. In the case of multiple bobcats, the first occurrence will be return, and that may nondeterministic.
+
+        All hosts in the network will be searched concurrently. Each host will be checked for HTTP connection, followed by a bobcat diagnoser check, and an animal name check if specified.
+
+        Args:
+            network (list, optional): A network to search in CIDR notation. Defaults to ["192.168.0.0/24", "10.0.0.0/24"]
+            animal (str, optional): The animal name of the bobcat to search for. The search will only return the bobcat that matches the animal name. Defaults to None
+        """
+
+        # https://www.twilio.com/blog/asynchronous-http-requests-in-python-with-aiohttp
+
         self.logger.debug(
-            f"Scanning the local network for the Bobcat ip address ({first_ip_addr}/16). This could take up to 15 minutes"
+            f"Searching for {'(' + animal + ')' if animal else 'a bobcat'} in these networks: {', '.join(networks)}"
         )
 
-        cidr_24 = [str(ip_addr) for ip_addr in ipaddress.ip_network(f"{first_ip_addr}/24").hosts()]
-        cidr_16 = [str(ip_addr) for ip_addr in ipaddress.ip_network(f"{first_ip_addr}/16").hosts()]
+        async def __search(host, animal):
+            """Create concurrent futures for is_a_bobcat and process them as they complete. Return when the bobcat is found and do not wait for other futures to complete."""
 
-        for hosts in [
-            cidr_24,  # first scan hosts in the smaller 24 CIDR.
-            list(
-                set(cidr_16) - set(cidr_24)
-            ),  # then try the larger 16 CIDR hosts if the ip address is still not found.
-        ]:
-            with Pool(processes=processes) as p:
+            # create concurrent future tasks for "is_a_bobcat()"
+            tasks = [
+                asyncio.ensure_future(self.is_a_bobcat(host, animal=animal, search_mode=True))
+                for host in host
+            ]
 
-                # process connections concurrently and return ordered results
-                pool_results = p.map(
-                    partial(self.can_connect, port=44158, timeout=1, find_mode=True), hosts
-                )
+            # process tasks as they complete for truthy host
+            for task in asyncio.as_completed(tasks):
+                host = await task
+                if host:
+                    # end the search now that we found the host
+                    return host
+            else:
+                return None
 
-                # get the indices of the successful connections from the pool results
-                success_indices = [idx for idx, result in enumerate(pool_results) if result]
+        for network in networks:
+            # get list of hosts in the network
+            hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
 
-                # get ip addrs for successful connections
-                ip_addrs = [hosts[idx] for idx in success_indices]
+            # search for bobcat in hosts
+            if result := asyncio.run(__search(hosts, animal)):
+                return result
 
-                for ip_addr in ip_addrs:
-                    if self.has_bobcat_webpage(ip_addr):
-                        self.logger.debug(f"Found the Bobcat ip address ({ip_addr})")
-                        return ip_addr
         else:
-            raise BobcatIpAddressNotFoundError(
-                f"Failed to find Bobcat ip address in local network ({first_ip_addr}/16)."
+            raise BobcatConnectionError(
+                f"Unable to find {'the (' + animal + ')' if animal else 'and connect to a'} bobcat in these networks: {', '.join(networks)}"
             )
 
     @backoff.on_exception(

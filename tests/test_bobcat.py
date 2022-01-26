@@ -10,9 +10,7 @@ import requests
 from bobcat_miner import Bobcat
 from bobcat_miner import BobcatConnection
 from bobcat_miner import BobcatLogger
-from bobcat_miner import BobcatIpAddressNotValidError
 from bobcat_miner import BobcatConnectionError
-from bobcat_miner import BobcatIpAddressNotFoundError
 
 import mock_bobcat
 
@@ -20,132 +18,110 @@ import mock_bobcat
 DISABLED = 100
 
 
-class TestBobcatConnection(unittest.TestCase):
-    """Test BobcatConnection."""
-
-    @patch("socket.socket.connect")
-    def test_valid_ip_address(self, mock_socket_connect):
-        bc = BobcatConnection(
-            ip_address="192.168.0.10", logger=BobcatLogger(log_level=DISABLED).logger
-        )
-        self.assertTrue(bc.validate_ip_address())
-
-    @patch("socket.socket.connect")
-    def test_invalid_ip_address_throws_error(self, mock_socket_connect):
-        with self.assertRaises(BobcatIpAddressNotValidError) as e:
-            BobcatConnection(ip_address="x.x.x.x", logger=BobcatLogger(log_level=DISABLED).logger)
-
-    @patch("socket.socket.connect")
-    def test_can_connect(self, mock_socket_connect):
-        BobcatConnection(ip_address="192.168.0.10", logger=BobcatLogger(log_level=DISABLED).logger)
-        mock_socket_connect.assert_has_calls(
-            [call(("192.168.0.10", 44158)), call(("192.168.0.10", 80))],
-            any_order=False,
-        )
-
-    @patch("socket.socket.connect", side_effect=OSError)
-    def test_cannot_connect_throws_error(self, mock_socket_connect):
-        with self.assertRaises(BobcatConnectionError) as e:
-            BobcatConnection(
-                ip_address="192.168.0.1", logger=BobcatLogger(log_level=DISABLED).logger
-            )
-        mock_socket_connect.assert_called_once_with(("192.168.0.1", 44158))
-
-
 class TestBobcatAPI(unittest.TestCase):
     """Test BobcatAPI."""
 
     def setUp(self):
-        self.mock_ip_address = "192.168.0.10"
+        self.mock_hostname = "192.168.0.10"
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh_status(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh_status(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh_status()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/status.json")
+        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/status.json")
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh_miner(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh_miner(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh_miner()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/miner.json")
+        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/miner.json")
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh_temp(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh_temp(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh_temp()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/temp.json")
+        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/temp.json")
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh_speed(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh_speed(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh_speed()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/speed.json")
+        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/speed.json")
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh_dig(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh_dig(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh_dig()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_ip_address + "/dig.json")
+        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/dig.json")
 
     @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_refresh(self, mock_bobcat_can_connect, mock_requests_get):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_refresh(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         b.refresh()
         mock_requests_get.assert_has_calls(
             [
-                call("http://" + self.mock_ip_address + "/status.json"),
-                call("http://" + self.mock_ip_address + "/miner.json"),
-                call("http://" + self.mock_ip_address + "/temp.json"),
-                call("http://" + self.mock_ip_address + "/speed.json"),
-                call("http://" + self.mock_ip_address + "/dig.json"),
+                call("http://" + self.mock_hostname + "/status.json"),
+                call("http://" + self.mock_hostname + "/miner.json"),
+                call("http://" + self.mock_hostname + "/temp.json"),
+                call("http://" + self.mock_hostname + "/speed.json"),
+                call("http://" + self.mock_hostname + "/dig.json"),
             ],
             any_order=True,
         )
 
     @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_reboot(self, mock_bobcat_can_connect, mock_requests_post):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_reboot(self, mock_is_a_bobcat, mock_requests_post):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         _ = b.reboot()
         mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_ip_address + "/admin/reboot",
+            "http://" + self.mock_hostname + "/admin/reboot",
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_reset(self, mock_bobcat_can_connect, mock_requests_post):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_reset(self, mock_is_a_bobcat, mock_requests_post):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         _ = b.reset()
         mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_ip_address + "/admin/reset",
+            "http://" + self.mock_hostname + "/admin/reset",
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_resync(self, mock_bobcat_can_connect, mock_requests_post):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_resync(self, mock_is_a_bobcat, mock_requests_post):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         _ = b.resync()
         mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_ip_address + "/admin/resync",
+            "http://" + self.mock_hostname + "/admin/resync",
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
     @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def test_fastsync(self, mock_bobcat_can_connect, mock_requests_post):
-        b = Bobcat(ip_address=self.mock_ip_address, log_level=DISABLED)
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def test_fastsync(self, mock_is_a_bobcat, mock_requests_post):
+        mock_is_a_bobcat.return_value = self.mock_hostname
+        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         _ = b.fastsync()
         mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_ip_address + "/admin/fastsync",
+            "http://" + self.mock_hostname + "/admin/fastsync",
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
 
@@ -154,8 +130,9 @@ class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
-    @patch("bobcat_miner.BobcatConnection.can_connect", return_value=True)
-    def setUp(self, mock_bobcat_can_connect, mock_requests_get):
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
+    def setUp(self, mock_is_a_bobcat, mock_requests_get):
+        mock_is_a_bobcat.return_value = "192.168.0.10"
         self.bobcat = Bobcat("192.168.0.10")
         self.bobcat.refresh()
 

@@ -47,7 +47,7 @@ Send `bobcat` logs to a Discord channel using a [webhook url](https://support.di
 
 ```bash
 $ export BOBCAT_LOG_LEVEL=DEBUG
-$ export BOBCAT_IP_ADDRESS=192.168.0.10
+$ export BOBCAT_HOSTNAME=192.168.0.10
 $ export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
 $ bobcat autopilot
 🚀 The Bobcat Autopilot is starting

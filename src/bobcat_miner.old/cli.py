@@ -18,7 +18,7 @@ except:
 
 def _network_handler(bobcat, autopilot):
     """Log network issue"""
-    autopilot.logger.critical(f"Failed to refresh the Bobcat ({bobcat.ip_address})")
+    autopilot.logger.critical(f"Failed to refresh the Bobcat ({bobcat.hostname})")
     autopilot.logger.debug("Please verify the IP address and network connection")
     autopilot.logger.debug(
         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
@@ -32,7 +32,7 @@ def _network_handler(bobcat, autopilot):
     "--ip-address",
     "-i",
     required=True,
-    envvar="BOBCAT_IP_ADDRESS",
+    envvar="BOBCAT_HOSTNAME",
     show_envvar=True,
     help="The Bobcat IP address.",
 )
@@ -85,7 +85,7 @@ def _network_handler(bobcat, autopilot):
 )
 def cli(
     ctx,
-    ip_address,
+    hostname,
     dry_run,
     discord_webhook_url,
     log_file,
@@ -93,7 +93,7 @@ def cli(
     lock_file,
 ):
     """Bobcat miner command line tools"""
-    bobcat = Bobcat(ip_address)
+    bobcat = Bobcat(hostname)
     autopilot = Autopilot(
         bobcat,
         dry_run=dry_run,
