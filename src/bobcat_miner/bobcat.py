@@ -251,8 +251,13 @@ class Bobcat(BobcatAPI):
         return int(self.temp_data.get("temp1"))
 
     @property
-    def highest_temp(self):
-        """Get the highest of the CPU temp from the two sensor."""
+    def coldest_temp(self):
+        """Get the lowest of the CPU temp from the two sensors."""
+        return self.temp0 if self.temp0 < self.temp1 else self.temp1
+
+    @property
+    def hottest_temp(self):
+        """Get the highest of the CPU temp from the two sensors."""
         return self.temp0 if self.temp0 > self.temp1 else self.temp1
 
     @property

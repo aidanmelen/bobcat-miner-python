@@ -172,29 +172,18 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
                 self.logger.debug(f"Lock Acquired: {self.lock_file}")
 
                 # run diagnoser checks
-                for check in self.checks:
-                    self.logger.debug(
-                        f"Checking: {check.warning_msg if check.warning_msg else check.error_msg}"
-                    )
+                for issue in self.issues:
 
-                    if check.condition():
-                        if check.warning_msg:
-                            self.logger.warning(check.warning_msg)
-
-                        if check.error_msg:
-                            self.logger.error(check.error_msg)
-
+                    if issue.check():
+                        pass
                         # run the autopilot repair steps
-                        for step in check.autopilot_steps:
-                            func, args, kwargs = (
-                                step["func"],
-                                step.get("args", []),
-                                step.get("kwargs", {}),
-                            )
-                            func(*args, **kwargs)
-                    else:
-                        if check.info_msg:
-                            self.logger.info(check.info_msg)
+                        # for step in check.autopilot_steps:
+                        #     func, args, kwargs = (
+                        #         step["func"],
+                        #         step.get("args", []),
+                        #         step.get("kwargs", {}),
+                        #     )
+                        #     func(*args, **kwargs)
 
             # clean up lock file
             if os.path.exists(self.lock_file):
