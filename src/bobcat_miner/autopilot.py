@@ -44,6 +44,14 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
 
     def managed_resync(self):
         """Resync the Bobcat and wait."""
+        self.refresh_status()
+        
+        if not self.gap or isinstance(self.gap, str):
+            self.logger.error(
+                f"Cancelling the Resync. Unable to read the blockchain gap ({self.gap})"
+            )
+            return
+
         self.logger.info(self.resync())
         self.sleep()
         self.wait()
@@ -70,7 +78,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
 
         self.logger.info(self.fastsync())
         self.wait()
-
+    
     def sleep(self, duration=FIVE_MINUTES):
         """Sleep.
 

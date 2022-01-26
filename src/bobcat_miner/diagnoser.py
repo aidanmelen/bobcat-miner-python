@@ -42,7 +42,7 @@ class BobcatDiagnoser:
                 root_cause="Internet connection or snapshot not loading.",
                 description="If the gap keeps getting larger, it could be the case that the internet connection to the miner is unstable. It is always recommended that you sync into the blockchain for the first time with an ethernet cable. Other reasons why you may be experiencing syncing issues include a network bug or a snapshot not loading. If the gap has not changed in over 24 hours, your miner is likely having an issue with the snapshot.",
                 autopilot_steps=[
-                    # TODO poll gap
+                    {"func": self.sleep, "kwargs": {"duration", ONE_DAY}},
                     {"func": self.managed_resync},
                     {"func": self.managed_fastsync},
                 ],
