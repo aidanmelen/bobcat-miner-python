@@ -47,7 +47,6 @@ BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
 BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
 BOBCAT_CMD=$(which bobcat)
 BOBCAT_OPTIONS="-i $BOBCAT_HOSTNAME \
---log-level $BOBCAT_LOG_LEVEL \
 --log-file $BOBCAT_LOG_FILE \
 --lock-file $BOBCAT_LOCK_FILE \
 --discord-webhook-url $BOBCAT_DISCORD_WEBHOOK_URL"
