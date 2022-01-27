@@ -1,4 +1,5 @@
 from __future__ import annotations
+from bs4 import BeautifulSoup
 from typing import List
 
 import time
@@ -128,9 +129,8 @@ class BobcatAPI(BobcatConnection):
             self.logger.warning("Dry run is enabled: Reboot Skipped")
         else:
             self.logger.warning("Rebooting Bobcat")
-            self.logger.debug(
-                self._BobcatConnection__post("http://" + self.hostname + "/admin/reboot")
-            )
+            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/reboot")
+            self.logger.debug(self.__parse_html(resp.text))
 
     def reset(self) -> None:
         """Reset the Bobcat."""
@@ -139,9 +139,8 @@ class BobcatAPI(BobcatConnection):
             self.logger.warning("Dry run is enabled: Reset Skipped")
         else:
             self.logger.warning("Resetting Bobcat")
-            self.logger.debug(
-                self._BobcatConnection__post("http://" + self.hostname + "/admin/reset")
-            )
+            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/reset")
+            self.logger.debug(self.__parse_html(resp.text))
 
     def resync(self) -> None:
         """Resync the Bobcat."""
@@ -150,9 +149,8 @@ class BobcatAPI(BobcatConnection):
             self.logger.warning("Dry run is enabled: Resync Skipped")
         else:
             self.logger.warning("Resyncing Bobcat")
-            self.logger.debug(
-                self._BobcatConnection__post("http://" + self.hostname + "/admin/resync")
-            )
+            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/resync")
+            self.logger.debug(self.__parse_html(resp.text))
 
     def fastsync(self) -> None:
         """Fastsync the Bobcat."""
@@ -160,6 +158,14 @@ class BobcatAPI(BobcatConnection):
             self.logger.warning("Dry run is enabled: Fastsync Skipped")
         else:
             self.logger.warning("Fastsyncing Bobcat")
-            self.logger.debug(
-                self._BobcatConnection__post("http://" + self.hostname + "/admin/fastsync")
-            )
+            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/fastsync")
+            self.logger.debug(self.__parse_html(resp.text))
+
+    def __parse_html(self, html) -> str:
+        """Parse HTML and return a str
+
+        Args:
+            html (str): The HTML to be parsed.
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        return soup.get_text(separator="\n")

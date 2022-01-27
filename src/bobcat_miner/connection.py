@@ -94,7 +94,6 @@ class BobcatConnection(BobcatBase):
             else:
                 raise BobcatConnectionError(f"Cannot connect to {host}: {err}")
 
-        # The host is not the bobcat if it does not have an animal name
         soup = BeautifulSoup(html, "html.parser")
 
         # The host is not a bobcat if it does not have a bobcat diagnoser page
