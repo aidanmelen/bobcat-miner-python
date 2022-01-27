@@ -47,6 +47,8 @@ $ bobcat --hostname 192.168.0.10 autopilot
 ```
 
 
+
+
 <!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
