@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
+import re
 import time
 
 try:
@@ -17,10 +18,12 @@ except:
 class BobcatIssue:
     """Class Bobcat Issues."""
 
+    name: str
     check: str
     root_cause: str
     description: str
-    manual_steps: List[str]
+    autopilot_repair_steps: List[str]
+    manual_repair_steps: List[str]
     customer_support_steps: List[str]
     troubleshooting_guide: str
 
@@ -29,18 +32,19 @@ class BobcatDiagnoser:
     """A class for Bobcat Diagnostics."""
 
     @property
-    def issues(self):
+    def known_issues(self):
         return [
             BobcatIssue(
+                name="Down or Error Status",
                 check=self.check_down_or_error,
                 root_cause="Miner's Docker Container",
                 description="This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.",
-                # autopilot_steps=[
-                #     {"func": self.managed_reboot},
-                #     {"func": self.managed_reset},
-                #     {"func": self.managed_fastsync},
-                # ],
-                manual_steps=[
+                autopilot_repair_steps=[
+                    {"func": self.managed_reboot},
+                    {"func": self.managed_reset},
+                    {"func": self.managed_fastsync},
+                ],
+                manual_repair_steps=[
                     "First Try Reboot",
                     "Try Reset",
                     "Then Fastsync",
@@ -56,15 +60,16 @@ class BobcatDiagnoser:
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-",
             ),
             BobcatIssue(
+                name="Height API Error Status",
                 check=self.check_height_api_error,
                 root_cause="Miner's Docker Container",
                 description="Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash resulting in an onboarding error. This crash can manifest itself in the miner not being able to access the correct API.",
-                # autopilot_steps=[
-                #     {"func": self.managed_reboot},
-                #     {"func": self.managed_reset},
-                #     {"func": self.managed_fastsync},
-                # ],
-                manual_steps=[
+                autopilot_repair_steps=[
+                    {"func": self.managed_reboot},
+                    {"func": self.managed_reset},
+                    {"func": self.managed_fastsync},
+                ],
+                manual_repair_steps=[
                     "First Try Reboot",
                     "Try Reset",
                     "Then Fastsync",
@@ -80,17 +85,18 @@ class BobcatDiagnoser:
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413699665435-API-Error",
             ),
             # BobcatIssue(
-            #     check=self.check_no_activity_error,
+            #     name="No Activity Issue",
+            #     check=self.check_no_activity_issue,
             #     error_msg="No Proof of Coverage activity",
             #     root_cause="Your miner not being connected to the blockchain. You have not participated in Proof of Coverage activity for some time.",
             #     description="This can happen for a variety of reasons: (1) Your miner could have lost internet connection; or (2) your miner's Docker could have crashed as a result of you losing power or internet connectivity during an OTA.",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reboot},
             #         # TODO poll activity
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "First Try Reboot and wait an hour.",
             #         "If the error persists, unplug the miner then plug it back in. Wait an Hour. If the problem continues proceed to step 3.",
             #         "Reset the miner and wait an hour for the miner to completely start back up.",
@@ -105,15 +111,15 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4414496658715-No-Activity",
             # ),
             # BobcatIssue(
-            #     check=self.check_no_witness_error,
-            #     error_msg="No Witnesses activity",
+            #     name="No Witnesses Issue",
+            #     check=self.check_no_witness_issue,
             #     root_cause="Your miner not being connected to the blockchain. You have not participated in Proof of Coverage activity for some time.",
             #     description="This can happen for a variety of different reasons. Possible reasons include: Your internet router's firewall settings are blocking LoRa packets before they reach your device. Your ISP has strict firewalls you are not aware of. Call your ISP to confirm. Your antenna is in a non-optimal location. You have the miner deployed in the wrong region. (AU915, US915, EU868, etc). There are too few miner's in your area. You are experiencing a network packet forwarding bug.",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "First try Reset then Fast Sync" "Then try Resync then Fast Sync",
             #         "Swapping antennas",
             #         "Moving miner/antenna to a different location to test",
@@ -131,15 +137,15 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692547355-No-Witness-",
             # ),
             # BobcatIssue(
+            #     name="Block Checksum Mismatch Error",
             #     check=self.check_block_checksum_mismatch_error,
-            #     error_msg="Block Checksum Mismatch",
             #     root_cause="EMMC / Memory issue",
             #     description="This error is related to the EMMC (Embedded MultiMediaCard) in your miner. This is a blockchain error you can potentially snapshot past. This is NOT related to your RAM size.  ",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "Reset",
             #         "Fast Sync",
             #         "Monitor for Error After it Has Fully Synced",
@@ -151,15 +157,15 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Compression Method or Corrupted Error",
             #     check=self.check_compression_method_or_corrupted_error,
-            #     error_msg="Compression Method or Corrupted",
             #     root_cause="EMMC / Memory issue",
             #     description="This points to an error related to the EMMC (Embedded MultiMediaCard) in your miner. Resyncing might get rid of this error. This is NOT related to your RAM size.",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_resync},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "Resync",
             #         "Fastsync",
             #     ],
@@ -170,12 +176,12 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Too Many Lookup Attempts Error",
             #     check=self.check_too_many_lookup_attempts_error,
-            #     error_msg="Too Many Lookup Attempts",
             #     root_cause="DNS server settings",
             #     description="This error occurs when your DNS server cannot find the correct nameserver. Normally, the Bobcat miner will automatically add the appropriate nameserver for you.",
-            #     autopilot_steps=[],
-            #     manual_steps=[
+            #     autopilot_repair_steps=[],
+            #     manual_repair_steps=[
             #         "If this error continues to appear and your miner is not behaving as expected you can try setting your DNS server to 8.8.8.8.",
             #     ],
             #     customer_support_steps=[
@@ -188,12 +194,12 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Onboarding Dewi Org Nxdomain Error",
             #     check=self.check_oboarding_dewi_org_nxdomain_error,
-            #     error_msg="Onboarding Dewi Org Nxdomain",
             #     root_cause="DNS server settings",
             #     description="This error occurs when your DNS server cannot find the correct nameserver. Normally, the Bobcat will automatically add the appropriate nameserver for you.  ",
-            #     autopilot_steps=[],
-            #     manual_steps=[
+            #     autopilot_repair_steps=[],
+            #     manual_repair_steps=[
             #         "If this error continues to appear and your miner is not behaving as expected you can try setting your DNS server to 8.8.8.8.",
             #     ],
             #     customer_support_steps=[
@@ -206,15 +212,15 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Failed To Start Child Error",
             #     check=self.check_failed_to_start_child_error,
-            #     error_msg="Failed To Start Child",
             #     root_cause="Faulty ECC chip",
             #     description="This usually means that there is either a ECC chip fault or it's a firmware issue. ",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "Reset",
             #         "Fastsync",
             #     ],
@@ -228,12 +234,12 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Not A Dets File Error",
             #     check=self.check_not_a_dets_file_error,
-            #     error_msg="Not A Dets File",
             #     root_cause="Broken Blockchain but this shouldn't be an issue anymore with the latest firmware.",
             #     description="There is probably a corruption in the database",
-            #     autopilot_steps=["resync", "fastsync"],
-            #     manual_steps=[
+            #     autopilot_repair_steps=["resync", "fastsync"],
+            #     manual_repair_steps=[
             #         "Resync",
             #         "Fastsync",
             #     ],
@@ -247,12 +253,12 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Snapshots Helium WTF Error",
             #     check=self.check_snapshots_helium_wtf_error,
-            #     error_msg="Snapshots Helium WTF",
             #     root_cause="DNS issue",
             #     description="Miner is unable to connect to DNS servers. New Diagnoser should automatically add Google DNS so it should get rid of this issue.",
-            #     autopilot_steps=[],
-            #     manual_steps=[
+            #     autopilot_repair_steps=[],
+            #     manual_repair_steps=[
             #         "Add 8.8.8.8 to your DNS server",
             #     ],
             #     customer_support_steps=[
@@ -266,12 +272,12 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="Snapshot Download or Loading Failed Error",
             #     check=self.check_snapshot_download_or_loading_failed_error,
-            #     error_msg="Snapshot Download Or Loading Failed",
             #     root_cause="Miner is unable to download the latest snapshot from the blockchain",
             #     description="There may be too many miners trying to download the snapshot at the same time or your internet connection may be too slow.",
-            #     autopilot_steps=[],
-            #     manual_steps=[
+            #     autopilot_repair_steps=[],
+            #     manual_repair_steps=[
             #         "Check that your miner is connected via ethernet and that your internet connection is stable, otherwise, the situation should eventually sort itself out.",
             #     ],
             #     customer_support_steps=[
@@ -284,15 +290,15 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="No Plausible Blocks In Batch Error",
             #     check=self.check_no_plausible_blocks_in_batch_error,
-            #     error_msg="No Plausible Blocks In Batch",
             #     root_cause="Helium Network Bug error",
             #     description="This is a Helium network bug that affects miners across all manufacturers. Helium is actively trying to solve the issue.",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "Helium recommends that you continue to resync and reset until your miner is able to get past the snapshot. Unfortunately, if that doesn't work then you will have to wait for Helium OTA update to fix the issue."
             #     ],
             #     customer_support_steps=[
@@ -305,16 +311,16 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             # BobcatIssue(
+            #     name="RPC to 'miner@127.0.0.1' failed Error",
             #     check=self.check_rpc_to_miner_failed_error,
-            #     error_msg="RPC to 'miner@127.0.0.1' failed",
             #     root_cause="Docker container or ECC fault",
             #     description="You might see this during a reset, reboot, or OTA. This is related to the status of the ECC chip. If this error goes away then nothing is wrong. If you continue to see the error you can try the following.",
-            #     autopilot_steps=[
+            #     autopilot_repair_steps=[
             #         {"func": self.managed_reboot},
             #         {"func": self.managed_reset},
             #         {"func": self.managed_fastsync},
             #     ],
-            #     manual_steps=[
+            #     manual_repair_steps=[
             #         "First Try Reboot",
             #         "Then Try Reset",
             #         "Then Fastsync",
@@ -330,15 +336,17 @@ class BobcatDiagnoser:
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
             BobcatIssue(
-                check=self.check_sync_status,
+                name="Not Synced Issue",
+                check=self.is_not_synced,
                 root_cause="Internet connection or snapshot not loading.",
                 description="If the gap keeps getting larger, it could be the case that the internet connection to the miner is unstable. It is always recommended that you sync into the blockchain for the first time with an ethernet cable. Other reasons why you may be experiencing syncing issues include a network bug or a snapshot not loading. If the gap has not changed in over 24 hours, your miner is likely having an issue with the snapshot.",
-                # autopilot_steps=[
-                #     {"func": self.sleep, "kwargs": {"duration", ONE_DAY}},
-                #     {"func": self.managed_resync},
-                #     {"func": self.managed_fastsync},
-                # ],
-                manual_steps=[
+                autopilot_repair_steps=[
+                    {"func": self.wait, "args": [ONE_DAY]},
+                    {"func": self.managed_resync},
+                    {"func": self.managed_fastsync},
+                    {"func": self.wait, "args": [ONE_DAY]},
+                ],
+                manual_repair_steps=[
                     "Give the miner more time to sync.",
                     "Connect the miner to an ethernet cable for the first time sync.",
                     "Resync then fast sync from the Diagnoser, allow at least 24 hours after fully syncing. If the problem persists, proceed to step 4.",
@@ -351,11 +359,12 @@ class BobcatDiagnoser:
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues",
             ),
             BobcatIssue(
-                check=self.check_relay_status,
+                name="Relay Issue",
+                check=self.is_relayed,
                 root_cause="Your Internet Router Settings",
                 description="This error is related to the EMMC (Embedded MultiMediaCard) in your miner. This is a blockchain error you can potentially snapshot past. This is NOT related to your RAM size.",
-                # autopilot_steps=[],
-                manual_steps=[
+                autopilot_repair_steps=[],
+                manual_repair_steps=[
                     "Set Static IP to the Device.",
                     "Enable UPnP or Open Port 44158 to the Device.",
                 ],
@@ -373,50 +382,48 @@ class BobcatDiagnoser:
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser",
             ),
             BobcatIssue(
-                check=self.check_network_speed_status,
+                name="Slow Network Issue",
+                check=self.is_network_speed_slow,
                 root_cause="The internet connection is slow.",
                 description="A hard wired internet connection with an ethernet cable will reduce syncing issues and will maximize earning potential. Wifi can be unstable and may cause syncing issues.",
-                # autopilot_steps=[],
-                manual_steps=[
+                autopilot_repair_steps=[],
+                manual_repair_steps=[
                     "Connect the Bobcat to the internet with a hard wired ethernet cable."
                 ],
                 customer_support_steps=[],
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4409231342363-Miner-is-Offline",
             ),
             BobcatIssue(
-                check=self.check_temperature_status,
+                name="Dangerous Temperature Issue",
+                check=self.is_temperature_dangerous,
                 root_cause="Red = Above 70°C | Yellow = Between 65°C and 70°C | White = Below 65°C)",
                 description="If the temperature is above 65°C, the Diagnoser will show an 'alert' by changing the color of the temperature label on the menu.",
-                # autopilot_steps=[],
-                manual_steps=["https://www.nowitness.org/diy-enclosure/"],
+                autopilot_repair_steps=[],
+                manual_repair_steps=["https://www.nowitness.org/diy-enclosure/"],
                 customer_support_steps=[],
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring",
             ),
         ]
 
     def check_down_or_error(self):
-        self.logger.debug("Checking: Status Down/Error")
-
-        if is_down := self.status.upper() == "DOWN" or (
+        if down_or_error := self.status.upper() == "DOWN" or (
             "ERROR" in self.status.upper() and "ERROR RESPONSE FROM DAEMON" in self.tip.upper()
         ):
-            self.logger.error("Bobcat Status: Down")
+            self.logger.error(f"Bobcat Status: {self.status.upper()}")
 
-        return is_down
+        return down_or_error
 
     def check_height_api_error(self):
-        self.logger.debug("Checking: Height API Error")
-
         if has_error := "HEIGHT API ERROR" in self.status.upper():
             self.logger.error("Bobcat Status: Height API Error")
 
         return has_error
 
-    # def check_no_activity_error(self):
+    # def check_no_activity_issue(self):
     #     # NotImplemented
     #     return False
 
-    # def check_no_witness_error(self):
+    # def check_no_witness_issue(self):
     #     # NotImplemented
     #     return False
 
@@ -460,42 +467,47 @@ class BobcatDiagnoser:
     #     # NotImplemented
     #     return False
 
-    def check_sync_status(self):
-        self.logger.debug("Checking: Sync Status")
+    def is_offline(self):
+        """Check Online Status."""
+        if is_offline := self.state.upper() != "RUNNING":
+            self.logger.error("Online Status: Offline")
+        else:
+            self.logger.info("Online Status: Online ✨")
 
-        not_synced = self.status.upper() != "SYNCED"
-        syncing_and_behind = self.status.upper() == "SYNCING" and self.gap > 300
+        return is_offline
+
+    def is_not_synced(self):
+        """Check Sync Status."""
+        is_synced = self.status.upper() == "SYNCED"
+        syncing_and_caught_up = self.status.upper() == "SYNCING" and self.gap <= 300
 
         msg = f"Sync Status: {self.status.capitalize()} (gap:{self.gap})"
 
-        if sync_status := not_synced or syncing_and_behind:
+        if is_not_synced := not is_synced and not syncing_and_caught_up:
             self.logger.error(msg)
         else:
-            self.logger.info(msg)
+            self.logger.info(msg + " ✨")
 
-        return sync_status
+        return is_not_synced
 
-    def check_relay_status(self):
-        self.logger.debug("Checking: Relay Status")
-
-        is_pub_ip_over_44158 = f"/ip4/{self.public_ip}/tcp/44158" in self.peerbook
-
-        is_nat_type_none = None
-        if isinstance(self.p2p_status, dict):
-            is_nat_type_none = self.p2p_status.get("nat_type") != "none"
-        else:
-            is_nat_type_none = "|nat_type | none  |".upper() in self.p2p_status.upper()
+    def is_relayed(self):
+        """Check Relay Status."""
+        is_pub_ip_over_44158 = re.search(
+            f"(/ip4/)({self.public_ip})(/tcp/44158)", self.peerbook, re.IGNORECASE
+        )
+        is_nat_type_none = re.search(
+            r"\|.*(nat_type).*\|.*(none).*\|", self.p2p_status, re.IGNORECASE
+        )
 
         if is_relayed := not is_pub_ip_over_44158 and not is_nat_type_none:
             self.logger.warning("Relay Status: Relayed")
         else:
-            self.logger.info("Relay Status: Not Relayed")
+            self.logger.info("Relay Status: Not Relayed ✨")
 
         return is_relayed
 
-    def check_network_speed_status(self):
-        self.logger.debug("Checking: Network Status")
-
+    def is_network_speed_slow(self):
+        """Check Network Speed Status."""
         download_speed = int(self.download_speed.strip(" Mbit/s"))
         upload_speed = int(self.upload_speed.strip(" Mbit/s"))
         latency = float(self.latency.strip("ms"))
@@ -506,17 +518,16 @@ class BobcatDiagnoser:
         elif is_upload_speed_slow := upload_speed < 5:
             self.logger.warning(f"Network Status: Upload Slow ({self.upload_speed})")
 
-        elif is_latency_high := latency > 50:
-            self.logger.warning(f"Network Status: Latency High ({self.upload_speed})")
+        elif is_latency_high := latency > 100.0:
+            self.logger.warning(f"Network Status: Latency High ({self.latency})")
 
         else:
-            self.logger.info(f"Network Status: Good 🌐")
+            self.logger.info(f"Network Status: Good 📶")
 
         return any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
 
-    def check_temperature_status(self):
-        self.logger.debug("Checking: Temperature Status")
-
+    def is_temperature_dangerous(self):
+        """Check Temperature Status."""
         if is_too_cold := self.coldest_temp < 0:
             self.logger.error(f"Temperature Status: Cold ({self.hottest_temp}°C) ❄️")
 

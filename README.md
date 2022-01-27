@@ -22,23 +22,51 @@ $ pip3 install bobcat-miner
 
 Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
-## Bobcat Autopilot Usage
+## Quick Start
 
 The `bobcat autopilot` command will automatically diagnose and repair the Bobcat!
 
-Follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address.
+```bash
+$ bobcat autopilot
+✅ Sync Status: Synced (gap:-1) ✨
+✅ Relay Status: Not Relayed ✨
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
 
-![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png)
+## Finding your Bobcat
 
-The `bobcat` command line tool accepts both command line options and environment variables. Please see the `bobcat --help` for more information.
+By default, the Bobcat's IP address will be automatically discovered and used. Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address.
 
+This is how you can set the IP address of the Bobcat.
+
+```bash
+$ bobcat --hostname 192.168.0.10 autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+...
+```
+
+
+<!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
 Diagnostics checks will run and all actions will be skipped during a Bobcat dry run.
 
 ```bash
-$ bobcat -i 192.168.0.10 -l DEBUG --dry-run autopilot
-🚧 Bobcat Autopilot Dry Run Enabled. Actions such as reboot, reset, resync, and fastsync will be skipped. Wait times will only last 1 second.
+$ export BOBCAT_LOG_LEVEL_STREAM=DEBUG
+$ bobcat --dry-run autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 Refresh: Miner Data
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+🐛 Lock Acquired: /etc/bobcat-autopilot.lock
+🐛 Checking: Down or Error Status
+🐛 Refresh: Status Data
+🐛 Checking: Height API Error Status
+🐛 Checking: Not Synced Issue
+✅ Sync Status: Synced (gap:-1) ✨
+🐛 Checking: Relay Issue
+✅ Relay Status: Not Relayed ✨
+...
 ```
 
 ### Discord Monitoring
@@ -71,7 +99,7 @@ $ bobcat --ip-address 192.168.0.10 --log-file bobcat-autopilot.log autopilot
 Run the `bobcat` command line tool as a docker container.
 
 ```bash
-$ docker run --rm -it aidanmelen/bobcat -i 192.168.0.10 status
+$ docker run --rm -it aidanmelen/bobcat -h 192.168.0.10 status
 {
     "status": "Synced",
     "gap": "-2",

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List
 from bs4 import BeautifulSoup
 
@@ -18,8 +19,9 @@ import aiohttp
 import asyncio
 import backoff
 import ipaddress
-import re
 import requests
+import socket
+import time
 
 
 class BobcatConnection(BobcatBase):
@@ -34,7 +36,10 @@ class BobcatConnection(BobcatBase):
     ) -> None:
         super().__init__(logger)
 
-        # normalize Helium animal name format (Fancy Awesome Bobcat) to the Bobcat animal name format (fancy-awesome-bobcat)
+        self.miner_data = {}  # initialize because we need it to validate the bobcat.
+
+        # normalize Helium animal name format (e.g. Fancy Awesome Bobcat)
+        # to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
         normalized_animal = (
             str(animal).strip().strip("'").strip('"').lower().replace(" ", "-") if animal else None
         )
@@ -44,8 +49,13 @@ class BobcatConnection(BobcatBase):
         else:
             self.hostname = self.search(networks, normalized_animal)
 
-    def can_connect(self, port=80, timeout=3):
-        """Verify network connectivity"""
+    def can_connect(self, port=80, timeout=3) -> bool:
+        """Verify network connectivity.
+
+        Args:
+            port (int, optional): The socket port. Defaults to port 80.
+            timeout (int, optional): The socket timeout. Defaults to 3 minutes.
+        """
         try:
             socket.setdefaulttimeout(timeout)  # minutes
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,7 +68,7 @@ class BobcatConnection(BobcatBase):
             s.close()
             return result
 
-    async def is_a_bobcat(self, host, animal=None, search_mode=False):
+    async def is_a_bobcat(self, host, animal=None, search_mode=False) -> (bool, str):
         """Connect to the host and check that it is a Bobcat and or matches the specified animal name.
 
         Args:
@@ -100,8 +110,11 @@ class BobcatConnection(BobcatBase):
         if animal:
 
             try:
-                bobcat_animal = requests.get(f"http://{host}/miner.json").json()["animal"]
+                self.logger.debug("Refresh: Miner Data")
+                self.miner_data = self.__get("http://" + host + "/miner.json").json()
+                bobcat_animal = self.miner_data.get("animal")
             except Exception as err:
+                self.logger.exception(err)
                 bobcat_animal = None
             finally:
                 if animal != bobcat_animal:
@@ -115,7 +128,7 @@ class BobcatConnection(BobcatBase):
         # This is the bobcat we are looking for ✨ 🍰 ✨
         return host
 
-    def search(self, networks=["192.168.0.0/24", "10.0.0.0/24"], animal=None):
+    def search(self, networks=["192.168.0.0/24", "10.0.0.0/24"], animal=None) -> (str, None):
         """Search for the Bobcat in a network. In the case of multiple bobcats, the first occurrence will be return, and that may nondeterministic.
 
         All hosts in the network will be searched concurrently. Each host will be checked for HTTP connection, followed by a bobcat diagnoser check, and an animal name check if specified.
@@ -131,7 +144,7 @@ class BobcatConnection(BobcatBase):
             f"Searching for {'(' + animal + ')' if animal else 'a bobcat'} in these networks: {', '.join(networks)}"
         )
 
-        async def __search(host, animal):
+        async def __search(host, animal) -> (str, None):
             """Create concurrent futures for is_a_bobcat and process them as they complete. Return when the bobcat is found and do not wait for other futures to complete."""
 
             # create concurrent future tasks for "is_a_bobcat()"

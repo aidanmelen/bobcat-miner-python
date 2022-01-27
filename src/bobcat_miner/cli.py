@@ -16,15 +16,6 @@ except:
     from autopilot import BobcatAutopilot
 
 
-# def _network_handler(bobcat, autopilot):
-#     """Log network issue"""
-#     autopilot.logger.critical(f"Failed to refresh the Bobcat ({bobcat.hostname})")
-#     autopilot.logger.debug("Please verify the IP address and network connection")
-#     autopilot.logger.debug(
-#         "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser"
-#     )
-
-
 @click.group(name="bobcat")
 @click.version_option()
 @click.pass_context
@@ -133,7 +124,7 @@ def cli(*args, **kwargs) -> None:
     ctx = args[0]
     ctx.ensure_object(dict)
 
-    # Hardcode the log level for the bobcat log to DEBUG to ensure no logs are filtered before they reach the log handlers
+    # Hardcode the bobcat logger log level to DEBUG to ensure no logs are filtered before they reach the log handlers
     # The CLI users should instead adjust the handler's log level e.g. --log-level-stream, --log-level-file, and --log-level-discord
     kwargs["log_level"] = "DEBUG"
 
@@ -145,6 +136,74 @@ def cli(*args, **kwargs) -> None:
 def autopilot(ctx) -> None:
     """Automatically diagnose and repair the Bobcat."""
     ctx.obj["AUTOPILOT"].run()
+
+
+@cli.command()
+@click.pass_context
+def status(ctx) -> None:
+    """Print Bobcat status data."""
+    click.echo(ctx.obj["AUTOPILOT"].refresh_status().status_data)
+
+
+@cli.command()
+@click.pass_context
+def miner(ctx) -> None:
+    """Print Bobcat miner data."""
+    # miner_data is initialized in the BobcatConnection constructor during bobcat verification
+    click.echo(ctx.obj["AUTOPILOT"].miner_data)
+
+
+@cli.command()
+@click.pass_context
+def speed(ctx) -> None:
+    """Print Bobcat network speed data."""
+    click.echo(ctx.obj["AUTOPILOT"].refresh_speed().speed_data)
+
+
+@cli.command()
+@click.pass_context
+def temp(ctx) -> None:
+    """Print Bobcat CPU tempurature data."""
+    click.echo(ctx.obj["AUTOPILOT"].refresh_temp().temp_data)
+
+
+@cli.command()
+@click.pass_context
+def dig(ctx) -> None:
+    """Print Bobcat DNS data."""
+    click.echo(ctx.obj["AUTOPILOT"].refresh_dig().dig_data)
+
+
+@cli.command()
+@click.pass_context
+def reboot(ctx) -> None:
+    """Run Bobcat Reboot."""
+    if click.confirm("Do you want to reboot the Bobcat?"):
+        click.echo(ctx.obj["AUTOPILOT"].managed_reboot())
+
+
+@cli.command()
+@click.pass_context
+def reset(ctx) -> None:
+    """Run Bobcat Reset."""
+    if click.confirm("Do you want to reset the Bobcat?"):
+        click.echo(ctx.obj["AUTOPILOT"].managed_reset())
+
+
+@cli.command()
+@click.pass_context
+def resync(ctx) -> None:
+    """Run Bobcat Resync."""
+    if click.confirm("Do you want to resync the Bobcat?"):
+        click.echo(ctx.obj["AUTOPILOT"].managed_resync())
+
+
+@cli.command()
+@click.pass_context
+def fastsync(ctx) -> None:
+    """Run Bobcat Fastsync."""
+    if click.confirm("Do you want to fastsync the Bobcat?"):
+        click.echo(ctx.obj["AUTOPILOT"].managed_fastsync())
 
 
 if __name__ == "__main__":

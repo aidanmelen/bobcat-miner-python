@@ -27,22 +27,28 @@ except:
 class BobcatAutopilot(Bobcat, BobcatDiagnoser):
     """A class for the Bobcat Autopilot automation."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.lock_file = kwargs.pop("lock_file", ".bobcat.lock")
         super().__init__(*args, **kwargs)
 
-    def managed_reboot(self):
+    def managed_reboot(self) -> None:
         """Reboot the Bobcat and wait."""
-        self.logger.info(self.reboot())
-        self.wait()
+        self.reboot()
 
-    def managed_reset(self):
+        if not self.dry_run:
+            self.managed_wait()
+            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
+
+    def managed_reset(self) -> None:
         """Reset the Bobcat and wait."""
-        self.logger.info(self.reset())
-        self.sleep()
-        self.wait()
+        self.reset()
 
-    def managed_resync(self):
+        if not self.dry_run:
+            self.wait(FIVE_MINUTES)
+            self.managed_wait()
+            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
+
+    def managed_resync(self) -> None:
         """Resync the Bobcat and wait."""
         self.refresh_status()
 
@@ -52,11 +58,14 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             )
             return
 
-        self.logger.info(self.resync())
-        self.sleep()
-        self.wait()
+        self.resync()
 
-    def managed_fastsync(self):
+        if not self.dry_run:
+            self.wait(FIVE_MINUTES)
+            self.managed_wait()
+            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
+
+    def managed_fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
         if not self.gap or isinstance(self.gap, str):
             self.logger.error(
@@ -64,7 +73,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             )
             return
 
-        if self.status.upper() in ["ERROR", "DOWN"] or self.error:
+        if self.status.upper() in ["ERROR", "DOWN"] or self.error or self.miner_alert:
             self.logger.warning(
                 f"Cancelling Fastsync because it can only be run on a healthy Bobcat. The current status is: {self.status}"
             )
@@ -76,23 +85,20 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             )
             return
 
-        self.logger.info(self.fastsync())
-        self.wait()
+        self.fastsync()
 
-    def sleep(self, duration=FIVE_MINUTES):
-        """Sleep.
+        if not self.dry_run:
+            self.managed_wait()
+            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
+
+    def wait(self, duration) -> None:
+        """Wait.
 
         Args:
-            duration (int, optional): An arbitrary duration of time to sleep. Defaults to FIVE_MINUTES.
+            duration (int, optional): An arbitrary duration of time to sleep.
         """
-        if self.dry_run:
-            self.logger.warning(
-                f"Dry run is enabled: ⏳ Sleeping for 1 Second instead of {int(duration / 60)} Minute{'s' if duration > 60 else ''}"
-            )
-            time.sleep(ONE_SECOND)
-        else:
-            self.logger.info(f"⏳ Sleeping for {int(duration / 60)} Minutes")
-            time.sleep(duration)
+        self.logger.info(f"⏳ Waiting for {int(duration / 60)} Minutes")
+        time.sleep(duration)
 
     def wait_for_connection(self, backoff_duration, max_attempts) -> None:
         """Wait for a Bobcat connection.
@@ -106,16 +112,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
 
             self.logger.warning("The Bobcat ({self.animal}) is unreachable")
 
-            if self.dry_run:
-                self.logger.debug(
-                    f"Dry run is enabled: ⏳ Waiting for 1 Second instead of {int(duration / 60)} Minute{'s' if duration > 60 else ''}"
-                )
-                time.sleep(backoff_duration)
-            else:
-                self.logger.debug(
-                    f"⏳ Waiting {int(backoff_duration / 60)} Minute{'s' if backoff_duration > 60 else ''}"
-                )
-                time.sleep(backoff_duration)
+            self.wait(backoff_duration)
 
             attempt_count += 1
             if attempt_count >= max_attempts:
@@ -134,16 +131,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
         while self.status not in ["Syncing", "Synced"] and not miner_alert:
             self.logger.warning(f"The Bobcat ({self.animal}) is {self.status}")
 
-            if self.dry_run:
-                self.logger.debug(
-                    f"Dry run is enabled: ⏳ Waiting for 1 Second instead of {int(duration / 60)} Minute{'s' if duration > 60 else ''}"
-                )
-                time.sleep(backoff_duration)
-            else:
-                self.logger.debug(
-                    f"⏳ Waiting {int(backoff_duration / 60)} Minute{'s' if backoff_duration > 60 else ''}"
-                )
-                time.sleep(backoff_duration)
+            self.wait(backoff_duration)
 
             attempt_count += 1
             if attempt_count >= max_attempts:
@@ -158,8 +146,8 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             backoff_duration (int, optional): A backoff duration of time in seconds to wait after connection or status attempts. Defaults to FIVE_MINUTES.
             max_attempts (int, optional): The max number of attempts before giving up. Defaults to 12 attempts.
         """
-        wait_for_connection(backoff_duration, max_attempts)
-        wait_until_running(backoff_duration, max_attempts)
+        self.wait_for_connection(backoff_duration, max_attempts)
+        self.wait_until_running(backoff_duration, max_attempts)
 
     def run(self):
         """Automatically diagnose and repair the Bobcat!"""
@@ -171,19 +159,29 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             with lock:
                 self.logger.debug(f"Lock Acquired: {self.lock_file}")
 
-                # run diagnoser checks
-                for issue in self.issues:
+                # run diagnoser checks for known issues
+                for issue in self.known_issues:
 
-                    if issue.check():
-                        pass
+                    self.logger.debug(f"Checking: {issue.name}")
+
+                    check_failed = issue.check()
+                    if check_failed:
+
                         # run the autopilot repair steps
-                        # for step in check.autopilot_steps:
-                        #     func, args, kwargs = (
-                        #         step["func"],
-                        #         step.get("args", []),
-                        #         step.get("kwargs", {}),
-                        #     )
-                        #     func(*args, **kwargs)
+                        for step in issue.autopilot_repair_steps:
+                            func, args, kwargs = (
+                                step["func"],
+                                step.get("args", []),
+                                step.get("kwargs", {}),
+                            )
+                            func(*args, **kwargs)
+
+                            # halt autopilot steps if the bobcat is healthy
+                            is_online = not self.is_offline()
+                            is_synced = not self.is_not_synced()
+                            if is_online and not is_synced:
+                                self.logger.debug("Bobcat Autopilot Repaired: {check.name}")
+                                break
 
             # clean up lock file
             if os.path.exists(self.lock_file):
