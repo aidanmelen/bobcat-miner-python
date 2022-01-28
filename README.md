@@ -50,7 +50,7 @@ $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ❌ Temperature Status: Hot (78°C) 🌋
 ```
 
-By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will now be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
+By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
 
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/>
 
