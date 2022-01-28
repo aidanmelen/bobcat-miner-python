@@ -23,6 +23,7 @@ except:
     "--hostname",
     "-h",
     required=False,
+    metavar="NAME",
     envvar="BOBCAT_HOSTNAME",
     show_envvar=True,
     help="The Bobcat hostname.",
@@ -31,6 +32,7 @@ except:
     "--animal",
     "-a",
     required=False,
+    metavar="NAME",
     envvar="BOBCAT_ANIMAL",
     show_envvar=True,
     help="The Bobcat animal name to search for e.g. Fancy Awesome Bobcat.",
@@ -42,6 +44,7 @@ except:
     required=False,
     multiple=True,
     default=["192.168.0.0/24", "10.0.0.0/24"],
+    metavar="CIDR",
     envvar="BOBCAT_NETWORKS",
     show_envvar=True,
     help="The networks used to search for a Bobcat.",
@@ -68,6 +71,7 @@ except:
     "-w",
     required=False,
     type=str,
+    metavar="URL",
     envvar="BOBCAT_DISCORD_WEBHOOK_URL",
     show_envvar=True,
     help="The Discord webhook url where log events will be sent.",
@@ -80,6 +84,7 @@ except:
     type=click.Choice(
         ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
+    metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_STREAM",
     show_envvar=True,
     help="The log level for console stream log handler.",
@@ -92,6 +97,7 @@ except:
     type=click.Choice(
         ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
+    metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_FILE",
     show_envvar=True,
     help="The log level for file log handler.",
@@ -104,6 +110,7 @@ except:
     type=click.Choice(
         ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
+    metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_DISCORD",
     show_envvar=True,
     help="The log level for discord channel log handler.",
@@ -142,7 +149,7 @@ def autopilot(ctx) -> None:
 @click.pass_context
 def status(ctx) -> None:
     """Print Bobcat status data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_status().status_data)
+    click.echo(ctx.obj["AUTOPILOT"].refresh_status()._status_data)
 
 
 @cli.command()
@@ -150,28 +157,28 @@ def status(ctx) -> None:
 def miner(ctx) -> None:
     """Print Bobcat miner data."""
     # miner_data is initialized in the BobcatConnection constructor during bobcat verification
-    click.echo(ctx.obj["AUTOPILOT"].miner_data)
+    click.echo(ctx.obj["AUTOPILOT"]._miner_data)
 
 
 @cli.command()
 @click.pass_context
 def speed(ctx) -> None:
     """Print Bobcat network speed data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_speed().speed_data)
+    click.echo(ctx.obj["AUTOPILOT"].refresh_speed()._speed_data)
 
 
 @cli.command()
 @click.pass_context
 def temp(ctx) -> None:
     """Print Bobcat CPU tempurature data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_temp().temp_data)
+    click.echo(ctx.obj["AUTOPILOT"].refresh_temp()._temp_data)
 
 
 @cli.command()
 @click.pass_context
 def dig(ctx) -> None:
     """Print Bobcat DNS data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_dig().dig_data)
+    click.echo(ctx.obj["AUTOPILOT"].refresh_dig()._dig_data)
 
 
 @cli.command()

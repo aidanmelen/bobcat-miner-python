@@ -1,16 +1,8 @@
-"""Unittests for bobcat REST API."""
 from unittest.mock import patch
-from unittest.mock import call
-from unittest.mock import MagicMock
 
-import datetime
 import unittest
-import requests
 
 from bobcat_miner import Bobcat
-from bobcat_miner import BobcatConnection
-from bobcat_miner import BobcatLogger
-from bobcat_miner import BobcatConnectionError
 
 import mock_bobcat
 
@@ -18,122 +10,12 @@ import mock_bobcat
 DISABLED = 100
 
 
-class TestBobcatAPI(unittest.TestCase):
-    """Test BobcatAPI."""
-
-    def setUp(self):
-        self.mock_hostname = "192.168.0.10"
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh_status(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_status()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/status.json")
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh_miner(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_miner()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/miner.json")
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh_temp(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_temp()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/temp.json")
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh_speed(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_speed()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/speed.json")
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh_dig(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_dig()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/dig.json")
-
-    @patch("requests.get")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_refresh(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh()
-        mock_requests_get.assert_has_calls(
-            [
-                call("http://" + self.mock_hostname + "/status.json"),
-                call("http://" + self.mock_hostname + "/miner.json"),
-                call("http://" + self.mock_hostname + "/temp.json"),
-                call("http://" + self.mock_hostname + "/speed.json"),
-                call("http://" + self.mock_hostname + "/dig.json"),
-            ],
-            any_order=True,
-        )
-
-    @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_reboot(self, mock_is_a_bobcat, mock_requests_post):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        _ = b.reboot()
-        mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_hostname + "/admin/reboot",
-            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
-        )
-
-    @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_reset(self, mock_is_a_bobcat, mock_requests_post):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        _ = b.reset()
-        mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_hostname + "/admin/reset",
-            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
-        )
-
-    @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_resync(self, mock_is_a_bobcat, mock_requests_post):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        _ = b.resync()
-        mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_hostname + "/admin/resync",
-            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
-        )
-
-    @patch("requests.post")
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def test_fastsync(self, mock_is_a_bobcat, mock_requests_post):
-        mock_is_a_bobcat.return_value = self.mock_hostname
-        b = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
-        _ = b.fastsync()
-        mock_requests_post.assert_called_once_with(
-            "http://" + self.mock_hostname + "/admin/fastsync",
-            headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
-        )
-
-
 class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat")
-    def setUp(self, mock_is_a_bobcat, mock_requests_get):
-        mock_is_a_bobcat.return_value = "192.168.0.10"
-        self.bobcat = Bobcat("192.168.0.10")
+    def setUp(self, mock_requests_get):
+        self.bobcat = Bobcat(hostname="192.168.0.10", ensure_hostname=False, log_level=DISABLED)
         self.bobcat.refresh()
 
     def test_status(self):
@@ -166,8 +48,8 @@ class TestBobcat(unittest.TestCase):
     def test_animal(self):
         self.assertEqual(self.bobcat.animal, "fancy-awesome-bobcat")
 
-    def test_name(self):
-        self.assertEqual(self.bobcat.name, "Fancy Awesome Bobcat")
+    def test_helium_animal(self):
+        self.assertEqual(self.bobcat.helium_animal, "Fancy Awesome Bobcat")
 
     def test_pubkey(self):
         self.assertEqual(

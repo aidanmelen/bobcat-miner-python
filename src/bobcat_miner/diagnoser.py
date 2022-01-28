@@ -409,13 +409,13 @@ class BobcatDiagnoser:
         if down_or_error := self.status.upper() == "DOWN" or (
             "ERROR" in self.status.upper() and "ERROR RESPONSE FROM DAEMON" in self.tip.upper()
         ):
-            self.logger.error(f"Bobcat Status: {self.status.upper()}")
+            self._logger.error(f"Bobcat Status: {self.status.upper()}")
 
         return down_or_error
 
     def check_height_api_error(self):
         if has_error := "HEIGHT API ERROR" in self.status.upper():
-            self.logger.error("Bobcat Status: Height API Error")
+            self._logger.error("Bobcat Status: Height API Error")
 
         return has_error
 
@@ -470,9 +470,9 @@ class BobcatDiagnoser:
     def is_offline(self):
         """Check Online Status."""
         if is_offline := self.state.upper() != "RUNNING":
-            self.logger.error("Online Status: Offline")
+            self._logger.error("Online Status: Offline")
         else:
-            self.logger.info("Online Status: Online ✨")
+            self._logger.info("Online Status: Online ✨")
 
         return is_offline
 
@@ -484,9 +484,9 @@ class BobcatDiagnoser:
         msg = f"Sync Status: {self.status.capitalize()} (gap:{self.gap})"
 
         if is_not_synced := not is_synced and not syncing_and_caught_up:
-            self.logger.error(msg)
+            self._logger.error(msg)
         else:
-            self.logger.info(msg + " ✨")
+            self._logger.info(msg + " ✨")
 
         return is_not_synced
 
@@ -500,9 +500,9 @@ class BobcatDiagnoser:
         )
 
         if is_relayed := not is_pub_ip_over_44158 and not is_nat_type_none:
-            self.logger.warning("Relay Status: Relayed")
+            self._logger.warning("Relay Status: Relayed")
         else:
-            self.logger.info("Relay Status: Not Relayed ✨")
+            self._logger.info("Relay Status: Not Relayed ✨")
 
         return is_relayed
 
@@ -513,31 +513,31 @@ class BobcatDiagnoser:
         latency = float(self.latency.strip("ms"))
 
         if is_download_speed_slow := download_speed < 5:
-            self.logger.warning(f"Network Status: Download Slow ({self.download_speed})")
+            self._logger.warning(f"Network Status: Download Slow ({self.download_speed})")
 
         elif is_upload_speed_slow := upload_speed < 5:
-            self.logger.warning(f"Network Status: Upload Slow ({self.upload_speed})")
+            self._logger.warning(f"Network Status: Upload Slow ({self.upload_speed})")
 
         elif is_latency_high := latency > 100.0:
-            self.logger.warning(f"Network Status: Latency High ({self.latency})")
+            self._logger.warning(f"Network Status: Latency High ({self.latency})")
 
         else:
-            self.logger.info(f"Network Status: Good 📶")
+            self._logger.info(f"Network Status: Good 📶")
 
         return any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
 
     def is_temperature_dangerous(self):
         """Check Temperature Status."""
         if is_too_cold := self.coldest_temp < 0:
-            self.logger.error(f"Temperature Status: Cold ({self.hottest_temp}°C) ❄️")
+            self._logger.error(f"Temperature Status: Cold ({self.hottest_temp}°C) ❄️")
 
         elif is_getting_hot := self.hottest_temp >= 65 and self.hottest_temp < 70:
-            self.logger.warning(f"Temperature Status: Warm ({self.hottest_temp}°C) 🔥")
+            self._logger.warning(f"Temperature Status: Warm ({self.hottest_temp}°C) 🔥")
 
         elif is_too_hot := self.hottest_temp >= 70 or self.hottest_temp >= 70:
-            self.logger.error(f"Temperature Status: Hot ({self.hottest_temp}°C) 🌋")
+            self._logger.error(f"Temperature Status: Hot ({self.hottest_temp}°C) 🌋")
 
         else:
-            self.logger.info(f"Temperature Status: Good ({self.hottest_temp}°C) ☀️")
+            self._logger.info(f"Temperature Status: Good ({self.hottest_temp}°C) ☀️")
 
         return is_too_cold and (is_hot_warning or is_hot_error)

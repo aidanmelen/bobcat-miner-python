@@ -20,8 +20,8 @@ class BobcatLogger:
         log_level_discord: str = "INFO",
     ) -> None:
 
-        self.logger = logging.getLogger("bobcat")
-        self.logger.setLevel(log_level)
+        self._logger = logging.getLogger("bobcat")
+        self._logger.setLevel(log_level)
 
         self.add_log_stream_handler(log_level_stream)
 
@@ -31,19 +31,24 @@ class BobcatLogger:
         if discord_webhook_url:
             self.add_log_discord_handler(discord_webhook_url, log_level_discord)
 
+    @property
+    def logger(self):
+        """Return logger."""
+        return self._logger
+
     def add_log_stream_handler(self, log_level: str) -> None:
         """Add the log stream handler to the logger."""
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(log_level.upper())
         stream_handler.setFormatter(BobcatLogStreamFormatter())
-        self.logger.addHandler(stream_handler)
+        self._logger.addHandler(stream_handler)
 
     def add_log_file_handler(self, log_file: str, log_level: str) -> None:
         """Add the log file handler to the logger."""
         file_handler = TimedRotatingFileHandler(log_file, when="midnight", backupCount=7)
         file_handler.setLevel(log_level.upper())
         file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)s %(levelname)s %(msg)s"))
-        self.logger.addHandler(file_handler)
+        self._logger.addHandler(file_handler)
 
     def add_log_discord_handler(self, discord_webhook_url: str, log_level: str) -> None:
         """Add the log Discord handler to the logger."""
@@ -52,7 +57,7 @@ class BobcatLogger:
             level=log_level.upper(),
             message_creator=BobcatEmbedMessageCreator(),
         )
-        self.logger.addHandler(discord_webhook_handler)
+        self._logger.addHandler(discord_webhook_handler)
 
 
 @dataclass
@@ -76,23 +81,23 @@ class Color:
 LOG_LEVEL_EMOJI = {
     "DEBUG": {
         "emoji": "🐛",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/bug_1f41b.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bug.png",
     },
     "INFO": {
         "emoji": "✅",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/check-mark-button_2705.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/check-mark-button.png",
     },
     "WARNING": {
         "emoji": "⚠️",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/warning_26a0-fe0f.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/warning.png",
     },
     "ERROR": {
         "emoji": "❌",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/cross-mark_274c.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/cross-mark.png",
     },
     "CRITICAL": {
         "emoji": "💥",
-        "url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/320/apple/285/collision_1f4a5.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/collision.png",
     },
 }
 

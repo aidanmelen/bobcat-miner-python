@@ -17,58 +17,43 @@ except:
 class BobcatAPI(BobcatConnection):
     """A class for interacting with the Bobcat API endpoints."""
 
-    def __init__(
-        self,
-        hostname: str = None,
-        animal: str = None,
-        networks: List[str] = ["192.168.0.0/24", "10.0.0.0/24"],
-        dry_run: bool = False,
-        logger: str = None,
-    ) -> None:
-        super().__init__(hostname, animal, networks, logger)
-
-        self.dry_run = dry_run
-
-        self.status_data = {}
-        # self.miner_data = {} # initialized in the BobcatConnection constructor during bobcat verification
-        self.temp_data = {}
-        self.speed_data = {}
-        self.dig_data = {}
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
     def refresh_status(self) -> BobcatAPI:
         """Refresh Bobcat status data."""
-        self.logger.debug("Refresh: Status Data")
-        self.status_data = self._BobcatConnection__get(
-            "http://" + self.hostname + "/status.json"
+        self._logger.debug("Refresh: Status Data")
+        self._status_data = self._BobcatConnection__get(
+            "http://" + self._hostname + "/status.json"
         ).json()
 
-        if self.status_data == {"message": "rate limit exceeded"}:
+        if self._status_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.refresh_status()
         return self
 
     def refresh_miner(self) -> BobcatAPI:
         """Refresh Bobcat miner data."""
-        self.logger.debug("Refresh: Miner Data")
-        self.miner_data = self._BobcatConnection__get(
-            "http://" + self.hostname + "/miner.json"
+        self._logger.debug("Refresh: Miner Data")
+        self._miner_data = self._BobcatConnection__get(
+            "http://" + self._hostname + "/miner.json"
         ).json()
 
-        if self.miner_data == {"message": "rate limit exceeded"}:
+        if self._miner_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.refresh_miner()
         return self
 
     def refresh_speed(self) -> BobcatAPI:
         """Refresh Bobcat network speed data."""
-        self.logger.debug("Refresh: Network Speed Data")
+        self._logger.debug("Refresh: Network Speed Data")
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
-        self.speed_data = self._BobcatConnection__get(
-            "http://" + self.hostname + "/speed.json"
+        self._speed_data = self._BobcatConnection__get(
+            "http://" + self._hostname + "/speed.json"
         ).json()
 
-        if (self.speed_data == {"message": "rate limit exceeded"}) or (
-            self.speed_data
+        if (self._speed_data == {"message": "rate limit exceeded"}) or (
+            self._speed_data
             == {
                 "DownloadSpeed": "",
                 "UploadSpeed": "",
@@ -81,22 +66,24 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_temp(self) -> BobcatAPI:
         """Refresh Bobcat temperature data."""
-        self.logger.debug("Refresh: Temperature Data")
-        self.temp_data = self._BobcatConnection__get(
-            "http://" + self.hostname + "/temp.json"
+        self._logger.debug("Refresh: Temperature Data")
+        self._temp_data = self._BobcatConnection__get(
+            "http://" + self._hostname + "/temp.json"
         ).json()
 
-        if self.temp_data == {"message": "rate limit exceeded"}:
+        if self._temp_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.refresh_temp()
         return self
 
     def refresh_dig(self) -> BobcatAPI:
         """Refresh Bobcat DNS data."""
-        self.logger.debug("Refresh Bobcat: DNS Data")
-        self.dig_data = self._BobcatConnection__get("http://" + self.hostname + "/dig.json").json()
+        self._logger.debug("Refresh Bobcat: DNS Data")
+        self._dig_data = self._BobcatConnection__get(
+            "http://" + self._hostname + "/dig.json"
+        ).json()
 
-        if self.dig_data == {"message": "rate limit exceeded"}:
+        if self._dig_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.refresh_dig()
         return self
@@ -122,44 +109,44 @@ class BobcatAPI(BobcatConnection):
             self.refresh_dig()
         return self
 
-    def reboot(self) -> None:
+    def reboot(self) -> str:
         """Reboot the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44076
-        if self.dry_run:
-            self.logger.warning("Dry run is enabled: Reboot Skipped")
+        if self._dry_run:
+            self._logger.warning("Dry run is enabled: Reboot Skipped")
         else:
-            self.logger.warning("Rebooting Bobcat")
-            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/reboot")
-            self.logger.debug(self.__parse_html(resp.text))
+            self._logger.warning("Rebooting Bobcat")
+            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
+            return self.__parse_html(resp.text)
 
-    def reset(self) -> None:
+    def reset(self) -> str:
         """Reset the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4412
-        if self.dry_run:
-            self.logger.warning("Dry run is enabled: Reset Skipped")
+        if self._dry_run:
+            self._logger.warning("Dry run is enabled: Reset Skipped")
         else:
-            self.logger.warning("Resetting Bobcat")
-            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/reset")
-            self.logger.debug(self.__parse_html(resp.text))
+            self._logger.warning("Resetting Bobcat")
+            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
+            return self.__parse_html(resp.text)
 
-    def resync(self) -> None:
+    def resync(self) -> str:
         """Resync the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44130
-        if self.dry_run:
-            self.logger.warning("Dry run is enabled: Resync Skipped")
+        if self._dry_run:
+            self._logger.warning("Dry run is enabled: Resync Skipped")
         else:
-            self.logger.warning("Resyncing Bobcat")
-            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/resync")
-            self.logger.debug(self.__parse_html(resp.text))
+            self._logger.warning("Resyncing Bobcat")
+            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
+            return self.__parse_html(resp.text)
 
-    def fastsync(self) -> None:
+    def fastsync(self) -> str:
         """Fastsync the Bobcat."""
-        if self.dry_run:
-            self.logger.warning("Dry run is enabled: Fastsync Skipped")
+        if self._dry_run:
+            self._logger.warning("Dry run is enabled: Fastsync Skipped")
         else:
-            self.logger.warning("Fastsyncing Bobcat")
-            resp = self._BobcatConnection__post("http://" + self.hostname + "/admin/fastsync")
-            self.logger.debug(self.__parse_html(resp.text))
+            self._logger.warning("Fastsyncing Bobcat")
+            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")
+            return self.__parse_html(resp.text)
 
     def __parse_html(self, html) -> str:
         """Parse HTML and return a str

@@ -27,27 +27,19 @@ import time
 class BobcatConnection(BobcatBase):
     """A class for Bobcat Connection."""
 
-    def __init__(
-        self,
-        hostname: str = None,
-        animal: str = None,
-        networks: List[str] = ["192.168.0.0/24", "10.0.0.0/24"],
-        logger: str = None,
-    ) -> None:
-        super().__init__(logger)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
-        self.miner_data = {}  # initialize because we need it to validate the bobcat.
-
-        # normalize Helium animal name format (e.g. Fancy Awesome Bobcat)
-        # to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
-        normalized_animal = (
-            str(animal).strip().strip("'").strip('"').lower().replace(" ", "-") if animal else None
-        )
-
-        if hostname:
-            self.hostname = asyncio.run(self.is_a_bobcat(hostname, normalized_animal))
+        if self._ensure_hostname:
+            if self._hostname:
+                _ = asyncio.run(self.is_a_bobcat(self._hostname))
+            else:
+                self._hostname = self.search()
         else:
-            self.hostname = self.search(networks, normalized_animal)
+            if not self._hostname:
+                raise BobcatConnectionError(
+                    f"Cannot connect to Bobcat hostname was not set and ensure_hostname is False."
+                )
 
     def can_connect(self, port=80, timeout=3) -> bool:
         """Verify network connectivity.
@@ -59,7 +51,7 @@ class BobcatConnection(BobcatBase):
         try:
             socket.setdefaulttimeout(timeout)  # minutes
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.hostname, port))
+            s.connect((self._hostname, port))
         except OSError as err:
             result = False
         else:
@@ -68,12 +60,11 @@ class BobcatConnection(BobcatBase):
             s.close()
             return result
 
-    async def is_a_bobcat(self, host, animal=None, search_mode=False) -> (bool, str):
+    async def is_a_bobcat(self, host, search_mode=False) -> (bool, str):
         """Connect to the host and check that it is a Bobcat and or matches the specified animal name.
 
         Args:
             host (str): The host to check.
-            animal (str, optional): The animal name to check if connected to a bobcat. Defaults to None
             search_mode (bool, optional): Running is search mode e.g. return False instead of raising BobcatConnectionError. Defaults to False
         """
 
@@ -98,7 +89,8 @@ class BobcatConnection(BobcatBase):
 
         # The host is not a bobcat if it does not have a bobcat diagnoser page
         if "Diagnoser - Bobcatminer Diagnostic Dashboard" in soup.title:
-            self.logger.debug(f"Connected to Bobcat: {host}")
+            self._logger.debug(f"Connected to Bobcat: {host}")
+
         else:
             if search_mode:
                 return False
@@ -106,50 +98,57 @@ class BobcatConnection(BobcatBase):
                 raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
 
         # The host is not the bobcat if the animal name does not match
-        if animal:
-
+        if self._animal:
             try:
-                self.logger.debug("Refresh: Miner Data")
-                self.miner_data = self.__get("http://" + host + "/miner.json").json()
-                bobcat_animal = self.miner_data.get("animal")
+                self._logger.debug("Refresh: Miner Data")
+                self._miner_data = self.__get("http://" + host + "/miner.json").json()
+                bobcat_animal = self._miner_data.get("animal")
+
             except Exception as err:
-                self.logger.exception(err)
+                self._logger.exception(err)
                 bobcat_animal = None
+
             finally:
-                if animal != bobcat_animal:
+
+                # normalize from Helium animal name format (e.g. Fancy Awesome Bobcat) to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
+                normalized_animal = (
+                    str(self._animal).strip().strip("'").strip('"').lower().replace(" ", "-")
+                    if self._animal
+                    else None
+                )
+
+                if normalized_animal == bobcat_animal:
+                    self._logger.debug(f"Verified Bobcat Animal: {self._animal}")
+
+                else:
                     if search_mode:
                         return False
                     else:
                         raise BobcatConnectionError(
-                            f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({animal})"
+                            f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({normalized_animal})"
                         )
 
         # This is the bobcat we are looking for ✨ 🍰 ✨
         return host
 
-    def search(self, networks=["192.168.0.0/24", "10.0.0.0/24"], animal=None) -> (str, None):
-        """Search for the Bobcat in a network. In the case of multiple bobcats, the first occurrence will be return, and that may nondeterministic.
+    def search(self) -> None:
+        """Search for the Bobcat in a network. In the case of multiple bobcats, the first occurrence will be returned.
 
         All hosts in the network will be searched concurrently. Each host will be checked for HTTP connection, followed by a bobcat diagnoser check, and an animal name check if specified.
-
-        Args:
-            network (list, optional): A network to search in CIDR notation. Defaults to ["192.168.0.0/24", "10.0.0.0/24"]
-            animal (str, optional): The animal name of the bobcat to search for. The search will only return the bobcat that matches the animal name. Defaults to None
         """
 
         # https://www.twilio.com/blog/asynchronous-http-requests-in-python-with-aiohttp
 
-        self.logger.debug(
-            f"Searching for {'(' + animal + ')' if animal else 'a bobcat'} in these networks: {', '.join(networks)}"
+        self._logger.debug(
+            f"Searching for {'(' + self._animal + ')' if self._animal else 'a bobcat'} in these networks: {', '.join(self._networks)}"
         )
 
-        async def __search(host, animal) -> (str, None):
+        async def __search(host) -> (str, None):
             """Create concurrent futures for is_a_bobcat and process them as they complete. Return when the bobcat is found and do not wait for other futures to complete."""
 
             # create concurrent future tasks for "is_a_bobcat()"
             tasks = [
-                asyncio.ensure_future(self.is_a_bobcat(host, animal=animal, search_mode=True))
-                for host in host
+                asyncio.ensure_future(self.is_a_bobcat(host, search_mode=True)) for host in host
             ]
 
             # process tasks as they complete for truthy host
@@ -161,17 +160,17 @@ class BobcatConnection(BobcatBase):
             else:
                 return None
 
-        for network in networks:
+        for network in self._networks:
             # get list of hosts in the network
             hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
 
             # search for bobcat in hosts
-            if result := asyncio.run(__search(hosts, animal)):
-                return result
+            if hostname := asyncio.run(__search(hosts)):
+                return hostname
 
         else:
             raise BobcatConnectionError(
-                f"Unable to find {'the (' + animal + ')' if animal else 'and connect to a'} bobcat in these networks: {', '.join(networks)}"
+                f"Unable to find {'the (' + self._animal + ')' if self._animal else 'and connect to a'} bobcat in these networks: {', '.join(self._networks)}"
             )
 
     @backoff.on_exception(
@@ -180,7 +179,10 @@ class BobcatConnection(BobcatBase):
         max_time=FIVE_MINUTES,
     )
     def __get(self, url: str) -> str:
-        """Make GET request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes."""
+        """Make GET request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes.
+        Args:
+            url (str): A URL to GET.
+        """
         return requests.get(url)
 
     @backoff.on_exception(
@@ -189,5 +191,8 @@ class BobcatConnection(BobcatBase):
         max_time=FIVE_MINUTES,
     )
     def __post(self, url: str) -> str:
-        """Make POST request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes."""
+        """Make POST request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes.
+        Args:
+            url (str): A URL to POST.
+        """
         return requests.post(url, headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"})

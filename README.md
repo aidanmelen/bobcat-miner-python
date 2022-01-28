@@ -13,18 +13,14 @@ A command line tool used to automate the Bobcat miner. This project also offers 
 ## Install
 
 ```bash
-# install command line tools
 $ pipx install bobcat-miner
-
-# install SDK
-$ pip3 install bobcat-miner
 ```
 
 Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
 ## Quick Start
 
-The `bobcat autopilot` command will automatically diagnose and repair the Bobcat!
+The `bobcat autopilot` command will automatically diagnose and repair the Bobcat miner!
 
 ```bash
 $ bobcat autopilot
@@ -34,108 +30,65 @@ $ bobcat autopilot
 ✅ Temperature Status: Good (38°C) ☀️
 ```
 
-## Finding your Bobcat
-
-By default, the Bobcat's IP address will be automatically discovered and used. Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address.
-
-This is how you can set the IP address of the Bobcat.
+or run with the offical Docker container
 
 ```bash
-$ bobcat --hostname 192.168.0.10 autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-...
+$ docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
+Run `bobcat --help` to learn about the available commands and options.
 
+## Monitoring with Discord
 
+Send events to a Discord channel using a [webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+
+```bash
+$ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
+✅ Sync Status: Synced (gap:0) ✨
+⚠️ Relay Status: Relayed
+✅ Network Status: Good 📶
+❌ Temperature Status: Hot (78°C) 🌋
+```
+
+By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will now be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
+
+<img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/>
+
+## Finding your Bobcat
+
+### Manually Specify the Hostname / IP Address
+
+By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10.0.0.0/24` local networks and try to establish a Bobcat connection.
+
+Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and manually specify it with:
+
+```bash
+$ bobcat --hostname 192.168.0.10 -S DEBUG autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+```
+
+### Search for Bobcat by Animal Name
+
+This will connect to the Bobcat on your network that matches the animal name.
+
+```bash
+$ bobcat --animal "Fancy Awesome Bobcat" -S DEBUG autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 Refresh: Miner Data
+🐛 Verified Bobcat Animal: fancy-awesome-bobcat
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+```
 
 <!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
-Diagnostics checks will run and all actions will be skipped during a Bobcat dry run.
+This example is admittedly contrived, but it demonstrates to enable a dry run so that actions ???.
 
 ```bash
-$ export BOBCAT_LOG_LEVEL_STREAM=DEBUG
-$ bobcat --dry-run autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-🐛 Refresh: Miner Data
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-🐛 Lock Acquired: /etc/bobcat-autopilot.lock
-🐛 Checking: Down or Error Status
-🐛 Refresh: Status Data
-🐛 Checking: Height API Error Status
-🐛 Checking: Not Synced Issue
-✅ Sync Status: Synced (gap:-1) ✨
-🐛 Checking: Relay Issue
-✅ Relay Status: Not Relayed ✨
-...
-```
-
-### Discord Monitoring
-
-Send `bobcat` logs to a Discord channel using a [webhook url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
-
-```bash
-$ export BOBCAT_LOG_LEVEL=DEBUG
-$ export BOBCAT_HOSTNAME=192.168.0.10
-$ export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
-$ bobcat autopilot
-🚀 The Bobcat Autopilot is starting
-```
-
-and watch your logs stream your Discord channel!
-
-![Bobcat Autopilot Discord](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord.png)
-
-### Log File
-
-Send logs to a file
-
-```bash
-$ bobcat --ip-address 192.168.0.10 --log-file bobcat-autopilot.log autopilot
-🚀 The Bobcat Autopilot is starting
-```
-
-### Bobcat Docker Container
-
-Run the `bobcat` command line tool as a docker container.
-
-```bash
-$ docker run --rm -it aidanmelen/bobcat -h 192.168.0.10 status
-{
-    "status": "Synced",
-    "gap": "-2",
-    "miner_height": "1185959",
-    "blockchain_height": "1185957",
-    "epoch": "31260"
-}
-```
-
-## Bobcat Autopilot SDK Usage
-
-```python
-import bobcat_miner
-
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
-autopilot = bobcat_miner.Autopilot(bobcat)
-
-# Automatically diagnose and repair the Bobcat
-autopilot.run()
-
-# diagnostics
-autopilot.is_relayed()
-autopilot.is_temp_dangerous()
-autopilot.is_network_speed_slow()
-autopilot.is_syncing()
-autopilot.has_errors()
-
-# actions
-autopilot.ping()        # Ping the Bobcat until it connects or attempts are maxed out
-autopilot.reboot()      # Reboot the Bobcat and wait for connection
-autopilot.reset()       # Reset the Bobcat and wait for connection or exceeds max attempts
-autopilot.resync()      # Fastsync the Bobcat and wait for connection
-autopilot.fastsync()    # Fastsync the Bobcat until the gap is less than 400 or exceeds max attempts
-autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over time
+$ bobcat --dry-run reboot
+Do you want to reboot the Bobcat? [y/N]: y
+⚠️ Dry run is enabled: Reboot Skipped
 ```
 
 ## Bobcat SDK Usage
@@ -143,7 +96,7 @@ autopilot.is_syncing()  # Poll the Bobcat's gap to see if it is syncing over tim
 ```python
 import bobcat_miner
 
-bobcat = bobcat_miner.Bobcat("192.168.1.100")
+bobcat = bobcat_miner.Bobcat("192.168.1.10")
 
 # refresh
 bobcat.refresh_status()
@@ -151,12 +104,11 @@ bobcat.refresh_miner()
 bobcat.refresh_speed()
 bobcat.refresh_temp()
 bobcat.refresh_dig()
-bobcat.refresh()
+bobcat.refresh() # all endpoints
 
 # properties
 bobcat.status
 bobcat.gap
-bobcat.miner_height
 bobcat.blockchain_height
 bobcat.epoch
 bobcat.tip
@@ -164,10 +116,13 @@ bobcat.ota_version
 bobcat.region
 bobcat.frequency_plan
 bobcat.animal
-bobcat.name
+bobcat.helium_animal
 bobcat.pubkey
 bobcat.state
 bobcat.miner_status
+bobcat.miner_height
+bobcat.miner_alert
+bobcat.miner_desc
 bobcat.names
 bobcat.image
 bobcat.created
@@ -177,13 +132,12 @@ bobcat.ports
 bobcat.private_ip
 bobcat.public_ip
 bobcat.peerbook
-bobcat.peerbook_miner
-bobcat.peerbook_listen_address
-bobcat.peerbook_peers
 bobcat.timestamp
 bobcat.error
 bobcat.temp0
 bobcat.temp1
+bobcat.coldest_temp
+bobcat.hottest_temp
 bobcat.temp0_c
 bobcat.temp1_c
 bobcat.temp0_f
@@ -197,14 +151,10 @@ bobcat.dig_dns
 bobcat.dig_records
 
 # actions
-bobcat.ping()
 bobcat.reboot()
 bobcat.reset()
 bobcat.resync()
 bobcat.fastsync()
-
-# diagnostics
-bobcat.is_bobcat()
 ```
 
 ## Troubleshooting
