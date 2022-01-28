@@ -83,7 +83,7 @@ $ bobcat --animal "Fancy Awesome Bobcat" -S DEBUG autopilot
 <!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
-This example is admittedly contrived, but it demonstrates how a dry run can be used to safely show what actions would normally be performed against the bobcat.
+This example is admittedly contrived, but it demonstrates how a dry run can show what actions would normally be performed against the bobcat.
 
 ```bash
 $ bobcat --dry-run reboot
