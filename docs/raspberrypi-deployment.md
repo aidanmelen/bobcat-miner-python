@@ -32,32 +32,30 @@ sudo chown pi:adm /etc/bobcat
 sudo chmod 0777 /etc/bobcat
 ```
 
-Then schedule Bobcat Autopilot with Cron
+Then create a file called `/home/pi/.bobcat-profile` with the following environment variables.
 
 ```bash
-# write out current crontab
+export BOBCAT_HOSTNAME=192.168.0.10
+export BOBCAT_ANIMAL='Fancy Awesome Bobcat'
+export BOBCAT_DRY_RUN=TRUE
+export BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
+export BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
+export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+export BOBCAT_LOG_LEVEL_STREAM=DEBUG
+export BOBCAT_LOG_LEVEL_FILE=INFO
+export BOBCAT_LOG_LEVEL_DISCORD=WARNING
+```
+
+Please run `bobcat --help` for more information about the environment variables.
+
+Finally schedule Bobcat Autopilot with Cron
+
+```bash
+# write out current crontab to a file
 crontab -l > mycron 2>/dev/null
 
-# echo new cron into cron file
-BOBCAT_HOSTNAME=192.168.0.10
-BOBCAT_DRY_RUN=TRUE
-BOBCAT_LOG_LEVEL=TRACE
-BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
-BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
-BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/xxx
-
-BOBCAT_CMD=$(which bobcat)
-
-BOBCAT_OPTIONS="-i $BOBCAT_HOSTNAME \
---log-file $BOBCAT_LOG_FILE \
---lock-file $BOBCAT_LOCK_FILE \
---discord-webhook-url $BOBCAT_DISCORD_WEBHOOK_URL"
-
-BOBCAT_AUTOPILOT="$BOBCAT_CMD $BOBCAT_OPTIONS autopilot"
-
-CRON_SCHEDULE="0 * * * *" # once every hour
-
-echo "$CRON_SCHEDULE $BOBCAT_AUTOPILOT &> /dev/null" >> mycron
+# append the bobcat autopilot command to the crontab
+echo "0 * * * * . /home/pi/.bobcat-profile; /home/pi/.local/bin/bobcat autopilot &> /dev/null" >> mycron
 
 # install new cron file
 crontab mycron
