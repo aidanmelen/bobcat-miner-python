@@ -1,9 +1,21 @@
 """Bobcat Miner"""
 
+from .autopilot import BobcatAutopilot
+from .diagnoser import BobcatDiagnoser
 from .bobcat import Bobcat
-from .autopilot import Autopilot
+from .api import BobcatAPI
+from .connection import BobcatConnection
+from .base import BobcatBase
+from .logger import BobcatLogger
+from .errors import BobcatConnectionError
 
 __all__ = (
+    "BobcatAutopilot",
+    "BobcatDiagnoser",
     "Bobcat",
-    "Autopilot",
+    "BobcatAPI",
+    "BobcatConnection",
+    "BobcatBase",
+    "BobcatLogger",
+    "BobcatConnectionError",
 )

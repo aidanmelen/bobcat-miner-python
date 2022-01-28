@@ -132,7 +132,7 @@ dmypy.json
 # Bobcat
 .env
 bobcat-autopilot.log
-scratch.py
+scratch*.py
 
 
 # Apple

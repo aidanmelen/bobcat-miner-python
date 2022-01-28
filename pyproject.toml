@@ -16,6 +16,8 @@ backoff = "^1.11.1"
 filelock = "^3.4.2"
 discord-lumberjack = "^1.0.4"
 click = "^8.0.3"
+aiohttp = "^3.8.1"
+beautifulsoup4 = "^4.10.0"
 
 [tool.poetry.scripts]
 bobcat = "bobcat_miner.cli:cli"
