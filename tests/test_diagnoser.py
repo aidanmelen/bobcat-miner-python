@@ -118,7 +118,9 @@ class TestSyncStatusCheck(unittest.TestCase):
             [
                 call.error("Sync Status: Syncing (gap:10000)", extra={}),
                 call.error("Sync Status: Syncing (gap:400)", extra={}),
-                call.error("Sync Status: Syncing (gap:400)", extra={"description": str(self.check)}),
+                call.error(
+                    "Sync Status: Syncing (gap:400)", extra={"description": str(self.check)}
+                ),
             ],
             any_order=False,
         )
@@ -168,9 +170,17 @@ class TestNetworkStatusCheck(unittest.TestCase):
                 call.warning("Network Status: Download Slow (5 Mbit/s)", extra={}),
                 call.warning("Network Status: Upload Slow (3 Mbit/s)", extra={}),
                 call.warning("Network Status: Latency High (130.669083ms)", extra={}),
-                call.warning("Network Status: Download Slow (5 Mbit/s)", extra={"description": str(self.check)}),
-                call.warning("Network Status: Upload Slow (3 Mbit/s)", extra={"description": str(self.check)}),
-                call.warning("Network Status: Latency High (130.669083ms)", extra={"description": str(self.check)}),
+                call.warning(
+                    "Network Status: Download Slow (5 Mbit/s)",
+                    extra={"description": str(self.check)},
+                ),
+                call.warning(
+                    "Network Status: Upload Slow (3 Mbit/s)", extra={"description": str(self.check)}
+                ),
+                call.warning(
+                    "Network Status: Latency High (130.669083ms)",
+                    extra={"description": str(self.check)},
+                ),
             ],
             any_order=False,
         )
@@ -202,7 +212,9 @@ class TestTemperatureStatusCheck(unittest.TestCase):
         self.mock_autopilot._logger.assert_has_calls(
             [
                 call.error("Temperature Status: Cold (-5°C) ❄️", extra={}),
-                call.error("Temperature Status: Cold (-5°C) ❄️", extra={"description": str(self.check)}),
+                call.error(
+                    "Temperature Status: Cold (-5°C) ❄️", extra={"description": str(self.check)}
+                ),
             ],
             any_order=False,
         )
@@ -228,7 +240,9 @@ class TestTemperatureStatusCheck(unittest.TestCase):
         self.mock_autopilot._logger.assert_has_calls(
             [
                 call.warning("Temperature Status: Warm (68°C) 🔥", extra={}),
-                call.warning("Temperature Status: Warm (68°C) 🔥", extra={"description": str(self.check)}),
+                call.warning(
+                    "Temperature Status: Warm (68°C) 🔥", extra={"description": str(self.check)}
+                ),
             ],
             any_order=False,
         )
@@ -247,7 +261,9 @@ class TestTemperatureStatusCheck(unittest.TestCase):
         self.mock_autopilot._logger.assert_has_calls(
             [
                 call.error("Temperature Status: Hot (80°C) 🌋", extra={}),
-                call.error("Temperature Status: Hot (80°C) 🌋", extra={"description": str(self.check)}),
+                call.error(
+                    "Temperature Status: Hot (80°C) 🌋", extra={"description": str(self.check)}
+                ),
             ],
             any_order=False,
         )
@@ -282,7 +298,6 @@ class TestOTAVersionStatusCheck(unittest.TestCase):
             ],
             any_order=False,
         )
-
 
     @patch("os.path.exists", return_value=True)
     @patch("os.path.isfile", return_value=True)
@@ -364,7 +379,9 @@ class TestHeightAPIErrorCheck(unittest.TestCase):
         self.mock_autopilot._logger.assert_has_calls(
             [
                 call.error("Bobcat Status: Height API Error", extra={}),
-                call.error("Bobcat Status: Height API Error", extra={"description": str(self.check)}),
+                call.error(
+                    "Bobcat Status: Height API Error", extra={"description": str(self.check)}
+                ),
             ],
             any_order=False,
         )

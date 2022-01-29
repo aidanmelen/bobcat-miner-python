@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-import inspect
 import json
 import os
 import re
@@ -25,18 +24,18 @@ class BobcatCheck(ABC):
         name: str,
         root_cause: str,
         description: str,
-        troubleshooting_guide: str,
         autopilot_repair_steps: List[str] = [],
         manual_repair_steps: List[str] = [],
         customer_support_steps: List[str] = [],
+        troubleshooting_guides: List[str] = [],
     ):
         self.name = name
         self.root_cause = root_cause
         self.description = description
-        self.troubleshooting_guide = troubleshooting_guide
         self.autopilot_repair_steps = autopilot_repair_steps
         self.manual_repair_steps = manual_repair_steps
         self.customer_support_steps = customer_support_steps
+        self.troubleshooting_guides = troubleshooting_guides
 
     @abstractmethod
     def check(self) -> bool:
@@ -44,26 +43,29 @@ class BobcatCheck(ABC):
         raise NotImplemented
 
     def __str__(self) -> str:
-        manual_repair_steps = "\n".join([f"{idx+1}. {step}" for idx, step in enumerate(self.manual_repair_steps)])
-        customer_support_steps = "\n".join([f"{idx+1}. {step}" for idx, step in enumerate(self.customer_support_steps)])
-
-        return inspect.cleandoc(
-            f"""
-            **Points to:** {self.root_cause}
-
-            ** Why does this error happen?** 
-            {self.description}
-
-            **What You Can Try:** 
-            {manual_repair_steps}
-
-            **What to provide customer support if unable to resolve:**
-            {customer_support_steps}
-
-            **Troublesooting Guide:**
-            {self.troubleshooting_guide}
-            """
+        manual_repair_steps = "\n".join(
+            [f"{idx+1}. {step}" for idx, step in enumerate(self.manual_repair_steps)]
         )
+        customer_support_steps = "\n".join(
+            [f"{idx+1}. {step}" for idx, step in enumerate(self.customer_support_steps)]
+        )
+        troubleshooting_guides = "\n".join([f"- {guide}" for guide in self.troubleshooting_guides])
+
+        return f"""
+**Points to:** {self.root_cause}
+
+** Why does this error happen?** 
+{self.description}
+
+**What You Can Try:** 
+{manual_repair_steps}
+
+**What to provide customer support if unable to resolve:**
+{customer_support_steps}
+
+**Troublesooting Guides:**
+{troubleshooting_guides}
+"""
 
 
 class OnlineStatusCheck(BobcatCheck):
@@ -76,7 +78,7 @@ class OnlineStatusCheck(BobcatCheck):
             autopilot_repair_steps=[],
             manual_repair_steps=[],
             customer_support_steps=[],
-            troubleshooting_guide="???",
+            troubleshooting_guides=["???"],
         )
 
     def check(self) -> bool:
@@ -89,7 +91,7 @@ class RelayStatusCheck(BobcatCheck):
         super().__init__(
             name="Relay Status",
             root_cause="Your Internet Router Settings",
-            description="This error is related to the EMMC (Embedded MultiMediaCard) in your miner. This is a blockchain error you can potentially snapshot past. This is NOT related to your RAM size.",
+            description="The Relay status is determined by lib_p2p. Hotspot's connection is being relayed through another Hotspot on the network which may affect mining. If port 44158 is closed, opening the port should solve the relay. A Relayed hotspot may show “NAT Type Symmetric“ or  “NAT Type Restricted” in your Bobcat Diagnoser. Non Relayed hotspot shows “NAT Type None“. If it’s showing “NAT Type Unknown“, that means you need to wait until the NAT Type is found by the miner. To confirm if your hotspot is relayed, you can click the “Helium Api” menu in your Diagnoser and see if the address is p2p, your hotspot is relayed.",
             autopilot_repair_steps=[],
             manual_repair_steps=[
                 "Set Static IP to the Device.",
@@ -106,7 +108,10 @@ class RelayStatusCheck(BobcatCheck):
                 "Router's Firewall Settings",
                 "Any additional router settings you think might help",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser",
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409239473691-Relayed-Miner",
+            ],
         )
 
     def check(self) -> bool:
@@ -153,7 +158,9 @@ class SyncStatusCheck(BobcatCheck):
                 "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic…",
                 "Provide more details about your Network set up; are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6…?",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
+            ],
         )
 
     def check(self) -> bool:
@@ -186,7 +193,9 @@ class NetworkStatusCheck(BobcatCheck):
                 "Connect the Bobcat to the internet with a hard wired ethernet cable."
             ],
             customer_support_steps=[],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4409231342363-Miner-is-Offline",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409231342363-Miner-is-Offline"
+            ],
         )
 
     def check(self) -> bool:
@@ -194,24 +203,21 @@ class NetworkStatusCheck(BobcatCheck):
         upload_speed = int(self.autopilot.upload_speed.strip(" Mbit/s"))
         latency = float(self.autopilot.latency.strip("ms"))
 
-        extra={"description": str(self)} if self.autopilot._verbose else {}
+        extra = {"description": str(self)} if self.autopilot._verbose else {}
 
         if is_download_speed_slow := download_speed <= 5:
             self.autopilot._logger.warning(
-                f"Network Status: Download Slow ({self.autopilot.download_speed})",
-                extra=extra
+                f"Network Status: Download Slow ({self.autopilot.download_speed})", extra=extra
             )
 
         if is_upload_speed_slow := upload_speed <= 5:
             self.autopilot._logger.warning(
-                f"Network Status: Upload Slow ({self.autopilot.upload_speed})",
-                extra=extra
+                f"Network Status: Upload Slow ({self.autopilot.upload_speed})", extra=extra
             )
 
         if is_latency_high := latency > 100.0:
             self.autopilot._logger.warning(
-                f"Network Status: Latency High ({self.autopilot.latency})",
-                extra=extra
+                f"Network Status: Latency High ({self.autopilot.latency})", extra=extra
             )
 
         is_network_speed_slow = any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
@@ -232,7 +238,9 @@ class TemperatureStatusCheck(BobcatCheck):
             autopilot_repair_steps=[],
             manual_repair_steps=["https://www.nowitness.org/diy-enclosure/"],
             customer_support_steps=[],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring"
+            ],
         )
 
     def check(self) -> bool:
@@ -241,20 +249,17 @@ class TemperatureStatusCheck(BobcatCheck):
 
         if is_too_cold := self.autopilot.coldest_temp < 0:
             self.autopilot._logger.error(
-                f"Temperature Status: Cold ({self.autopilot.coldest_temp}°C) ❄️",
-                extra=extra
+                f"Temperature Status: Cold ({self.autopilot.coldest_temp}°C) ❄️", extra=extra
             )
 
         if is_getting_hot := self.autopilot.hottest_temp >= 65 and self.autopilot.hottest_temp < 70:
             self.autopilot._logger.warning(
-                f"Temperature Status: Warm ({self.autopilot.hottest_temp}°C) 🔥",
-                extra=extra
+                f"Temperature Status: Warm ({self.autopilot.hottest_temp}°C) 🔥", extra=extra
             )
 
         if is_too_hot := self.autopilot.hottest_temp >= 70 or self.autopilot.hottest_temp >= 70:
             self.autopilot._logger.error(
-                f"Temperature Status: Hot ({self.autopilot.hottest_temp}°C) 🌋",
-                extra=extra
+                f"Temperature Status: Hot ({self.autopilot.hottest_temp}°C) 🌋", extra=extra
             )
 
         is_temperature_dangerous = is_too_cold or (is_getting_hot or is_too_hot)
@@ -277,7 +282,9 @@ class OTAVersionStatusCheck(BobcatCheck):
             autopilot_repair_steps=[],
             manual_repair_steps=[],
             customer_support_steps=[],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4410155816987-Changes-to-My-Miner-During-an-OTA",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4410155816987-Changes-to-My-Miner-During-an-OTA"
+            ],
         )
 
     def check(self) -> bool:
@@ -330,7 +337,9 @@ class DownOrErrorCheck(BobcatCheck):
                 "Provide Miner's IP Address",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-"
+            ],
         )
 
     def check(self) -> bool:
@@ -371,7 +380,9 @@ class HeightAPIErrorCheck(BobcatCheck):
                 "Provide Miner's IP Address",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413699665435-API-Error",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413699665435-API-Error"
+            ],
         )
 
     def check(self) -> bool:
@@ -409,7 +420,9 @@ class NoActivityCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4414496658715-No-Activity",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4414496658715-No-Activity"
+            ],
         )
 
     def check():
@@ -442,7 +455,9 @@ class NoWitnessesCheck(BobcatCheck):
                 "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic…",
                 "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6…",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692547355-No-Witness-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692547355-No-Witness-"
+            ],
         )
 
     def check():
@@ -469,7 +484,9 @@ class BlockChecksumMismatchErrorCheck(BobcatCheck):
                 "Keep your miner online so that our engineers can work on your miner.",
                 "You might notice your miner resyncing while our engineers are working on your miner. The process can take some time so please be patient and cooperative.",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -495,7 +512,9 @@ class CompressionMethodorCorruptedErrorCheck(BobcatCheck):
                 "Keep your miner online so that our engineers can work on your issue.",
                 "You might notice your miner resyncing while our engineers are working on your miner. The process can take some time so please be patient and cooperative.",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -520,7 +539,9 @@ class TooManyLookupAttemptsErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -545,7 +566,9 @@ class OnboardingDewiOrgNxdomainErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -574,7 +597,9 @@ class FailedToStartChildErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -600,7 +625,9 @@ class NotADetsFileErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -626,7 +653,9 @@ class SnapshotsHeliumWTFErrorCheck(BobcatCheck):
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
                 "Double check with your ISP to see if there is a strict firewall.",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -651,7 +680,9 @@ class SnapshotDownloadOrLoadingFailedErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -679,7 +710,9 @@ class NoPlausibleBlocksInBatchErrorCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
@@ -711,7 +744,9 @@ class RPCFailedCheck(BobcatCheck):
                 "Provide the miner's public IP address.",
                 "Confirm Port 22 is Open (Include a Screenshot of this Page)",
             ],
-            troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-"
+            ],
         )
 
     def check():
