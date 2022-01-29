@@ -43,7 +43,10 @@ class BobcatCheck(ABC):
         """Return True when the check failed."""
         raise NotImplemented
 
-    def __str__(self):
+    def __str__(self) -> str:
+        manual_repair_steps = "\n".join([f"{idx+1}. {step}" for idx, step in enumerate(self.manual_repair_steps)])
+        customer_support_steps = "\n".join([f"{idx+1}. {step}" for idx, step in enumerate(self.customer_support_steps)])
+
         return inspect.cleandoc(
             f"""
             **Points to:** {self.root_cause}
@@ -52,10 +55,10 @@ class BobcatCheck(ABC):
             {self.description}
 
             **What You Can Try:** 
-            {"/n".join(self.manual_repair_steps)}
+            {manual_repair_steps}
 
             **What to provide customer support if unable to resolve:**
-            {"/n".join(self.customer_support_steps)}
+            {customer_support_steps}
 
             **Troublesooting Guide:**
             {self.troubleshooting_guide}
