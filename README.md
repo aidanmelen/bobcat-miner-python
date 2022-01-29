@@ -52,7 +52,8 @@ $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 
 By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
 
-<img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/>
+<!-- <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/> -->
+<img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
 ## Finding your Bobcat
 
