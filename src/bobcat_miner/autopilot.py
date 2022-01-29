@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from filelock import Timeout, FileLock
 
-import json
 import os
 import requests
 import time

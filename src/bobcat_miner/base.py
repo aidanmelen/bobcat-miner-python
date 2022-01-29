@@ -15,13 +15,15 @@ class BobcatBase:
         self._animal = kwargs.pop("animal", None)
         self._lock_file = kwargs.pop("lock_file", ".bobcat.lock")
         self._log_file = kwargs.pop("log_file", None)
+        self._state_file = kwargs.pop("state_file", None)
         self._dry_run = kwargs.pop("dry_run", None)
+        self._trace = kwargs.pop("trace", False)
         self._networks = kwargs.pop("networks", ["192.168.0.0/24", "10.0.0.0/24"])
         self._ensure_hostname = kwargs.pop("ensure_hostname", True)
 
         self.__discord_webhook_url = kwargs.pop("discord_webhook_url", None)
         self.__log_level = kwargs.pop("log_level", "DEBUG")
-        self.__log_level_stream = kwargs.pop("log_level_stream", "INFO")
+        self.__log_level_console = kwargs.pop("log_level_console", "INFO")
         self.__log_level_file = kwargs.pop("log_level_file", "DEBUG")
         self.__log_level_discord = kwargs.pop("log_level_discord", "WARN")
 
@@ -29,7 +31,7 @@ class BobcatBase:
             log_file=self._log_file,
             discord_webhook_url=self.__discord_webhook_url,
             log_level=self.__log_level,
-            log_level_stream=self.__log_level_stream,
+            log_level_console=self.__log_level_console,
             log_level_file=self.__log_level_file,
             log_level_discord=self.__log_level_discord,
         ).logger

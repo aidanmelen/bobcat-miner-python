@@ -32,6 +32,13 @@ sudo chown pi:adm /etc/bobcat
 sudo chmod 0777 /etc/bobcat
 ```
 
+<!-- docker run --rm -it \
+-v /etc/bobcat:/etc/bobcat \
+-v /var/log/bobcat:/var/log/bobcat \
+--env-file /home/pi/.bobcat-profile \
+aidanmelen/bobcat autopilot -->
+
+
 Then create a file called `/home/pi/.bobcat-profile` with the following environment variables.
 
 ```bash
@@ -41,7 +48,7 @@ export BOBCAT_DRY_RUN=TRUE
 export BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
 export BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
 export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
-export BOBCAT_LOG_LEVEL_STREAM=DEBUG
+export BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
 export BOBCAT_LOG_LEVEL_FILE=INFO
 export BOBCAT_LOG_LEVEL_DISCORD=WARNING
 ```

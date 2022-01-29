@@ -3,7 +3,7 @@
 [![Release](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml)
 [![Tests](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/tests.yaml)
 [![Lint](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
 # bobcat miner python
@@ -63,7 +63,7 @@ By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10
 Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and manually specify it with:
 
 ```bash
-$ bobcat --hostname 192.168.0.10 -S DEBUG autopilot
+$ bobcat --hostname 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 ```
@@ -73,14 +73,13 @@ $ bobcat --hostname 192.168.0.10 -S DEBUG autopilot
 This will connect to the Bobcat on your network that matches the animal name.
 
 ```bash
-$ bobcat --animal "Fancy Awesome Bobcat" -S DEBUG autopilot
+$ bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 Refresh: Miner Data
 🐛 Verified Bobcat Animal: fancy-awesome-bobcat
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 ```
 
-<!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
 This example is admittedly contrived, but it demonstrates how a dry run can show what actions would normally be performed against the bobcat.

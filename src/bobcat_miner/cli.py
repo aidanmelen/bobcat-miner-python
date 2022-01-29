@@ -58,6 +58,14 @@ except:
     help="Dry run where actions are skipped and wait times are 1 second long.",
 )
 @click.option(
+    "--trace",
+    "-t",
+    is_flag=True,
+    envvar="BOBCAT_TRACE",
+    show_envvar=True,
+    help="Verbosely log Bobcat endpoint data when it is refreshed.",
+)
+@click.option(
     "--log-file",
     "-f",
     required=False,
@@ -77,17 +85,17 @@ except:
     help="The Discord webhook url where log events will be sent.",
 )
 @click.option(
-    "--log-level-stream",
-    "-S",
+    "--log-level-console",
+    "-C",
     default="INFO",
     show_default=True,
     type=click.Choice(
         ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
     metavar="LEVEL",
-    envvar="BOBCAT_LOG_LEVEL_STREAM",
+    envvar="BOBCAT_LOG_LEVEL_CONSOLE",
     show_envvar=True,
-    help="The log level for console stream log handler.",
+    help="The log level for the console log handler.",
 )
 @click.option(
     "--log-level-file",
@@ -100,7 +108,7 @@ except:
     metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_FILE",
     show_envvar=True,
-    help="The log level for file log handler.",
+    help="The log level for the file log handler.",
 )
 @click.option(
     "--log-level-discord",
@@ -113,7 +121,7 @@ except:
     metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_DISCORD",
     show_envvar=True,
-    help="The log level for discord channel log handler.",
+    help="The log level for the discord channel log handler.",
 )
 @click.option(
     "--lock-file",
@@ -126,13 +134,24 @@ except:
     show_envvar=True,
     help="The lock file path.",
 )
+@click.option(
+    "--state-file",
+    "-s",
+    required=False,
+    default=".autopilot.json",
+    show_default=True,
+    type=click.Path(writable=True),
+    envvar="BOBCAT_STATE_FILE",
+    show_envvar=True,
+    help="The state file path.",
+)
 def cli(*args, **kwargs) -> None:
     """Bobcat miner command line tools."""
     ctx = args[0]
     ctx.ensure_object(dict)
 
     # Hardcode the bobcat logger log level to DEBUG to ensure no logs are filtered before they reach the log handlers
-    # The CLI users should instead adjust the handler's log level e.g. --log-level-stream, --log-level-file, and --log-level-discord
+    # The CLI users should instead adjust the handler's log level e.g. --log-level-console, --log-level-file, and --log-level-discord
     kwargs["log_level"] = "DEBUG"
 
     ctx.obj["AUTOPILOT"] = BobcatAutopilot(**kwargs)
@@ -157,7 +176,10 @@ def status(ctx) -> None:
 def miner(ctx) -> None:
     """Print Bobcat miner data."""
     # miner_data is initialized in the BobcatConnection constructor during bobcat verification
-    click.echo(ctx.obj["AUTOPILOT"]._miner_data)
+    if miner_data := ctx.obj["AUTOPILOT"]._miner_data:
+        click.echo(miner_data)
+    else:
+        click.echo(ctx.obj["AUTOPILOT"].refresh_miner()._miner_data)
 
 
 @cli.command()

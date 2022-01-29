@@ -15,7 +15,7 @@ class BobcatLogger:
         log_file: str = None,
         discord_webhook_url: str = None,
         log_level: str = "DEBUG",
-        log_level_stream: str = "INFO",
+        log_level_console: str = "INFO",
         log_level_file: str = "DEBUG",
         log_level_discord: str = "INFO",
     ) -> None:
@@ -23,7 +23,7 @@ class BobcatLogger:
         self._logger = logging.getLogger("bobcat")
         self._logger.setLevel(log_level)
 
-        self.add_log_stream_handler(log_level_stream)
+        self.add_log_console_handler(log_level_console)
 
         if log_file:
             self.add_log_file_handler(log_file, log_level_file)
@@ -36,22 +36,22 @@ class BobcatLogger:
         """Return logger."""
         return self._logger
 
-    def add_log_stream_handler(self, log_level: str) -> None:
-        """Add the log stream handler to the logger."""
-        stream_handler = logging.StreamHandler()
-        stream_handler.setLevel(log_level.upper())
-        stream_handler.setFormatter(BobcatLogStreamFormatter())
-        self._logger.addHandler(stream_handler)
+    def add_log_console_handler(self, log_level: str) -> None:
+        """Add the console log handler to the logger."""
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(log_level.upper())
+        console_handler.setFormatter(BobcatLogConsoleFormatter())
+        self._logger.addHandler(console_handler)
 
     def add_log_file_handler(self, log_file: str, log_level: str) -> None:
-        """Add the log file handler to the logger."""
+        """Add the file log handler to the logger."""
         file_handler = TimedRotatingFileHandler(log_file, when="midnight", backupCount=7)
         file_handler.setLevel(log_level.upper())
-        file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)s %(levelname)s %(msg)s"))
+        file_handler.setFormatter(BobcatLogFileFormatter())
         self._logger.addHandler(file_handler)
 
     def add_log_discord_handler(self, discord_webhook_url: str, log_level: str) -> None:
-        """Add the log Discord handler to the logger."""
+        """Add the Discord log handler to the logger."""
         discord_webhook_handler = DiscordWebhookHandler(
             url=discord_webhook_url,
             level=log_level.upper(),
@@ -102,11 +102,26 @@ LOG_LEVEL_EMOJI = {
 }
 
 
-# https://stackoverflow.com/a/70796089/3894599
-class BobcatLogStreamFormatter(logging.Formatter):
-    """A class for formatting colored logs."""
+class BobcatLogFileFormatter(logging.Formatter):
+    """A class for formatting logs in the file."""
 
-    FORMAT = "%(prefix)s%(emoji)s%(emoji_separator)s%(msg)s%(suffix)s"
+    FORMAT = "%(asctime)s %(name)s %(levelname)s %(msg)s%(trace)s"
+
+    def format(self, record: LogRecord):
+        """Format log records with trace attribute"""
+
+        if not hasattr(record, "trace"):
+            record.trace = ""
+
+        formatter = logging.Formatter(self.FORMAT)
+        return formatter.format(record)
+
+
+# https://stackoverflow.com/a/70796089/3894599
+class BobcatLogConsoleFormatter(logging.Formatter):
+    """A class for formatting colored logs in the console."""
+
+    FORMAT = "%(prefix)s%(emoji)s%(emoji_separator)s%(msg)s%(suffix)s%(trace)s"
 
     LOG_LEVEL_COLOR = {
         "DEBUG": {"prefix": "", "suffix": ""},
@@ -132,6 +147,9 @@ class BobcatLogStreamFormatter(logging.Formatter):
 
         if not hasattr(record, "suffix"):
             record.suffix = self.LOG_LEVEL_COLOR.get(record.levelname.upper()).get("suffix")
+
+        if not hasattr(record, "trace"):
+            record.trace = ""
 
         formatter = logging.Formatter(self.FORMAT)
         return formatter.format(record)
@@ -169,4 +187,7 @@ class BobcatEmbedMessageCreator(EmbedMessageCreator):
         Returns:
                 str: The string to set the description to.
         """
+        if hasattr(record, "trace"):
+            if record.trace:
+                return f"```{record.trace}```"
         return ""

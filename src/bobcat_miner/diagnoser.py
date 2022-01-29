@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
+import json
+import os
 import re
 import time
 
@@ -16,7 +18,7 @@ except:
 
 @dataclass
 class BobcatIssue:
-    """Class Bobcat Issues."""
+    """A data class for a Bobcat Issue."""
 
     name: str
     check: str
@@ -403,6 +405,16 @@ class BobcatDiagnoser:
                 customer_support_steps=[],
                 troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring",
             ),
+            BobcatIssue(
+                name="OTA Version Change",
+                check=self.did_ota_version_change,
+                root_cause="The Bobcat OTA Updates may cause the Helium hotspot firmware to crash.",
+                description="The Bobcat OTA (Over the Air) Updates are periodic installations of new firmware on your Bobcat Miner that help optimize your miner's functions.",
+                autopilot_repair_steps=[],
+                manual_repair_steps=[],
+                customer_support_steps=[],
+                troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4410155816987-Changes-to-My-Miner-During-an-OTA",
+            ),
         ]
 
     def check_down_or_error(self):
@@ -504,7 +516,7 @@ class BobcatDiagnoser:
         else:
             self._logger.info("Relay Status: Not Relayed ✨")
 
-        return is_relayed
+        return True  # is_relayed # TODO undo
 
     def is_network_speed_slow(self):
         """Check Network Speed Status."""
@@ -541,3 +553,25 @@ class BobcatDiagnoser:
             self._logger.info(f"Temperature Status: Good ({self.hottest_temp}°C) ☀️")
 
         return is_too_cold and (is_hot_warning or is_hot_error)
+
+    def did_ota_version_change(self):
+        """Check for OTA version change."""
+        if not os.path.exists(os.path.dirname(self._state_file)):
+            os.makedirs(os.path.dirname(self._state_file))
+
+        if not os.path.isfile(self._state_file):
+            with open(self._state_file, "w") as f:
+                json.dump({"ota_version": self.ota_version}, f)
+
+        with open(self._state_file, "r") as f:
+            state = json.load(f)
+            previous_ota_version = state.get("ota_version", self.ota_version)
+
+        if did_ota_version_change := previous_ota_version != self.ota_version:
+            state["ota_version"] = self.ota_version
+            self._logger.warning(f"New OTA Version: {self.ota_version}")
+
+        with open(self._state_file, "w") as f:
+            json.dump(state, f)
+
+        return did_ota_version_change

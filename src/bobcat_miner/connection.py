@@ -19,6 +19,7 @@ import aiohttp
 import asyncio
 import backoff
 import ipaddress
+import json
 import requests
 import socket
 import time
@@ -102,6 +103,13 @@ class BobcatConnection(BobcatBase):
             try:
                 self._logger.debug("Refresh: Miner Data")
                 self._miner_data = self.__get("http://" + host + "/miner.json").json()
+
+                if self._trace:
+                    self._logger.debug(
+                        "Trace: Miner Data",
+                        extra={"trace": f"\n{json.dumps(self._miner_data, indent=4)}"},
+                    )
+
                 bobcat_animal = self._miner_data.get("animal")
 
             except Exception as err:
