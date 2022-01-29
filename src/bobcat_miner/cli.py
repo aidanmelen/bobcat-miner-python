@@ -77,15 +77,15 @@ except:
     help="The Discord webhook url where log events will be sent.",
 )
 @click.option(
-    "--log-level-stream",
-    "-S",
+    "--log-level-console",
+    "-C",
     default="INFO",
     show_default=True,
     type=click.Choice(
         ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
     ),
     metavar="LEVEL",
-    envvar="BOBCAT_LOG_LEVEL_STREAM",
+    envvar="BOBCAT_LOG_LEVEL_CONSOLE",
     show_envvar=True,
     help="The log level for console stream log handler.",
 )

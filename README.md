@@ -50,7 +50,7 @@ $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ❌ Temperature Status: Hot (78°C) 🌋
 ```
 
-By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will now be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
+By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
 
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/>
 
@@ -83,7 +83,7 @@ $ bobcat --animal "Fancy Awesome Bobcat" -S DEBUG autopilot
 <!-- ![Bobcat Autopilot Term](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bobcat-autopilot-term.png) -->
 ### Bobcat Dry Run
 
-This example is admittedly contrived, but it demonstrates to enable a dry run so that actions ???.
+This example is admittedly contrived, but it demonstrates how a dry run can show what actions would normally be performed against the bobcat.
 
 ```bash
 $ bobcat --dry-run reboot
