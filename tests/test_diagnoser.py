@@ -69,7 +69,7 @@ class TestBobcatDiagnoser(unittest.TestCase):
 
     # def test_check_rpc_to_miner_failed_error(self):
     #     pass
-    
+
     def test_is_not_synced(self):
         d = BobcatDiagnoser()
         d._logger = MagicMock()
@@ -180,7 +180,7 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.hottest_temp = -4
         self.assertTrue(d.is_temperature_dangerous())
         mock_logger.assert_has_calls([call.error("Temperature Status: Cold (-5°C) ❄️")])
-  
+
     def test_is_temperature_good(self):
         mock_logger = MagicMock()
         d = BobcatDiagnoser()
