@@ -36,6 +36,7 @@ class BobcatDiagnoser:
     @property
     def known_issues(self):
         return [
+            # recoverable failures are checked first
             BobcatIssue(
                 name="Down or Error Status",
                 check=self.check_down_or_error,
@@ -337,6 +338,7 @@ class BobcatDiagnoser:
             #     ],
             #     troubleshooting_guide="https://bobcatminer.zendesk.com/hc/en-us/articles/4413692565659-Common-Error-Logs-in-Miner-5s-",
             # ),
+            # then status checked after
             BobcatIssue(
                 name="Not Synced Issue",
                 check=self.is_not_synced,

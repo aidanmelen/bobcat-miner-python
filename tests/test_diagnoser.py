@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, patch, call, mock_open
 
 import unittest
 
@@ -34,41 +34,41 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.status = "Synced"
         self.assertFalse(d.check_height_api_error())
 
-    def test_check_no_activity_issue(self):
-        pass
+    # def test_check_no_activity_issue(self):
+    #     pass
 
-    def test_check_no_witness_issue(self):
-        pass
+    # def test_check_no_witness_issue(self):
+    #     pass
 
-    def test_check_block_checksum_mismatch_error(self):
-        pass
+    # def test_check_block_checksum_mismatch_error(self):
+    #     pass
 
-    def test_check_compression_method_or_corrupted_error(self):
-        pass
+    # def test_check_compression_method_or_corrupted_error(self):
+    #     pass
 
-    def test_check_too_many_lookup_attempts_error(self):
-        pass
+    # def test_check_too_many_lookup_attempts_error(self):
+    #     pass
 
-    def test_check_oboarding_dewi_org_nxdomain_error(self):
-        pass
+    # def test_check_oboarding_dewi_org_nxdomain_error(self):
+    #     pass
 
-    def test_check_failed_to_start_child_error(self):
-        pass
+    # def test_check_failed_to_start_child_error(self):
+    #     pass
 
-    def test_check_not_a_dets_file_error(self):
-        pass
+    # def test_check_not_a_dets_file_error(self):
+    #     pass
 
-    def test_check_snapshots_helium_wtf_error(self):
-        pass
+    # def test_check_snapshots_helium_wtf_error(self):
+    #     pass
 
-    def test_check_snapshot_download_or_loading_failed_error(self):
-        pass
+    # def test_check_snapshot_download_or_loading_failed_error(self):
+    #     pass
 
-    def test_check_no_plausible_blocks_in_batch_error(self):
-        pass
+    # def test_check_no_plausible_blocks_in_batch_error(self):
+    #     pass
 
-    def test_check_rpc_to_miner_failed_error(self):
-        pass
+    # def test_check_rpc_to_miner_failed_error(self):
+    #     pass
 
     def test_is_not_synced(self):
         d = BobcatDiagnoser()
@@ -179,12 +179,7 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.coldest_temp = -5
         d.hottest_temp = -4
         self.assertTrue(d.is_temperature_dangerous())
-        mock_logger.assert_has_calls(
-            [
-                call.error("Temperature Status: Cold (-5°C) ❄️"),
-            ],
-            any_order=False,
-        )
+        mock_logger.assert_has_calls([call.error("Temperature Status: Cold (-5°C) ❄️")])
 
     def test_is_temperature_good(self):
         mock_logger = MagicMock()
@@ -193,12 +188,7 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.coldest_temp = 30
         d.hottest_temp = 32
         self.assertFalse(d.is_temperature_dangerous())
-        mock_logger.assert_has_calls(
-            [
-                call.info("Temperature Status: Good (32°C) ☀️"),
-            ],
-            any_order=False,
-        )
+        mock_logger.assert_has_calls([call.info("Temperature Status: Good (32°C) ☀️")])
 
     def test_is_temperature_warm(self):
         mock_logger = MagicMock()
@@ -207,12 +197,7 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.coldest_temp = 67
         d.hottest_temp = 68
         self.assertTrue(d.is_temperature_dangerous())
-        mock_logger.assert_has_calls(
-            [
-                call.warning("Temperature Status: Warm (68°C) 🔥"),
-            ],
-            any_order=False,
-        )
+        mock_logger.assert_has_calls([call.warning("Temperature Status: Warm (68°C) 🔥")])
 
     def test_is_temperature_hot(self):
         mock_logger = MagicMock()
@@ -221,12 +206,39 @@ class TestBobcatDiagnoser(unittest.TestCase):
         d.coldest_temp = 79
         d.hottest_temp = 80
         self.assertTrue(d.is_temperature_dangerous())
-        mock_logger.assert_has_calls(
-            [
-                call.error("Temperature Status: Hot (80°C) 🌋"),
-            ],
-            any_order=False,
-        )
+        mock_logger.assert_has_calls([call.error("Temperature Status: Hot (80°C) 🌋")])
+
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.isfile", return_value=True)
+    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.76"}')
+    @patch("json.dump")
+    def test_ota_version_changed(
+        self, mock_json_dump, mock_open, mock_os_path_isfile, mock_os_path_exists
+    ):
+        mock_logger = MagicMock()
+        d = BobcatDiagnoser()
+        d._logger = mock_logger
+        d._state_file = "/etc/bobcat/autopilot.json"
+        d.ota_version = "1.0.2.77"
+        self.assertTrue(d.did_ota_version_change())
+        mock_logger.assert_has_calls([call.warning(f"New OTA Version: {d.ota_version}")])
+        mock_json_dump.called_once_with({"ota_version": "1.0.2.77"}, mock_open)
+
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.isfile", return_value=True)
+    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.77"}')
+    @patch("json.dump")
+    def test_ota_version_not_changed(
+        self, mock_json_dump, mock_open, mock_os_path_isfile, mock_os_path_exists
+    ):
+        mock_logger = MagicMock()
+        d = BobcatDiagnoser()
+        d._logger = mock_logger
+        d._state_file = "/etc/bobcat/autopilot.json"
+        d.ota_version = "1.0.2.77"
+        self.assertFalse(d.did_ota_version_change())
+        self.assertFalse(mock_logger.called)
+        mock_json_dump.called_once_with({"ota_version": "1.0.2.77"}, mock_open)
 
 
 if __name__ == "__main__":
