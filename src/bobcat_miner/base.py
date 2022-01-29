@@ -17,6 +17,7 @@ class BobcatBase:
         self._log_file = kwargs.pop("log_file", None)
         self._state_file = kwargs.pop("state_file", None)
         self._dry_run = kwargs.pop("dry_run", None)
+        self._verbose = kwargs.pop("verbose", False)
         self._trace = kwargs.pop("trace", False)
         self._networks = kwargs.pop("networks", ["192.168.0.0/24", "10.0.0.0/24"])
         self._ensure_hostname = kwargs.pop("ensure_hostname", True)

@@ -105,13 +105,13 @@ LOG_LEVEL_EMOJI = {
 class BobcatLogFileFormatter(logging.Formatter):
     """A class for formatting logs in the file."""
 
-    FORMAT = "%(asctime)s %(name)s %(levelname)s %(msg)s%(trace)s"
+    FORMAT = "%(asctime)s %(name)s %(levelname)s %(msg)s%(description)s"
 
     def format(self, record: LogRecord):
-        """Format log records with trace attribute"""
+        """Format log records with description attribute"""
 
-        if not hasattr(record, "trace"):
-            record.trace = ""
+        if not hasattr(record, "description"):
+            record.description = ""
 
         formatter = logging.Formatter(self.FORMAT)
         return formatter.format(record)
@@ -121,7 +121,7 @@ class BobcatLogFileFormatter(logging.Formatter):
 class BobcatLogConsoleFormatter(logging.Formatter):
     """A class for formatting colored logs in the console."""
 
-    FORMAT = "%(prefix)s%(emoji)s%(emoji_separator)s%(msg)s%(suffix)s%(trace)s"
+    FORMAT = "%(prefix)s%(emoji)s%(emoji_separator)s%(msg)s%(suffix)s%(description)s"
 
     LOG_LEVEL_COLOR = {
         "DEBUG": {"prefix": "", "suffix": ""},
@@ -148,8 +148,8 @@ class BobcatLogConsoleFormatter(logging.Formatter):
         if not hasattr(record, "suffix"):
             record.suffix = self.LOG_LEVEL_COLOR.get(record.levelname.upper()).get("suffix")
 
-        if not hasattr(record, "trace"):
-            record.trace = ""
+        if not hasattr(record, "description"):
+            record.description = ""
 
         formatter = logging.Formatter(self.FORMAT)
         return formatter.format(record)
@@ -187,7 +187,7 @@ class BobcatEmbedMessageCreator(EmbedMessageCreator):
         Returns:
                 str: The string to set the description to.
         """
-        if hasattr(record, "trace"):
-            if record.trace:
-                return f"```{record.trace}```"
+        if hasattr(record, "description"):
+            if record.description:
+                return f"{record.description}"
         return ""

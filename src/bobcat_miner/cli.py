@@ -58,12 +58,20 @@ except:
     help="Dry run where actions are skipped and wait times are 1 second long.",
 )
 @click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    envvar="BOBCAT_VERBOSE",
+    show_envvar=True,
+    help="Verbosely log Bobcat Checks.",
+)
+@click.option(
     "--trace",
     "-t",
     is_flag=True,
     envvar="BOBCAT_TRACE",
     show_envvar=True,
-    help="Verbosely log Bobcat endpoint data when it is refreshed.",
+    help="Trace and log Bobcat endpoint data when it is refreshed.",
 )
 @click.option(
     "--log-file",

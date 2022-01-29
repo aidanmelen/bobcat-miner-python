@@ -23,16 +23,17 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_status(self) -> BobcatAPI:
         """Refresh Bobcat status data."""
-        self._logger.debug("Refresh: Status Data")
         self._status_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/status.json"
         ).json()
 
         if self._trace:
             self._logger.debug(
-                "Trace: Status Data",
-                extra={"trace": f"\n{json.dumps(self._status_data, indent=4)}"},
+                "Refresh: Status Data",
+                extra={"description": f"\n```{json.dumps(self._status_data, indent=4)}```"},
             )
+        else:
+            self._logger.debug("Refresh: Status Data")
 
         if self._status_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -41,16 +42,17 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_miner(self) -> BobcatAPI:
         """Refresh Bobcat miner data."""
-        self._logger.debug("Refresh: Miner Data")
         self._miner_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/miner.json"
         ).json()
 
         if self._trace:
             self._logger.debug(
-                "Trace: Miner Data",
-                extra={"trace": f"\n{json.dumps(self._miner_data, indent=4)}"},
+                "Refresh: Miner Data",
+                extra={"description": f"{json.dumps(self._miner_data, indent=4)}"},
             )
+        else:
+            self._logger.debug("Refresh: Miner Data")
 
         if self._miner_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -59,7 +61,6 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_speed(self) -> BobcatAPI:
         """Refresh Bobcat network speed data."""
-        self._logger.debug("Refresh: Network Speed Data")
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self._speed_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/speed.json"
@@ -67,9 +68,11 @@ class BobcatAPI(BobcatConnection):
 
         if self._trace:
             self._logger.debug(
-                "Trace: Network Speed Data",
-                extra={"trace": f"\n{json.dumps(self._speed_data, indent=4)}"},
+                "Refresh: Network Speed Data",
+                extra={"description": f"\n```{json.dumps(self._speed_data, indent=4)}```"},
             )
+        else:
+            self._logger.debug("Refresh: Network Speed Data")
 
         if (self._speed_data == {"message": "rate limit exceeded"}) or (
             self._speed_data
@@ -85,16 +88,17 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_temp(self) -> BobcatAPI:
         """Refresh Bobcat temperature data."""
-        self._logger.debug("Refresh: Temperature Data")
         self._temp_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/temp.json"
         ).json()
 
         if self._trace:
             self._logger.debug(
-                "Trace: Temperature Data",
-                extra={"trace": f"\n{json.dumps(self._temp_data, indent=4)}"},
+                "Refresh: Temperature Data",
+                extra={"description": f"\n```{json.dumps(self._temp_data, indent=4)}```"},
             )
+        else:
+            self._logger.debug("Refresh: Temperature Data")
 
         if self._temp_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -103,16 +107,17 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_dig(self) -> BobcatAPI:
         """Refresh Bobcat DNS data."""
-        self._logger.debug("Refresh: DNS Data")
         self._dig_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/dig.json"
         ).json()
 
         if self._trace:
             self._logger.debug(
-                "Trace: DNS Data",
-                extra={"trace": f"\n{json.dumps(self._dig_data, indent=4)}"},
+                "Refresh: DNS Data",
+                extra={"description": f"\n```{json.dumps(self._dig_data, indent=4)}```"},
             )
+        else:
+            self._logger.debug("Refresh: DNS Data")
 
         if self._dig_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
