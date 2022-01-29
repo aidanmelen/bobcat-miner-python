@@ -8,7 +8,7 @@ DISABLED = 100
 
 
 class TestBobcatConnection(unittest.TestCase):
-    """Test BobcatAPI."""
+    """Test BobcatConnection."""
 
     def setUp(self):
         self.mock_hostname = "192.168.0.10"

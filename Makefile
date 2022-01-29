@@ -38,6 +38,14 @@ tests-py3.10: ## Run the unittests on python3.10
 	docker build . --build-arg PYTHON_VERSION=3.10 -t $(NAME)-3.10
 	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
 
+quick-tests: ## Run the unittests on python3.10
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.8
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.9
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
+
+quick-test: ## Run the unittests on python3.10
+	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
+
 tests: tests-py3.8 tests-py3.9 tests-py3.10	## Run the unittests
 
 lint: ## Run the linter
