@@ -50,7 +50,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
         """Resync the Bobcat and wait."""
         self._logger.debug(self.refresh_status())
 
-        if not self.gap or isinstance(self.gap, str):
+        if not self.gap or isinstance(self.gap, int):
             self._logger.error(
                 f"Cancelling the Resync. Unable to read the blockchain gap ({self.gap})"
             )
@@ -65,7 +65,7 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
 
     def managed_fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
-        if not self.gap or isinstance(self.gap, str):
+        if not self.gap or isinstance(self.gap, int):
             self._logger.error(
                 f"Cancelling the Fastsync. Unable to read the blockchain gap ({self.gap})"
             )

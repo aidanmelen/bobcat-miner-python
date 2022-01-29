@@ -479,14 +479,15 @@ class BobcatDiagnoser:
     #     # NotImplemented
     #     return False
 
-    def is_offline(self):
-        """Check Online Status."""
-        if is_offline := self.state.upper() != "RUNNING":
-            self._logger.error("Online Status: Offline")
-        else:
-            self._logger.info("Online Status: Online ✨")
+    # TODO get online status from helium API AKA https://api.helium.io/v1/hotspots/${HELIUM_ADDRESS}
+    # def is_offline(self):
+    #     """Check Online Status."""
+    #     if is_offline := self.state.upper() != "RUNNING":
+    #         self._logger.error("Online Status: Offline")
+    #     else:
+    #         self._logger.info("Online Status: Online ✨")
 
-        return is_offline
+    #     return is_offline
 
     def is_not_synced(self):
         """Check Sync Status."""
@@ -516,7 +517,7 @@ class BobcatDiagnoser:
         else:
             self._logger.info("Relay Status: Not Relayed ✨")
 
-        return True  # is_relayed # TODO undo
+        return is_relayed
 
     def is_network_speed_slow(self):
         """Check Network Speed Status."""
@@ -524,35 +525,40 @@ class BobcatDiagnoser:
         upload_speed = int(self.upload_speed.strip(" Mbit/s"))
         latency = float(self.latency.strip("ms"))
 
-        if is_download_speed_slow := download_speed < 5:
+        if is_download_speed_slow := download_speed <= 5:
             self._logger.warning(f"Network Status: Download Slow ({self.download_speed})")
 
-        elif is_upload_speed_slow := upload_speed < 5:
+        if is_upload_speed_slow := upload_speed <= 5:
             self._logger.warning(f"Network Status: Upload Slow ({self.upload_speed})")
 
-        elif is_latency_high := latency > 100.0:
+        if is_latency_high := latency > 100.0:
             self._logger.warning(f"Network Status: Latency High ({self.latency})")
 
-        else:
+        is_network_speed_slow = any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
+
+        if not is_network_speed_slow:
             self._logger.info(f"Network Status: Good 📶")
 
-        return any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
+        return is_network_speed_slow
 
     def is_temperature_dangerous(self):
         """Check Temperature Status."""
-        if is_too_cold := self.coldest_temp < 0:
-            self._logger.error(f"Temperature Status: Cold ({self.hottest_temp}°C) ❄️")
 
-        elif is_getting_hot := self.hottest_temp >= 65 and self.hottest_temp < 70:
+        if is_too_cold := self.coldest_temp < 0:
+            self._logger.error(f"Temperature Status: Cold ({self.coldest_temp}°C) ❄️")
+
+        if is_getting_hot := self.hottest_temp >= 65 and self.hottest_temp < 70:
             self._logger.warning(f"Temperature Status: Warm ({self.hottest_temp}°C) 🔥")
 
-        elif is_too_hot := self.hottest_temp >= 70 or self.hottest_temp >= 70:
+        if is_too_hot := self.hottest_temp >= 70 or self.hottest_temp >= 70:
             self._logger.error(f"Temperature Status: Hot ({self.hottest_temp}°C) 🌋")
 
-        else:
+        is_temperature_dangerous = is_too_cold or (is_getting_hot or is_too_hot)
+
+        if not is_temperature_dangerous:
             self._logger.info(f"Temperature Status: Good ({self.hottest_temp}°C) ☀️")
 
-        return is_too_cold and (is_hot_warning or is_hot_error)
+        return is_temperature_dangerous
 
     def did_ota_version_change(self):
         """Check for OTA version change."""
