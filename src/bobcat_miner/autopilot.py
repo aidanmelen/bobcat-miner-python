@@ -1,33 +1,52 @@
-from dataclasses import dataclass
 from filelock import Timeout, FileLock
 
 import os
 import requests
-import time
 
 try:
-    from bobcat import Bobcat
+    from diagnoser import *
 except:
-    from .bobcat import Bobcat
-try:
-    from diagnoser import BobcatDiagnoser
-except:
-    from .diagnoser import BobcatDiagnoser
-try:
-    from errors import BobcatConnectionError
-except:
-    from .errors import BobcatConnectionError
+    from .diagnoser import *
 try:
     from constants import *
 except:
     from .constants import *
+try:
+    from errors import BobcatConnectionError
+except:
+    from .errors import BobcatConnectionError
 
 
-class BobcatAutopilot(Bobcat, BobcatDiagnoser):
+class BobcatAutopilot(Bobcat):
     """A class for the Bobcat Autopilot automation."""
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+    @property
+    def checks(self):
+        return (
+            # OnlineStatusCheck(self),
+            RelayStatusCheck(self),
+            SyncStatusCheck(self),
+            NetworkStatusCheck(self),
+            TemperatureStatusCheck(self),
+            OTAVersionStatusCheck(self),
+            DownOrErrorCheck(self),
+            HeightAPIErrorCheck(self),
+            # NoActivityCheck(self),
+            # NoWitnessesCheck(self),
+            # BlockChecksumMismatchErrorCheck(self),
+            # CompressionMethodorCorruptedErrorCheck(self),
+            # TooManyLookupAttemptsErrorCheck(self),
+            # OnboardingDewiOrgNxdomainErrorCheck(self),
+            # FailedToStartChildErrorCheck(self),
+            # NotADetsFileErrorCheck(self),
+            # SnapshotsHeliumWTFErrorCheck(self),
+            # SnapshotDownloadOrLoadingFailedErrorCheck(self),
+            # NoPlausibleBlocksInBatchErrorCheck(self),
+            # RPCFailedCheck(self),
+        )
 
     def managed_reboot(self) -> None:
         """Reboot the Bobcat and wait."""
@@ -157,16 +176,15 @@ class BobcatAutopilot(Bobcat, BobcatDiagnoser):
             with lock:
                 self._logger.debug(f"Lock Acquired: {self._lock_file}")
 
-                # run diagnoser checks for known issues
-                for issue in self.known_issues:
+                # run diagnoser checks
+                for check in self.checks:
 
-                    self._logger.debug(f"Checking: {issue.name}")
+                    self._logger.debug(f"Checking: {check.name}")
 
-                    check_failed = issue.check()
-                    if check_failed:
+                    if check.check():
 
                         # run the autopilot repair steps
-                        for step in issue.autopilot_repair_steps:
+                        for step in check.autopilot_repair_steps:
                             func, args, kwargs = (
                                 step["func"],
                                 step.get("args", []),

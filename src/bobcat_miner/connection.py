@@ -39,7 +39,7 @@ class BobcatConnection(BobcatBase):
         else:
             if not self._hostname:
                 raise BobcatConnectionError(
-                    f"Cannot connect to Bobcat hostname was not set and ensure_hostname is False."
+                    f"Cannot connect to Bobcat because hostname was not set and ensure_hostname is False."
                 )
 
     def can_connect(self, port=80, timeout=3) -> bool:
@@ -101,14 +101,15 @@ class BobcatConnection(BobcatBase):
         # The host is not the bobcat if the animal name does not match
         if self._animal:
             try:
-                self._logger.debug("Refresh: Miner Data")
                 self._miner_data = self.__get("http://" + host + "/miner.json").json()
 
                 if self._trace:
                     self._logger.debug(
-                        "Trace: Miner Data",
-                        extra={"trace": f"\n{json.dumps(self._miner_data, indent=4)}"},
+                        "Refresh: Miner Data",
+                        extra={"description": f"\n{json.dumps(self._miner_data, indent=4)}"},
                     )
+                else:
+                    self._logger.debug("Refresh: Miner Data")
 
                 bobcat_animal = self._miner_data.get("animal")
 

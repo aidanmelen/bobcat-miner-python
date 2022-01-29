@@ -1,7 +1,7 @@
 """Bobcat Miner"""
 
 from .autopilot import BobcatAutopilot
-from .diagnoser import BobcatDiagnoser
+from .diagnoser import *
 from .bobcat import Bobcat
 from .api import BobcatAPI
 from .connection import BobcatConnection
@@ -11,7 +11,6 @@ from .errors import BobcatConnectionError
 
 __all__ = (
     "BobcatAutopilot",
-    "BobcatDiagnoser",
     "Bobcat",
     "BobcatAPI",
     "BobcatConnection",
