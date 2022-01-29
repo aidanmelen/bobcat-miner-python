@@ -62,7 +62,8 @@ Finally schedule Bobcat Autopilot with Cron
 crontab -l > mycron 2>/dev/null
 
 # append the bobcat autopilot command to the crontab
-echo "0 * * * * . /home/pi/.bobcat-profile; /home/pi/.local/bin/bobcat autopilot &> /dev/null" >> mycron
+# this will run 4 times a day: at minute 0 past hour 0, 6, 12, and 18.
+echo "0 0,6,12,18 * * * . /home/pi/.bobcat-profile; /home/pi/.local/bin/bobcat autopilot &> /dev/null" >> mycron
 
 # install new cron file
 crontab mycron
