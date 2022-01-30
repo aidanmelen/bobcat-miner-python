@@ -31,7 +31,7 @@ class TestBobcatConnection(unittest.TestCase):
     def test_can_connect(self, mock_socket_connect):
         self.assertTrue(self.bobcat_conn.can_connect())
         mock_socket_connect.assert_called_once_with((self.mock_hostname, 80))
-    
+
     # @patch('aiohttp.ClientSession', return_value=AsyncMock())
     # def test_is_bobcat(self, mock_session):
 
