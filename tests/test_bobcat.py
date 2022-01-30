@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import unittest
 
@@ -13,9 +13,10 @@ DISABLED = 100
 class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
+    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
     @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
-    def setUp(self, mock_requests_get):
-        self.bobcat = Bobcat(hostname="192.168.0.10", ensure_hostname=False, log_level=DISABLED)
+    def setUp(self, mock_requests_get, mock_bobcat_conn_is_bobcat):
+        self.bobcat = Bobcat(hostname="192.168.0.10", log_level=DISABLED)
         self.bobcat.refresh()
 
     def test_status(self):
