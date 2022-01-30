@@ -75,7 +75,7 @@ class BobcatAutopilot(Bobcat):
             )
             return
 
-        self.resync()
+        self._logger.debug(self.resync())
 
         if not self._dry_run:
             self.wait(FIVE_MINUTES)

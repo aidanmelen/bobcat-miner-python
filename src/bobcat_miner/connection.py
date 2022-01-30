@@ -31,16 +31,10 @@ class BobcatConnection(BobcatBase):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        if self._ensure_hostname:
-            if self._hostname:
-                _ = asyncio.run(self.is_a_bobcat(self._hostname))
-            else:
-                self._hostname = self.search()
+        if self._hostname:
+            _ = asyncio.run(self.is_a_bobcat(self._hostname))
         else:
-            if not self._hostname:
-                raise BobcatConnectionError(
-                    f"Cannot connect to Bobcat because hostname was not set and ensure_hostname is False."
-                )
+            self._hostname = self.search()
 
     def can_connect(self, port=80, timeout=3) -> bool:
         """Verify network connectivity.

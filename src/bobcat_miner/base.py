@@ -20,7 +20,6 @@ class BobcatBase:
         self._verbose = kwargs.pop("verbose", False)
         self._trace = kwargs.pop("trace", False)
         self._networks = kwargs.pop("networks", ["192.168.0.0/24", "10.0.0.0/24"])
-        self._ensure_hostname = kwargs.pop("ensure_hostname", True)
 
         self.__discord_webhook_url = kwargs.pop("discord_webhook_url", None)
         self.__log_level = kwargs.pop("log_level", "DEBUG")
