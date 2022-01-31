@@ -288,7 +288,7 @@ class OTAVersionStatusCheck(BobcatCheck):
         )
 
     def check(self) -> bool:
-        if not os.path.exists(os.path.dirname(self.autopilot._state_file)):
+        if not os.path.exists(os.path.abspath(os.path.dirname(self.autopilot._state_file))):
             os.makedirs(os.path.dirname(self.autopilot._state_file))
 
         if not os.path.isfile(self.autopilot._state_file):
