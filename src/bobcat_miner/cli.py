@@ -146,7 +146,7 @@ except:
     "--state-file",
     "-s",
     required=False,
-    default=".autopilot.json",
+    default=".bobcat.json",
     show_default=True,
     type=click.Path(writable=True),
     envvar="BOBCAT_STATE_FILE",

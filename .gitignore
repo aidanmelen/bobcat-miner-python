@@ -131,7 +131,9 @@ dmypy.json
 
 # Bobcat
 .env
-bobcat-autopilot.log
+*bobcat*.lock
+*bobcat*.json
+*bobcat*.log
 scratch*.py
 
 

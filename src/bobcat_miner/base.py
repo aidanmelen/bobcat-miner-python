@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import os
+
 try:
     from logger import BobcatLogger
 except:
@@ -15,7 +18,7 @@ class BobcatBase:
         self._animal = kwargs.pop("animal", None)
         self._lock_file = kwargs.pop("lock_file", ".bobcat.lock")
         self._log_file = kwargs.pop("log_file", None)
-        self._state_file = kwargs.pop("state_file", None)
+        self._state_file = kwargs.pop("state_file", ".bobcat.json")
         self._dry_run = kwargs.pop("dry_run", None)
         self._verbose = kwargs.pop("verbose", False)
         self._trace = kwargs.pop("trace", False)

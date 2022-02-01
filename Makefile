@@ -1,4 +1,5 @@
 NAME = bobcat-miner-python
+VERSION = $(shell poetry version -s)
 
 SHELL := /bin/bash
 
@@ -9,49 +10,50 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-all: lint tests run
+all: build-all lint tests run
 
-build: ## Build the container
-	docker build . -t $(NAME)
+build: ## Build
+	docker build . -t bobcat
+	docker build . -t $(NAME)-test --target test
+	docker-compose build
 
-dev: ## Get python interepter in the container
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-dev.sh --env-file .env $(NAME)
+up: ## Spin up local dev stack
+	docker-compose up -d --remove-orphans
 
-run: ## Run the container
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME)
+dev: up ## Build and run dev container
+	docker-compose exec $(NAME)-dev poetry run /bin/bash
 
-bobcat-ping: ## Run the bobcat-autopilot
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME) ping
+dev-fancy-awesome-bobcat: up ## Build and run dev container
+	docker-compose exec fancy-awesome-bobcat /bin/bash
 
-bobcat-autopilot: ## Run the bobcat-autopilot
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --env-file .env $(NAME) autopilot
+down: ## Spin down local dev stack
+	docker-compose down
 
-tests-py3.8: ## Run the unittests on python3.8
-	docker build . --build-arg PYTHON_VERSION=3.8 -t $(NAME)-3.8
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.8
+lint: ## Lint with black
+	docker run --rm --volume "$$(pwd)":/src --workdir /src pyfound/black:latest_release black --line-length 100 . 
 
-tests-py3.9: ## Run the unittests on python3.9
-	docker build . --build-arg PYTHON_VERSION=3.9 -t $(NAME)-3.9
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.9
+test: ## Build and run dev container
+	docker run --rm -it -v "$$(pwd)":/app $(NAME)-test
 
-tests-py3.10: ## Run the unittests on python3.10
-	docker build . --build-arg PYTHON_VERSION=3.10 -t $(NAME)-3.10
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
+tests: lint test ## Lint and Test
 
-quick-tests: ## Run the unittests on python3.10
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.8
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.9
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
+run: ## Run the 'bobcat autopilot' in a container
+	docker run --rm -it -v "$$(pwd)":/app --env-file .env bobcat autopilot
 
-quick-test: ## Run the unittests on python3.10
-	docker run --rm -it -v "$$(pwd)":/bobcat_miner_python --entrypoint=/bobcat_miner_python/entrypoint-tests.sh $(NAME)-3.10
+# lint: ## Run the linter
+# 	black --line-length 100 .
 
-tests: tests-py3.8 tests-py3.9 tests-py3.10	## Run the unittests
+# test: ## Run the unittests
+# 	docker run -v "$$(pwd)":/app --rm -it $(NAME)-dev python -m unittest discover -s tests -v
 
-lint: ## Run the linter
-	black --line-length 100 .
+release: all  ## Push tags and trigger Github Actions release.
+	git tag $(VERSION)
+	git push --tags
 
-release: ## publish pypi and dockerhub
-	poetry build
-	poetry publish
-	docker push $(NAME)-3.10 aidanmelen/bobcat:latest
+clean: ## Remove Python cache files.
+	@rm -rf build dist .eggs *.egg-info .venv requirements.txt
+	@rm -rf .benchmarks .coverage coverage.xml htmlcov report.xml .tox
+	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
+	@find . -type d -name '__pycache__' -exec rm -rf {} +
+	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
+	@find . -type f -name "*.py[co]" -exec rm -rf {} +
