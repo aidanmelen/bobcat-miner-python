@@ -220,7 +220,7 @@ Please see the [docker-compose.yml](https://raw.githubusercontent.com/aidanmelen
 Run unittests
 
 ```bash
-docker build . -t $(NAME)-test --target test
+docker build . -t bobcat-miner-python-test --target test
 docker run --rm -it -v $(pwd):/app bobcat-miner-python-test
 ```
 
@@ -235,9 +235,11 @@ docker run --rm --volume $(pwd):/src --workdir /src pyfound/black:latest_release
 Read the version from `poetry`, tag, and push.
 
 ```bash
-VERSION = $(shell poetry version -s)
-git tag $(VERSION)
-git push --tags
+$ git checkout main
+$ git pull
+
+$ git tag $(poetry version -s)
+$ git push --tags
 ```
 
 This will trigger the [Release Github Action](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml).
