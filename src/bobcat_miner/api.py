@@ -30,7 +30,7 @@ class BobcatAPI(BobcatConnection):
         if self._trace:
             self._logger.debug(
                 "Refresh: Status Data",
-                extra={"description": f"\n```{json.dumps(self._status_data, indent=4)}```"},
+                extra={"description": f"\n```\n{json.dumps(self._status_data, indent=4)}\n```"},
             )
         else:
             self._logger.debug("Refresh: Status Data")
@@ -69,7 +69,7 @@ class BobcatAPI(BobcatConnection):
         if self._trace:
             self._logger.debug(
                 "Refresh: Network Speed Data",
-                extra={"description": f"\n```{json.dumps(self._speed_data, indent=4)}```"},
+                extra={"description": f"\n```\n{json.dumps(self._speed_data, indent=4)}\n```"},
             )
         else:
             self._logger.debug("Refresh: Network Speed Data")
@@ -95,7 +95,7 @@ class BobcatAPI(BobcatConnection):
         if self._trace:
             self._logger.debug(
                 "Refresh: Temperature Data",
-                extra={"description": f"\n```{json.dumps(self._temp_data, indent=4)}```"},
+                extra={"description": f"\n```\n{json.dumps(self._temp_data, indent=4)}\n```"},
             )
         else:
             self._logger.debug("Refresh: Temperature Data")
@@ -114,7 +114,7 @@ class BobcatAPI(BobcatConnection):
         if self._trace:
             self._logger.debug(
                 "Refresh: DNS Data",
-                extra={"description": f"\n```{json.dumps(self._dig_data, indent=4)}```"},
+                extra={"description": f"\n```\n{json.dumps(self._dig_data, indent=4)}\n```"},
             )
         else:
             self._logger.debug("Refresh: DNS Data")

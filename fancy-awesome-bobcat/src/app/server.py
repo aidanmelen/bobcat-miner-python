@@ -427,8 +427,6 @@ def dig():
 @app.route("/admin/reboot", methods=["POST"])
 @basic_auth.required
 def reboot():
-    print(request.authorization["username"])
-    print(request.authorization["password"])
     subprocess.run(["/bin/bash", "/bobcat/reboot.sh"])
     return "Rebooting hotspot"
 

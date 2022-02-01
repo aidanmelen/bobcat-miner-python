@@ -193,11 +193,11 @@ class BobcatAutopilot(Bobcat):
                             func(*args, **kwargs)
 
                             # halt autopilot steps if the bobcat is healthy
-                            is_online = not self.is_offline()
-                            is_synced = not self.is_not_synced()
-                            if is_online and not is_synced:
-                                self._logger.debug("Bobcat Autopilot Repaired: {check.name}")
-                                break
+                            # is_online = not self.is_offline()
+                            # is_synced = not self.is_not_synced()
+                            # if is_online and not is_synced:
+                            #     self._logger.debug("Bobcat Autopilot Repaired: {check.name}")
+                            #     break
 
             # clean up lock file
             if os.path.exists(self._lock_file):

@@ -1,6 +1,6 @@
 services:
 
-  # fake bobcat miner
+  # fake bobcat miner service
   fancy-awesome-bobcat:
     image: fancy-awesome-bobcat
     hostname: fancy-awesome-bobcat
@@ -10,12 +10,14 @@ services:
     build:
       context: ./fancy-awesome-bobcat
       dockerfile: ./Dockerfile
+    # volumes:
+    #   - ./fancy-awesome-bobcat/src/app:/app
 
   # bobcat-miner-python command line tools
-  bobcat-miner-python:
-    image: bobcat-miner-python
-    hostname: bobcat-miner-python
-    container_name: bobcat-miner-python
+  bobcat-miner-python-dev:
+    image: bobcat-miner-python-dev
+    hostname: bobcat-miner-python-dev
+    container_name: bobcat-miner-python-dev
     environment:
       BOBCAT_HOSTNAME: "fancy-awesome-bobcat"
       BOBCAT_ANIMAL: "fancy-awesome-bobcat"
@@ -29,7 +31,10 @@ services:
       BOBCAT_LOG_LEVEL_CONSOLE: "DEBUG"
       BOBCAT_LOG_LEVEL_FILE: "DEBUG"
       BOBCAT_LOG_LEVEL_DISCORD: "DEBUG"
-    command: autopilot
-    stdin_open: true
+    entrypoint: /usr/bin/tail
+    command: "-f /dev/null"
     build:
       context: .
+      target: dev
+    volumes:
+      - .:/app

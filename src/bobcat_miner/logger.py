@@ -23,6 +23,8 @@ class BobcatLogger:
         self._logger = logging.getLogger("bobcat")
         self._logger.setLevel(log_level)
 
+        logging.getLogger("backoff").setLevel(10000)
+
         self.add_log_console_handler(log_level_console)
 
         if log_file:
@@ -81,23 +83,23 @@ class Color:
 LOG_LEVEL_EMOJI = {
     "DEBUG": {
         "emoji": "🐛",
-        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/bug.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bug.png",
     },
     "INFO": {
         "emoji": "✅",
-        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/check-mark-button.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/check-mark-button.png",
     },
     "WARNING": {
         "emoji": "⚠️",
-        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/warning.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/warning.png",
     },
     "ERROR": {
         "emoji": "❌",
-        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/cross-mark.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/cross-mark.png",
     },
     "CRITICAL": {
         "emoji": "💥",
-        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/images/collision.png",
+        "url": "https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/collision.png",
     },
 }
 

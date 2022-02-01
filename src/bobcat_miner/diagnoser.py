@@ -54,7 +54,7 @@ class BobcatCheck(ABC):
         return f"""
 **Points to:** {self.root_cause}
 
-** Why does this error happen?** 
+**Why does this error happen?** 
 {self.description}
 
 **What You Can Try:** 
@@ -91,7 +91,7 @@ class RelayStatusCheck(BobcatCheck):
         super().__init__(
             name="Relay Status",
             root_cause="Your Internet Router Settings",
-            description="The Relay status is determined by lib_p2p. Hotspot's connection is being relayed through another Hotspot on the network which may affect mining. If port 44158 is closed, opening the port should solve the relay. A Relayed hotspot may show “NAT Type Symmetric“ or  “NAT Type Restricted” in your Bobcat Diagnoser. Non Relayed hotspot shows “NAT Type None“. If it’s showing “NAT Type Unknown“, that means you need to wait until the NAT Type is found by the miner. To confirm if your hotspot is relayed, you can click the “Helium Api” menu in your Diagnoser and see if the address is p2p, your hotspot is relayed.",
+            description="The Relay status is determined by lib_p2p. Hotspot's connection is being relayed through another Hotspot on the network which may affect mining. If port 44158 is closed, opening the port should solve the relay. A Relayed hotspot may show 'NAT Type Symmetric' or  'NAT Type Restricted' in your Bobcat Diagnoser. Non Relayed hotspot shows 'NAT Type None'. If it's showing 'NAT Type Unknown', that means you need to wait until the NAT Type is found by the miner. To confirm if your hotspot is relayed, you can click the 'Helium Api' menu in your Diagnoser and see if the address is p2p, your hotspot is relayed.",
             autopilot_repair_steps=[],
             manual_repair_steps=[
                 "Set Static IP to the Device.",
@@ -99,10 +99,10 @@ class RelayStatusCheck(BobcatCheck):
             ],
             customer_support_steps=[
                 "For quickest results start by contacting your ISP technician.",
-                "If still unresolved after calling ISP tech please provide: ",
-                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc. ",
-                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN…  ",
-                "Provide the following screenshots: ",
+                "If still unresolved after calling ISP tech please provide:",
+                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc.",
+                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN...",
+                "Provide the following screenshots:",
                 "Router's port forward settings",
                 "Router's UPnP settings, if available",
                 "Router's Firewall Settings",
@@ -155,8 +155,8 @@ class SyncStatusCheck(BobcatCheck):
                 "Reset then fast sync, allow at least 24 hours after fully syncing before reassessing.",
             ],
             customer_support_steps=[
-                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic…",
-                "Provide more details about your Network set up; are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6…?",
+                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic...",
+                "Provide more details about your Network set up; are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6...?",
             ],
             troubleshooting_guides=[
                 "https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
@@ -452,8 +452,8 @@ class NoWitnessesCheck(BobcatCheck):
             customer_support_steps=[
                 "Confirm you have adjusted your firewall settings. If you have configured pass packet rules in your internet router, please indicate if you have confirmed that these were done correctly.",
                 "Describe where exactly your antenna is located. Is it inside/outside, on the roof, in a window, on a pole, under a tree, near a building, near a hill? Please be specific.",
-                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic…",
-                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6…",
+                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic...",
+                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6...",
             ],
             troubleshooting_guides=[
                 "https://bobcatminer.zendesk.com/hc/en-us/articles/4413692547355-No-Witness-"
@@ -470,7 +470,7 @@ class BlockChecksumMismatchErrorCheck(BobcatCheck):
         super().__init__(
             name="Block Checksum Mismatch Error",
             root_cause="EMMC / Memory issue",
-            description="This error is related to the EMMC (Embedded MultiMediaCard) in your miner. This is a blockchain error you can potentially snapshot past. This is NOT related to your RAM size.  ",
+            description="This error is related to the EMMC (Embedded MultiMediaCard) in your miner. This is a blockchain error you can potentially snapshot past. This is NOT related to your RAM size. ",
             autopilot_repair_steps=[
                 {"func": self.autopilot.managed_reset},
                 {"func": self.autopilot.managed_fastsync},
@@ -554,7 +554,7 @@ class OnboardingDewiOrgNxdomainErrorCheck(BobcatCheck):
         super().__init__(
             name="Onboarding Dewi Org Nxdomain Error",
             root_cause="DNS server settings",
-            description="This error occurs when your DNS server cannot find the correct nameserver. Normally, the Bobcat will automatically add the appropriate nameserver for you.  ",
+            description="This error occurs when your DNS server cannot find the correct nameserver. Normally, the Bobcat will automatically add the appropriate nameserver for you. ",
             autopilot_repair_steps=[],
             manual_repair_steps=[
                 "If this error continues to appear and your miner is not behaving as expected you can try setting your DNS server to 8.8.8.8.",
@@ -581,7 +581,7 @@ class FailedToStartChildErrorCheck(BobcatCheck):
         super().__init__(
             name="Failed To Start Child Error",
             root_cause="Faulty ECC chip",
-            description="This usually means that there is either a ECC chip fault or it's a firmware issue. ",
+            description="This usually means that there is either a ECC chip fault or it's a firmware issue.",
             autopilot_repair_steps=[
                 {"func": self.autopilot.managed_reset},
                 {"func": self.autopilot.managed_fastsync},

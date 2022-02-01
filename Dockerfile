@@ -1,14 +1,31 @@
 ARG PYTHON_VERSION=3.10
-FROM python:${PYTHON_VERSION}-slim
+ARG POETRY_VERSION=1.1.4
 
-RUN pip install poetry
-
-COPY . /bobcat_miner_python
-
-WORKDIR bobcat_miner_python
-
-RUN poetry install --no-interaction --no-ansi 
-
+FROM python:${PYTHON_VERSION} as base
+RUN apt-get update && apt-get install -y curl jq vim.tiny \
+ && ln -s /usr/bin/vim.tiny /usr/bin/vim
+RUN pip install --upgrade pip \
+ && pip install poetry${POETRY_VERSION+==$POETRY_VERSION}
+WORKDIR /app
+COPY pyproject.toml *poetry.lock .
+RUN poetry install --no-interaction --no-ansi --no-root
 RUN mkdir /var/log/bobcat && mkdir /etc/bobcat
+ENTRYPOINT ["poetry", "run", "bash"]
 
-ENTRYPOINT ["poetry", "run", "bobcat"]
+FROM base as dev
+COPY . .
+RUN poetry install --no-interaction --no-ansi
+
+FROM dev as test
+ENTRYPOINT ["poetry", "run"]
+CMD ["python", "-m", "unittest", "discover", "-s", "tests", "-v"]
+
+FROM test AS build
+RUN poetry build --format wheel
+
+# package up tiny release image
+FROM python:${PYTHON_VERSION}-alpine AS release
+COPY --from=build /app/dist /app/dist
+RUN mkdir /var/log/bobcat && mkdir /etc/bobcat \
+ && pip install /app/dist/*.whl
+ENTRYPOINT ["bobcat"]
