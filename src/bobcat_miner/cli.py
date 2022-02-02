@@ -168,79 +168,121 @@ def cli(*args, **kwargs) -> None:
 @cli.command()
 @click.pass_context
 def autopilot(ctx) -> None:
-    """Automatically diagnose and repair the Bobcat."""
-    ctx.obj["AUTOPILOT"].run()
+    """Automatically diagnose and repair the Bobcat miner."""
+    try:
+        ctx.obj["AUTOPILOT"].run()
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
+
+
+@cli.command()
+@click.pass_context
+def find(ctx) -> None:
+    """Search local network and find the Bobcat miner."""
+    try:
+        autopilot = ctx.obj["AUTOPILOT"]
+        autopilot.find()
+        click.echo(f"Found Bobcat: {autopilot._hostname}")
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def status(ctx) -> None:
     """Print Bobcat status data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_status()._status_data)
+    try:
+        click.echo(ctx.obj["AUTOPILOT"].refresh_status()._status_data)
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def miner(ctx) -> None:
     """Print Bobcat miner data."""
-    # miner_data is initialized in the BobcatConnection constructor during bobcat verification
-    if miner_data := ctx.obj["AUTOPILOT"]._miner_data:
-        click.echo(miner_data)
-    else:
-        click.echo(ctx.obj["AUTOPILOT"].refresh_miner()._miner_data)
+    try:
+        # miner_data is initialized in the BobcatConnection constructor during bobcat verification
+        if miner_data := ctx.obj["AUTOPILOT"]._miner_data:
+            click.echo(miner_data)
+        else:
+            click.echo(ctx.obj["AUTOPILOT"].refresh_miner()._miner_data)
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def speed(ctx) -> None:
     """Print Bobcat network speed data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_speed()._speed_data)
+    try:
+        click.echo(ctx.obj["AUTOPILOT"].refresh_speed()._speed_data)
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def temp(ctx) -> None:
     """Print Bobcat CPU tempurature data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_temp()._temp_data)
+    try:
+        click.echo(ctx.obj["AUTOPILOT"].refresh_temp()._temp_data)
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def dig(ctx) -> None:
     """Print Bobcat DNS data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_dig()._dig_data)
+    try:
+        click.echo(ctx.obj["AUTOPILOT"].refresh_dig()._dig_data)
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def reboot(ctx) -> None:
-    """Run Bobcat Reboot."""
-    if click.confirm("Do you want to reboot the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_reboot())
+    """Reboot the Bobcat."""
+    try:
+        if click.confirm("Do you want to reboot the Bobcat?"):
+            click.echo(ctx.obj["AUTOPILOT"].managed_reboot())
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def reset(ctx) -> None:
-    """Run Bobcat Reset."""
-    if click.confirm("Do you want to reset the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_reset())
+    """Reset the Bobcat."""
+    try:
+        if click.confirm("Do you want to reset the Bobcat?"):
+            click.echo(ctx.obj["AUTOPILOT"].managed_reset())
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def resync(ctx) -> None:
-    """Run Bobcat Resync."""
-    if click.confirm("Do you want to resync the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_resync())
+    """Resync the Bobcat."""
+    try:
+        if click.confirm("Do you want to resync the Bobcat?"):
+            click.echo(ctx.obj["AUTOPILOT"].managed_resync())
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 @cli.command()
 @click.pass_context
 def fastsync(ctx) -> None:
-    """Run Bobcat Fastsync."""
-    if click.confirm("Do you want to fastsync the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_fastsync())
+    """Fastsync the Bobcat."""
+    try:
+        if click.confirm("Do you want to fastsync the Bobcat?"):
+            click.echo(ctx.obj["AUTOPILOT"].managed_fastsync())
+    except Exception as err:
+        raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
 
 if __name__ == "__main__":

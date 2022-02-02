@@ -10,7 +10,8 @@ WORKDIR /app
 COPY pyproject.toml *poetry.lock .
 RUN poetry install --no-interaction --no-ansi --no-root
 RUN mkdir /var/log/bobcat && mkdir /etc/bobcat
-ENTRYPOINT ["poetry", "run", "bash"]
+ENTRYPOINT ["poetry", "run"]
+CMD ["bash"]
 
 FROM base as dev
 COPY . .

@@ -30,7 +30,7 @@ $ bobcat autopilot
 ✅ Temperature Status: Good (38°C) ☀️
 ```
 
-or run with the offical Docker container
+or run with the offical Docker image
 
 ```bash
 $ docker run --rm -it aidanmelen/bobcat autopilot
@@ -38,9 +38,35 @@ $ docker run --rm -it aidanmelen/bobcat autopilot
 
 Run `bobcat --help` to learn about the available commands and options.
 
+## Finding your Bobcat
+
+By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10.0.0.0/24` local networks to find the Bobcat miner.
+
+### Find Bobcat by Animal Name
+
+This will connect to the Bobcat on your network that matches the animal name.
+
+```bash
+$ bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 Refresh: Miner Data
+🐛 Verified Bobcat Animal: fancy-awesome-bobcat
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+```
+
+### Specify the Hostname / IP Address
+
+Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and specify it with:
+
+```bash
+$ bobcat --hostname 192.168.0.10 -C DEBUG autopilot
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+```
+
 ## Monitoring with Discord
 
-Send events to a Discord channel using a [webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+Monitor your Bobcat remotely by sending events to a Discord channel by specifying a [webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks). No need for VPN or SSH agent setup!
 
 ```bash
 $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
@@ -55,35 +81,9 @@ By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be
 <!-- <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/> -->
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
-## Finding your Bobcat
+### Dry Run
 
-### Manually Specify the Hostname / IP Address
-
-By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10.0.0.0/24` local networks and try to establish a Bobcat connection.
-
-Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and manually specify it with:
-
-```bash
-$ bobcat --hostname 192.168.0.10 -C DEBUG autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-```
-
-### Search for Bobcat by Animal Name
-
-This will connect to the Bobcat on your network that matches the animal name.
-
-```bash
-$ bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-🐛 Refresh: Miner Data
-🐛 Verified Bobcat Animal: fancy-awesome-bobcat
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-```
-
-### Bobcat Dry Run
-
-This example is admittedly contrived, but it demonstrates how a dry run can show what actions would normally be performed against the bobcat.
+This example is admittedly contrived, but it demonstrates how the `--dry-run` option can be used show what actions would normally be performed against the bobcat without actually running them.
 
 ```bash
 $ bobcat --dry-run reboot
@@ -91,158 +91,14 @@ Do you want to reboot the Bobcat? [y/N]: y
 ⚠️ Dry run is enabled: Reboot Skipped
 ```
 
-## Bobcat SDK Usage
+## Bobcat SDK
 
-```python
-import bobcat_miner
+Please see [docs/bobcat_sdk.md](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docs/bobcat_sdk.md) for more information.
 
-bobcat = bobcat_miner.Bobcat("192.168.1.10")
 
-# refresh
-bobcat.refresh_status()
-bobcat.refresh_miner()
-bobcat.refresh_speed()
-bobcat.refresh_temp()
-bobcat.refresh_dig()
-bobcat.refresh() # all endpoints
+## Contributions
 
-# properties
-bobcat.status
-bobcat.gap
-bobcat.blockchain_height
-bobcat.epoch
-bobcat.tip
-bobcat.ota_version
-bobcat.region
-bobcat.frequency_plan
-bobcat.animal
-bobcat.helium_animal
-bobcat.pubkey
-bobcat.state
-bobcat.miner_status
-bobcat.miner_height
-bobcat.miner_alert
-bobcat.miner_desc
-bobcat.names
-bobcat.image
-bobcat.created
-bobcat.p2p_status
-bobcat.ports_desc
-bobcat.ports
-bobcat.private_ip
-bobcat.public_ip
-bobcat.peerbook
-bobcat.timestamp
-bobcat.error
-bobcat.temp0
-bobcat.temp1
-bobcat.coldest_temp
-bobcat.hottest_temp
-bobcat.temp0_c
-bobcat.temp1_c
-bobcat.temp0_f
-bobcat.temp1_f
-bobcat.download_speed
-bobcat.upload_speed
-bobcat.latency
-bobcat.dig_name
-bobcat.dig_message
-bobcat.dig_dns
-bobcat.dig_records
-
-# actions
-bobcat.reboot()
-bobcat.reset()
-bobcat.resync()
-bobcat.fastsync()
-```
-
-## Development
-
-The containerized development environment can be spun up with `docker compose`.
-
-```bash
-$ docker compose up --detach
-[+] Running 3/3
- ⠿ Network bobcat-miner-python_default  Created
- ⠿ Container bobcat-miner-python-dev    Started
- ⠿ Container fancy-awesome-bobcat       Started 
-```
-
-Then get a shell in the `bobcat-miner-python-dev` container.
-
-```
-$ docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
-root@bobcat-miner-python-dev:/app#
-```
-
-This dev container is networked with the fake bobcat service call `fancy-awesome-bobcat`.
-
-```
-$ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
-🐛 Connected to Bobcat: fancy-awesome-bobcat
-🐛 Refresh: Miner Data
-🐛 Verified Bobcat Animal: fancy-awesome-bobcat
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-🐛 Lock Acquired: /etc/bobcat/autopilot.lock
-🐛 Checking: Relay Status
-✅ Relay Status: Not Relayed ✨
-🐛 Checking: Sync Status
-🐛 Refresh: Status Data
-✅ Sync Status: Synced (gap:0) ✨
-🐛 Checking: Network Status
-🐛 Refresh: Network Speed Data
-✅ Network Status: Good 📶
-🐛 Checking: Temperature Status
-🐛 Refresh: Temperature Data
-✅ Temperature Status: Good (38°C) ☀️
-🐛 Checking: OTA Version Change
-🐛 Checking: Down or Error Status
-🐛 Checking: Height API Error Status
-🐛 Lock Released: /etc/bobcat/autopilot.lock
-🐛 The Bobcat Autopilot is finished ✨ 🍰 ✨
-```
-
-and bring the development environment down.
-
-```bash
-docker compose down
-[+] Running 3/2
- ⠿ Container bobcat-miner-python-dev
- ⠿ Container fancy-awesome-bobcat
- ⠿ Network bobcat-miner-python_default  Removed 
-```
-
-Please see the [docker-compose.yml](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docker-compose.yml) for more information.
-
-## Tests
-
-Run unittests
-
-```bash
-docker build . -t bobcat-miner-python-test --target test
-docker run --rm -it -v $(pwd):/app bobcat-miner-python-test
-```
-
-and run the linter
-
-```bash
-docker run --rm --volume $(pwd):/src --workdir /src pyfound/black:latest_release black --line-length 100 .
-```
-
-## Release
-
-Read the version from `poetry`, tag, and push.
-
-```bash
-$ git checkout main
-$ git pull
-
-$ git tag $(poetry version -s)
-$ git push --tags
-```
-
-This will trigger the [Release Github Action](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml).
+Please see [docs/contributions.md](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docs/contributions.md) for more information.
 
 ## Troubleshooting
 
