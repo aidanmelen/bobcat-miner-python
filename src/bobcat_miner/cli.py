@@ -174,6 +174,7 @@ def autopilot(ctx) -> None:
     except Exception as err:
         raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
 
+
 @cli.command()
 @click.pass_context
 def find(ctx) -> None:
@@ -218,6 +219,7 @@ def speed(ctx) -> None:
         click.echo(ctx.obj["AUTOPILOT"].refresh_speed()._speed_data)
     except Exception as err:
         raise click.ClickException(f"An unexpected error has occurred: {str(err)}")
+
 
 @cli.command()
 @click.pass_context

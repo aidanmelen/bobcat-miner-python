@@ -116,7 +116,6 @@ class BobcatConnection(BobcatBase):
                 self._logger.exception(err)
                 raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
 
-
             # normalize from Helium animal name format (e.g. Fancy Awesome Bobcat) to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
             normalized_animal = (
                 str(self._animal).strip().strip("'").strip('"').lower().replace(" ", "-")
