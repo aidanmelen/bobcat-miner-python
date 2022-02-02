@@ -34,7 +34,7 @@ class BobcatConnection(BobcatBase):
         if self._hostname:
             _ = asyncio.run(self.is_a_bobcat(self._hostname))
         else:
-            self._hostname = self.search()
+            self._hostname = self.find()
 
     def can_connect(self, port=80, timeout=3) -> bool:
         """Verify network connectivity.
@@ -80,17 +80,20 @@ class BobcatConnection(BobcatBase):
             else:
                 raise BobcatConnectionError(f"Cannot connect to {host}: {err}")
 
-        soup = BeautifulSoup(html, "html.parser")
+        try:
+            soup = BeautifulSoup(html, "html.parser")
 
-        # The host is not a bobcat if it does not have a bobcat diagnoser page
-        if "Diagnoser - Bobcatminer Diagnostic Dashboard" in soup.title:
-            self._logger.debug(f"Connected to Bobcat: {host}")
+            # The host is not a bobcat if it does not have a bobcat diagnoser page
+            if "Diagnoser - Bobcatminer Diagnostic Dashboard" in soup.title:
+                self._logger.debug(f"Connected to Bobcat: {host}")
 
-        else:
-            if search_mode:
-                return False
             else:
-                raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
+                if search_mode:
+                    return False
+                else:
+                    raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
+        except Exception as err:
+            raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
 
         # The host is not the bobcat if the animal name does not match
         if self._animal:
@@ -111,33 +114,32 @@ class BobcatConnection(BobcatBase):
 
             except Exception as err:
                 self._logger.exception(err)
-                bobcat_animal = None
+                raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
 
-            finally:
 
-                # normalize from Helium animal name format (e.g. Fancy Awesome Bobcat) to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
-                normalized_animal = (
-                    str(self._animal).strip().strip("'").strip('"').lower().replace(" ", "-")
-                    if self._animal
-                    else None
-                )
+            # normalize from Helium animal name format (e.g. Fancy Awesome Bobcat) to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
+            normalized_animal = (
+                str(self._animal).strip().strip("'").strip('"').lower().replace(" ", "-")
+                if self._animal
+                else None
+            )
 
-                if normalized_animal == bobcat_animal:
-                    self._logger.debug(f"Verified Bobcat Animal: {self._animal}")
+            if normalized_animal == bobcat_animal:
+                self._logger.debug(f"Verified Bobcat Animal: {self._animal}")
 
+            else:
+                if search_mode:
+                    return False
                 else:
-                    if search_mode:
-                        return False
-                    else:
-                        raise BobcatConnectionError(
-                            f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({normalized_animal})"
-                        )
+                    raise BobcatConnectionError(
+                        f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({normalized_animal})"
+                    )
 
         # This is the bobcat we are looking for ✨ 🍰 ✨
         return host
 
-    def search(self) -> None:
-        """Search for the Bobcat in a network. In the case of multiple bobcats, the first occurrence will be returned.
+    def find(self) -> None:
+        """Find a Bobcat in a network. In the case of multiple bobcats, the first occurrence will be returned.
 
         All hosts in the network will be searched concurrently. Each host will be checked for HTTP connection, followed by a bobcat diagnoser check, and an animal name check if specified.
         """
@@ -148,7 +150,7 @@ class BobcatConnection(BobcatBase):
             f"Searching for {'(' + self._animal + ')' if self._animal else 'a bobcat'} in these networks: {', '.join(self._networks)}"
         )
 
-        async def __search(host) -> (str, None):
+        async def __find(host) -> (str, None):
             """Create concurrent futures for is_a_bobcat and process them as they complete. Return when the bobcat is found and do not wait for other futures to complete."""
 
             # create concurrent future tasks for "is_a_bobcat()"
@@ -170,7 +172,7 @@ class BobcatConnection(BobcatBase):
             hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
 
             # search for bobcat in hosts
-            if hostname := asyncio.run(__search(hosts)):
+            if hostname := asyncio.run(__find(hosts)):
                 return hostname
 
         else:

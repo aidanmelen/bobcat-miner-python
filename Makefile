@@ -3,14 +3,14 @@ VERSION = $(shell poetry version -s)
 
 SHELL := /bin/bash
 
-.PHONY: help all build dev run bobcat-autopilot tests lint
+.PHONY: help all
 
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
 
-all: build-all lint tests run
+all: build tests run
 
 build: ## Build
 	docker build . -t bobcat
@@ -38,13 +38,7 @@ test: ## Build and run dev container
 tests: lint test ## Lint and Test
 
 run: ## Run the 'bobcat autopilot' in a container
-	docker run --rm -it -v "$$(pwd)":/app --env-file .env bobcat autopilot
-
-# lint: ## Run the linter
-# 	black --line-length 100 .
-
-# test: ## Run the unittests
-# 	docker run -v "$$(pwd)":/app --rm -it $(NAME)-dev python -m unittest discover -s tests -v
+	docker run --rm -it --env-file .env bobcat autopilot
 
 release: all  ## Push tags and trigger Github Actions release.
 	git tag $(VERSION)
