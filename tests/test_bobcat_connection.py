@@ -44,9 +44,10 @@ class TestBobcatConnection(unittest.TestCase):
         b._BobcatConnection__refresh_miner()
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/miner.json")
 
-
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock())
+    @patch(
+        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
+    )
     @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
     def test_verify_should_pass(self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find):
         mock_get_homepage.return_value = "Diagnoser - Bobcatminer Diagnostic Dashboard"
@@ -55,12 +56,14 @@ class TestBobcatConnection(unittest.TestCase):
 
         mock_get_homepage.assert_awaited_with(self.mock_hostname)
         self.assertFalse(mock_does_bobcat_match_animal.called)
-        
+
         self.assertTrue(is_bobcat_verified)
         self.assertEqual(host, self.mock_hostname)
-    
+
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock())
+    @patch(
+        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
+    )
     @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
     def test_verify_should_fail(self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find):
         mock_get_homepage.return_value = "This is not a bobcat"
@@ -69,15 +72,18 @@ class TestBobcatConnection(unittest.TestCase):
 
         mock_get_homepage.assert_awaited_with(self.mock_hostname)
         self.assertFalse(mock_does_bobcat_match_animal.called)
-        
+
         self.assertFalse(is_bobcat_verified)
         self.assertEqual(host, self.mock_hostname)
 
-
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock())
+    @patch(
+        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
+    )
     @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
-    def test_verify_with_animal_match(self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find):
+    def test_verify_with_animal_match(
+        self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find
+    ):
         mock_get_homepage.return_value = "Diagnoser - Bobcatminer Diagnostic Dashboard"
         b = BobcatConnection(animal="fancy-awesome-bobcat")
         b._animal = "fancy-awesome-bobcat"
