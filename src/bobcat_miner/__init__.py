@@ -7,7 +7,6 @@ from .api import BobcatAPI
 from .connection import BobcatConnection
 from .base import BobcatBase
 from .logger import BobcatLogger
-from .errors import BobcatConnectionError
 
 __all__ = (
     "BobcatAutopilot",
@@ -16,5 +15,4 @@ __all__ = (
     "BobcatConnection",
     "BobcatBase",
     "BobcatLogger",
-    "BobcatConnectionError",
 )

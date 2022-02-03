@@ -230,25 +230,25 @@ def dashboard():
         </head>
         <body>
         <div class="sidebar">
-                <header id="header"><i class="fas fa-lightbulb" style="color:lime"></i>&nbsp; Merry Peanut Swan</header>
+                <header id="header"><i class="fas fa-lightbulb" style="color:lime"></i>&nbsp; Fancy Awesome Bobcat</header>
                 <a href="/status.json" title="">
                 <i class="fas fa-sync-alt Synced"></i>
                 <span class="Synced">Synced (gap:0)</span>
-                &nbsp;<span class="quarter"><i class="fas fa-thermometer-quarter"></i>27 °C</span>
+                &nbsp;<span class="quarter"><i class="fas fa-thermometer-quarter"></i>38 °C</span>
                 </a>
                 <a id="miner" href="/miner.json" title="Output miner image version, onboarding, p2p status, etc. It will cause the Miner slow down, don't click it frequently!">
                 <i class="fab fa-bitcoin "></i>
                 <span class="">Miner (5s)</span>
                 </a>
-                <a href="https://explorer.helium.com/hotspots/112YUS4TUQy4boXRvGjrj6z7XyiSx8FDumTn6vtRYPgoGPnjBGWW" target="_blank" title="Redirect to Helium Explorer">
+                <a href="https://explorer.helium.com/hotspots/11TEwEgnByBdXxX7AyH4Zaky5AsRqXrMetZQEHvbUrrfdvT2ryz" target="_blank" title="Redirect to Helium Explorer">
                 <i class="fas fa-map-marked"></i>
                 <span>Explorer</span>
                 </a>
-                <a href="https://api.helium.io/v1/hotspots/112YUS4TUQy4boXRvGjrj6z7XyiSx8FDumTn6vtRYPgoGPnjBGWW" target="_blank" title="Redirect to Helium Api">
+                <a href="https://api.helium.io/v1/hotspots/11TEwEgnByBdXxX7AyH4Zaky5AsRqXrMetZQEHvbUrrfdvT2ryz" target="_blank" title="Redirect to Helium Api">
                 <i class="fas fa-cogs"></i>
                 <span>Helium Api</span>
                 </a>
-                <a href="https://onboarding.dewi.org/api/v2/hotspots/112YUS4TUQy4boXRvGjrj6z7XyiSx8FDumTn6vtRYPgoGPnjBGWW" target="_blank" title="Redirect to DeWi Api">
+                <a href="https://onboarding.dewi.org/api/v2/hotspots/11TEwEgnByBdXxX7AyH4Zaky5AsRqXrMetZQEHvbUrrfdvT2ryz" target="_blank" title="Redirect to DeWi Api">
                 <i class="fas fa-search-location"></i>
                 <span>Onboarding</span>
                 </a>
@@ -289,7 +289,7 @@ def dashboard():
                 <span>Dig</span>
                 </a>
                 <footer>
-                <a target="_blank" href="https://www.bobcatminer.com" title="1.2.9.220126.0047">©2021 by Bobcatminer. v1.0.2.77</a>
+                <a target="_blank" href="https://www.bobcatminer.com" title="1.2.9.220126.0047">©2021 by Bobcatminer. v1.0.2.66</a>
                 </footer>
         </div>
 </body>

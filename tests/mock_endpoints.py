@@ -24,7 +24,7 @@ def mock_synced_bobcat(*args, **kwargs):
                 "region": "region_us915",
                 "frequency_plan": "us915",
                 "animal": "fancy-awesome-bobcat",
-                "pubkey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "pubkey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 "miner": {
                     "State": "running",
                     "Status": "Up 36 hours",
@@ -119,6 +119,104 @@ def mock_synced_bobcat(*args, **kwargs):
                 ],
             }
         )
+    response = Response()
+    response.status_code = 200
+    response._content = str.encode(response_content)
+    return response
+
+
+def mock_helium_api_online(*args, **kwargs):
+    response_content = json.dumps(
+        {
+            "data": {
+                "speculative_nonce": 6,
+                "lng": 0.8154535504049,
+                "lat": 0.7123168464,
+                "timestamp_added": "2021-07-14T16:48:11.000000Z",
+                "status": {
+                    "timestamp": "2022-01-30T03:14:46.738000Z",
+                    "online": "online",
+                    "listen_addrs": ["/ip4/33.117.96.28/tcp/44158"],
+                    "height": 1204332,
+                },
+                "reward_scale": 0.837982177734375,
+                "payer": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "owner": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "nonce": 6,
+                "name": "fancy-awesome-bobcat",
+                "mode": "full",
+                "location_hex": "55555a801fffff",
+                "location": "555555a80009bff",
+                "last_poc_challenge": 1208016,
+                "last_change_block": 1208348,
+                "geocode": {
+                    "short_street": "Main Street",
+                    "short_state": "UT",
+                    "short_country": "US",
+                    "short_city": "Salt Lake City",
+                    "long_street": "Main Street",
+                    "long_state": "Utah",
+                    "long_country": "United States",
+                    "long_city": "Salt Lake City",
+                    "city_id": "c2FsdCBsYWtlIGNpdHl1dGFodW5pdGVkIHN0YXRlcw",
+                },
+                "gain": 58,
+                "elevation": 6,
+                "block_added": 921761,
+                "block": 1208409,
+                "address": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            }
+        }
+    )
+    response = Response()
+    response.status_code = 200
+    response._content = str.encode(response_content)
+    return response
+
+
+def mock_helium_api_offline(*args, **kwargs):
+    response_content = json.dumps(
+        {
+            "data": {
+                "speculative_nonce": 6,
+                "lng": 0.8154535504049,
+                "lat": 0.7123168464,
+                "timestamp_added": "2021-07-14T16:48:11.000000Z",
+                "status": {
+                    "timestamp": "2022-01-30T03:14:46.738000Z",
+                    "online": "offline",
+                    "listen_addrs": ["/ip4/33.117.96.28/tcp/44158"],
+                    "height": 1204332,
+                },
+                "reward_scale": 0.837982177734375,
+                "payer": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "owner": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "nonce": 6,
+                "name": "fancy-awesome-bobcat",
+                "mode": "full",
+                "location_hex": "55555a801fffff",
+                "location": "555555a80009bff",
+                "last_poc_challenge": 1208016,
+                "last_change_block": 1208348,
+                "geocode": {
+                    "short_street": "Main Street",
+                    "short_state": "UT",
+                    "short_country": "US",
+                    "short_city": "Salt Lake City",
+                    "long_street": "Main Street",
+                    "long_state": "Utah",
+                    "long_country": "United States",
+                    "long_city": "Salt Lake City",
+                    "city_id": "c2FsdCBsYWtlIGNpdHl1dGFodW5pdGVkIHN0YXRlcw",
+                },
+                "gain": 58,
+                "elevation": 6,
+                "block_added": 921761,
+                "block": 1208409,
+                "address": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            }
+        }
+    )
     response = Response()
     response.status_code = 200
     response._content = str.encode(response_content)

@@ -7,53 +7,43 @@ Deploy the Bobcat Autopilot to a Raspberry Pi for unattended automation and moni
 
 - Operating System: Raspbian GNU/Linux 11 (bullseye).
 - The Raspberry PI is on the same network as the Bobcat.
-- You want to remotely monitor the Bobcat Autopilot with Discord.
+- You want to run `bobcat autopilot` as a Docker container.
+- You want to schedule `bobcat autopilot` to run 4 times a day.
+- You want remotely monitor the Bobcat Autopilot with Discord.
 
 ## Setup
 
-Install the bobcat command line tool with Pipx.
+Install the Docker Community Edition.
 
 ```bash
-# install pipx
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
-
-# install the bobcat cli with pipx
-python3 -m pipx install bobcat-miner
-
-# create a new folder for bobcat autopilot log files
-sudo mkdir /var/log/bobcat
-sudo chown pi:adm /var/log/bobcat
-sudo chmod 0777 /var/log/bobcat
-
-# create a new folder for the bobcat autopilot lock file
-sudo mkdir /etc/bobcat
-sudo chown pi:adm /etc/bobcat
-sudo chmod 0777 /etc/bobcat
+sudo apt install -y docker-ce
 ```
 
-<!-- docker run --rm -it \
+Create a file called `/home/pi/bobcat-autopilot.env` with your configuration information
+
+```bash
+BOBCAT_HOSTNAME=192.168.0.10
+BOBCAT_ANIMAL='Fancy Awesome Bobcat'
+BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
+BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
+BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
+BOBCAT_LOG_LEVEL_FILE=INFO
+BOBCAT_LOG_LEVEL_DISCORD=WARNING
+```
+
+Please run `sudo docker run --rm -it aidanmelen/bobcat --help` for more information about the environment variables.
+
+Next we will verify the configuration file with a dry run
+
+```bash
+$ sudo docker run --rm -it \
 -v /etc/bobcat:/etc/bobcat \
 -v /var/log/bobcat:/var/log/bobcat \
---env-file /home/pi/.bobcat-profile \
-aidanmelen/bobcat autopilot -->
-
-
-Then create a file called `/home/pi/.bobcat-profile` with the following environment variables.
-
-```bash
-export BOBCAT_HOSTNAME=192.168.0.10
-export BOBCAT_ANIMAL='Fancy Awesome Bobcat'
-export BOBCAT_DRY_RUN=TRUE
-export BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
-export BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
-export BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
-export BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
-export BOBCAT_LOG_LEVEL_FILE=INFO
-export BOBCAT_LOG_LEVEL_DISCORD=WARNING
+--env-file /home/pi/bobcat-autopilot.env \
+--env BOBCAT_DRY_RUN=TRUE \
+aidanmelen/bobcat autopilot
 ```
-
-Please run `bobcat --help` for more information about the environment variables.
 
 Finally schedule Bobcat Autopilot with Cron
 
@@ -63,7 +53,11 @@ crontab -l > mycron 2>/dev/null
 
 # append the bobcat autopilot command to the crontab
 # this will run 4 times a day: at minute 0 past hour 0, 6, 12, and 18.
-echo "0 0,6,12,18 * * * . /home/pi/.bobcat-profile; /home/pi/.local/bin/bobcat autopilot &> /dev/null" >> mycron
+echo "0 0,6,12,18 * * * sudo docker run --rm -it \
+-v /etc/bobcat:/etc/bobcat \
+-v /var/log/bobcat:/var/log/bobcat \
+--env-file /home/pi/bobcat-autopilot.env \
+aidanmelen/bobcat autopilot &> /dev/null" >> mycron
 
 # install new cron file
 crontab mycron

@@ -4,14 +4,14 @@ import unittest
 
 from bobcat_miner import BobcatAutopilot
 
-import mock_bobcat
+import mock_endpoints
 
 
 class TestAutopilot(unittest.TestCase):
     """Test BobcatAutopilot."""
 
-    @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
-    def setUp(self, mock_requests_get, mock_request):
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    def setUp(self, mock_requests_get):
         self.bobcat = BobcatAutopilot(hostname="192.168.0.10")
         self.bobcat.refresh()
 

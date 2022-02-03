@@ -40,7 +40,7 @@ tests: lint test ## Lint and Test
 run: ## Run the 'bobcat autopilot' in a container
 	docker run --rm -it --env-file .env bobcat autopilot
 
-release: all  ## Push tags and trigger Github Actions release.
+release: tests  ## Push tags and trigger Github Actions release.
 	git tag $(VERSION)
 	git push --tags
 

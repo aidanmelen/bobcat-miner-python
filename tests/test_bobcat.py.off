@@ -4,7 +4,7 @@ import unittest
 
 from bobcat_miner import Bobcat
 
-import mock_bobcat
+import mock_endpoints
 
 
 DISABLED = 100
@@ -13,8 +13,8 @@ DISABLED = 100
 class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
-    @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
     def setUp(self, mock_requests_get, mock_bobcat_conn_is_bobcat):
         self.bobcat = Bobcat(hostname="192.168.0.10", log_level=DISABLED)
         self.bobcat.refresh()
@@ -55,7 +55,7 @@ class TestBobcat(unittest.TestCase):
     def test_pubkey(self):
         self.assertEqual(
             self.bobcat.pubkey,
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         )
 
     def test_state(self):
