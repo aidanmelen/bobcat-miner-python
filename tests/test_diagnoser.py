@@ -44,12 +44,10 @@ class TestOnlineStatusCheck(unittest.TestCase):
         self.assertTrue(self.check.check())
 
     @patch("requests.get", side_effect=Exception("Unable to Reach Helium API"))
-    def test_OnlineStatusCheck_when_helium_api_is_unreachable_and_not_running(self, mock_requests_get):
-        self.assertTrue(self.check.check())
-    
-    # @patch("requests.get", side_effect=Exception("Unable to Reach Helium API"))
-    # def test_OnlineStatusCheck_when_helium_api_is_unreachable_and_running(self, mock_requests_get):
-    #     self.assertFalse(self.check.check())
+    def test_OnlineStatusCheck_when_helium_api_is_unreachable_and_not_running(
+        self, mock_requests_get
+    ):
+        self.assertFalse(self.check.check())
 
 
 class TestSyncStatusCheck(unittest.TestCase):

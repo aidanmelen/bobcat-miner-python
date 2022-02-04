@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict
 
 import json
 import os
@@ -91,49 +91,44 @@ class OnlineStatusCheck(BobcatCheck):
             troubleshooting_guides=["https://www.nowitness.org/troubleshooting/"],
         )
 
-    def check(self) -> bool:
+    def _is_offline(self) -> (Dict, None):
+        """Get Hotspot data from Helium API."""
+        data = requests.get(f"https://api.helium.io/v1/hotspots/{self.autopilot.pubkey}").json()
+        return data.get("data", {}).get("status", {}).get("online", "offline").lower() != "online"
 
+    def _is_running(self) -> bool:
+        """Check if the Bobcat is running."""
         is_running = self.autopilot.miner_state.lower() == "running"
-        is_healthy = (
-            not self.autopilot.miner_alert
-            and self.autopilot.status.lower()
-            not in ["loading", "syncing", "synced"]
-        )
 
+        return is_running
+
+    def check(self) -> bool:
         try:
-            data = requests.get(f"https://api.helium.io/v1/hotspots/{self.autopilot.pubkey}").json()
+            is_offline = self._is_offline()
         except Exception as err:
-            if is_running and is_healthy:
-                self.autopilot._logger.warning(
-                    "The Bobcat is running and is healthy but Autopilot was unable to get the online status from the Helium API.",
-                    extra={"description": str(self)} if self.autopilot._verbose else {},
-                )
-                return False
-            else:
-                self.autopilot._logger.error(
-                    "Unable to get the online status from the Helium API.",
-                    extra={"description": str(self)} if self.autopilot._verbose else {},
-                )
-                return True
+            self.autopilot._logger.warning(
+                "The Helium API is not responding. Skipping Online Status Check",
+                extra={"description": str(self)} if self.autopilot._verbose else {},
+            )
+            return False
 
-        if (
-            is_offline := data.get("data", {}).get("status", {}).get("online", "offline").lower()
-            != "online"
-        ):
-            if is_running and is_healthy:
-                self.autopilot._logger.warning(
-                    f"{self.name}: Offline",
-                    extra={"description": str(self)} if self.autopilot._verbose else {},
-                )
-            else:
-                self.autopilot._logger.error(
-                    f"{self.name}: Offline",
-                    extra={"description": str(self)} if self.autopilot._verbose else {},
-                )
         else:
-            self.autopilot._logger.info(f"{self.name}: Online ⭐")
-
-        return is_offline
+            if is_offline:
+                if self._is_running():
+                    self.autopilot._logger.warning(
+                        f"{self.name}: Bobcat is running and the Helium API is stale",
+                        extra={"description": str(self)} if self.autopilot._verbose else {},
+                    )
+                    return False
+                else:
+                    self.autopilot._logger.error(
+                        f"{self.name}: Offline",
+                        extra={"description": str(self)} if self.autopilot._verbose else {},
+                    )
+                    return True
+            else:
+                self.autopilot._logger.info(f"{self.name}: Online ⭐")
+                return False
 
 
 class SyncStatusCheck(BobcatCheck):

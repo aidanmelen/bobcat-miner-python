@@ -2,6 +2,7 @@ from filelock import Timeout, FileLock
 
 import os
 import requests
+import sys
 
 try:
     from diagnoser import *
@@ -27,6 +28,7 @@ class BobcatAutopilot(Bobcat):
 
         except BobcatSearchNetworkError as err:
             self._logger.critical(str(err))
+            sys.exit(1)  # 👋
 
         except (BobcatVerificationError, BobcatNotFoundError) as err:
             msg = "\n".join(
@@ -36,11 +38,12 @@ class BobcatAutopilot(Bobcat):
                     "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser",
                 ]
             )
-
             self._logger.critical(msg)
+            sys.exit(1)  # 👋
 
         except Exception as err:
             self._logger.exception(f"An unexpected error has occurred: {str(err)}")
+            sys.exit(1)  # 👋
 
     @property
     def checks(self):
@@ -105,19 +108,22 @@ class BobcatAutopilot(Bobcat):
                             if is_running and is_healthy:
                                 self._logger.info("Repair Status: Complete")
 
+        except Timeout:
+            self._logger.warning("Stopping. Another instance of Bobcat Autopilot currently running")
+            sys.exit(1)  # 👋
+
+        except BobcatConnectionError as err:
+            self._logger.critical(str(err))
+            sys.exit(1)  # 👋
+
+        except Exception as err:
+            self._logger.exception(f"An unexpected error has occurred: {str(err)}")
+            sys.exit(1)  # 👋
+
+        finally:
             # clean up lock file
             if os.path.exists(self._lock_file):
                 os.remove(self._lock_file)
                 self._logger.debug(f"Lock Released: {self._lock_file}")
 
-        except Timeout:
-            self._logger.warning("Stopping. Another instance of Bobcat Autopilot currently running")
-
-        except BobcatConnectionError as err:
-            self._logger.critical(str(err))
-
-        except Exception as err:
-            self._logger.exception(f"An unexpected error has occurred: {str(err)}")
-
-        finally:
             self._logger.debug("The Bobcat Autopilot is finished ✨ 🍰 ✨")

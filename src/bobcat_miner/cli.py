@@ -191,7 +191,7 @@ def status(ctx) -> None:
 def miner(ctx) -> None:
     """Print Bobcat miner data."""
 
-    # miner_data is initialized in the BobcatConnection constructor during bobcat verification
+    # miner data is initialized in the BobcatConnection constructor during bobcat verification
     if miner_data := ctx.obj["AUTOPILOT"]._miner_data:
         click.echo(miner_data)
     else:
