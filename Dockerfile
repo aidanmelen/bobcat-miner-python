@@ -2,8 +2,6 @@ ARG PYTHON_VERSION=3.10
 ARG POETRY_VERSION=1.1.4
 
 FROM python:${PYTHON_VERSION} as base
-RUN apt-get update && apt-get install -y curl jq vim.tiny \
- && ln -s /usr/bin/vim.tiny /usr/bin/vim
 RUN pip install --upgrade pip \
  && pip install poetry${POETRY_VERSION+==$POETRY_VERSION}
 WORKDIR /app
@@ -16,6 +14,8 @@ CMD ["bash"]
 FROM base as dev
 COPY . .
 RUN poetry install --no-interaction --no-ansi
+RUN apt-get update && apt-get install -y curl jq vim.tiny \
+ && ln -s /usr/bin/vim.tiny /usr/bin/vim
 
 FROM dev as test
 ENTRYPOINT ["poetry", "run"]
