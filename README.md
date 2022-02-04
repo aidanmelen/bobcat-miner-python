@@ -25,8 +25,8 @@ The `bobcat autopilot` command will automatically diagnose and repair the Bobcat
 ```bash
 $ bobcat autopilot
 ✅ Online Status: Online ⭐
-✅ Sync Status: Synced (gap:-1) ✨
-✅ Relay Status: Not Relayed 💫
+✅ Sync Status: Synced (gap:-1) 💫
+✅ Relay Status: Not Relayed ✨
 ✅ Network Status: Good 📶
 ✅ Temperature Status: Good (38°C) ☀️
 ```
@@ -72,7 +72,7 @@ Monitor your Bobcat remotely by sending events to a Discord channel by specifyin
 ```bash
 $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ✅ Online Status: Online ⭐
-✅ Sync Status: Synced (gap:0) ✨
+✅ Sync Status: Synced (gap:0) 💫
 ⚠️ Relay Status: Relayed
 ✅ Network Status: Good 📶
 ❌ Temperature Status: Hot (78°C) 🌋

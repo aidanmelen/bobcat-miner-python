@@ -25,7 +25,7 @@ bobcat.frequency_plan
 bobcat.animal
 bobcat.helium_animal
 bobcat.pubkey
-bobcat.state
+bobcat.miner_state
 bobcat.miner_status
 bobcat.miner_height
 bobcat.miner_alert

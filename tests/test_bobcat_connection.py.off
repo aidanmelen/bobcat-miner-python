@@ -1,9 +1,9 @@
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, call, AsyncMock
 
 import asyncio
 import unittest
 
-from bobcat_miner import BobcatConnection
+from bobcat_miner import BobcatConnection, BobcatNotFoundError
 
 DISABLED = 100
 
@@ -45,10 +45,8 @@ class TestBobcatConnection(unittest.TestCase):
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/miner.json")
 
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch(
-        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
-    )
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
+    @patch("bobcat_miner.BobcatConnection._get_homepage", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection._does_bobcat_match_animal")
     def test_verify_should_pass(self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find):
         mock_get_homepage.return_value = "Diagnoser - Bobcatminer Diagnostic Dashboard"
         b = BobcatConnection()
@@ -61,10 +59,8 @@ class TestBobcatConnection(unittest.TestCase):
         self.assertEqual(host, self.mock_hostname)
 
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch(
-        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
-    )
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
+    @patch("bobcat_miner.BobcatConnection._get_homepage", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection._does_bobcat_match_animal")
     def test_verify_should_fail(self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find):
         mock_get_homepage.return_value = "This is not a bobcat"
         b = BobcatConnection()
@@ -77,10 +73,8 @@ class TestBobcatConnection(unittest.TestCase):
         self.assertEqual(host, self.mock_hostname)
 
     @patch("bobcat_miner.BobcatConnection.find")
-    @patch(
-        "bobcat_miner.BobcatConnection._BobcatConnection__get_homepage", return_value=AsyncMock()
-    )
-    @patch("bobcat_miner.BobcatConnection._BobcatConnection__does_bobcat_match_animal")
+    @patch("bobcat_miner.BobcatConnection._get_homepage", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection._does_bobcat_match_animal")
     def test_verify_with_animal_match(
         self, mock_does_bobcat_match_animal, mock_get_homepage, mock_find
     ):
@@ -93,14 +87,38 @@ class TestBobcatConnection(unittest.TestCase):
         self.assertTrue(is_bobcat_verified)
         self.assertEqual(host, self.mock_hostname)
 
-    # @patch("bobcat_miner.BobcatConnection.find")
-    # @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
-    # def test_BobcatConnection(self, mock_verify, mock_find):
-    #     _ = BobcatConnection(hostname=self.mock_hostname)
-    #     mock_verify.assert_awaited_with(self.mock_hostname)
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_search_throws_error_when_bobcat_not_found(self, mock_verify):
+        mock_verify.side_effect = [(False, "192.168.0.1"), (False, "192.168.0.2")]
 
-    #     _ = BobcatConnection()
-    #     mock_find.assert_called_once_with()
+        with self.assertRaises(BobcatNotFoundError) as err:
+            BobcatConnection(networks=["192.168.0.0/30"])
+            mock_verify.assert_has_calls(
+                [
+                    call("192.168.0.1"),
+                    call("192.168.0.2"),
+                ],
+                any_order=False,
+            )
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_search_finds_hostname(self, mock_verify):
+        mock_verify.side_effect = [(False, "192.168.0.1"), (True, "192.168.0.2")]
+
+        b = BobcatConnection(networks=["192.168.0.0/30"])
+        mock_verify.assert_has_calls(
+            [
+                call("192.168.0.1"),
+                call("192.168.0.2"),
+            ],
+            any_order=False,
+        )
+        self.assertEqual(b._hostname, "192.168.0.2")
+
+    @patch("bobcat_miner.BobcatConnection._search", return_value=AsyncMock())
+    def test_find(self, mock_search):
+        BobcatConnection(networks=["192.168.0.0/30"])
+        mock_search.assert_called_once_with(["192.168.0.1", "192.168.0.2"])
 
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("socket.socket.connect")

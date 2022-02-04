@@ -77,14 +77,12 @@ class BobcatAutopilot(Bobcat):
             with lock:
                 self._logger.debug(f"Lock Acquired: {self._lock_file}")
 
-                # run diagnoser checks
                 for check in self.checks:
 
                     self._logger.debug(f"Checking: {check.name}")
 
                     if check.check():
 
-                        # run the autopilot repair steps
                         for step in check.autopilot_repair_steps:
                             func, args, kwargs = (
                                 step["func"],
@@ -93,12 +91,19 @@ class BobcatAutopilot(Bobcat):
                             )
                             func(*args, **kwargs)
 
-                            # halt autopilot steps if the bobcat is healthy
-                            # is_online = not self.is_offline()
-                            # is_synced = not self.is_not_synced()
-                            # if is_online and not is_synced:
-                            #     self._logger.debug("Bobcat Autopilot Repaired: {check.name}")
-                            #     break
+                            self.refresh(
+                                status=True, miner=True, temp=False, speed=False, dig=False
+                            )
+
+                            is_running = self.miner_state.lower() == "running"
+                            is_healthy = (
+                                not self.autopilot.miner_alert
+                                and self.autopilot.status.lower()
+                                not in ["loading", "syncing", "synced"]
+                            )
+
+                            if is_running and is_healthy:
+                                self._logger.info("Repair Status: Complete")
 
             # clean up lock file
             if os.path.exists(self._lock_file):
@@ -107,6 +112,9 @@ class BobcatAutopilot(Bobcat):
 
         except Timeout:
             self._logger.warning("Stopping. Another instance of Bobcat Autopilot currently running")
+
+        except BobcatConnectionError as err:
+            self._logger.critical(str(err))
 
         except Exception as err:
             self._logger.exception(f"An unexpected error has occurred: {str(err)}")

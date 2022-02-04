@@ -78,7 +78,7 @@ class OnlineStatusCheck(BobcatCheck):
             description="This shows the hotspot information that is currently available in the Helium blockchain. Note that this might differ from the actual status of your hotpsot as it takes time for information to propagate from your hotspot to the blockchain.",
             autopilot_repair_steps=[],
             manual_repair_steps=[
-                "Check the Diagnoser to see if the Bobcat is healthy.",
+                "Check the Diagnoser to see if the Bobcat is running and is healthy.",
                 "Give the Helium Network more time to propagate from your hotspot to the blockchain. Wait 24 hours and check again.",
             ],
             customer_support_steps=[
@@ -92,23 +92,44 @@ class OnlineStatusCheck(BobcatCheck):
         )
 
     def check(self) -> bool:
+
+        is_running = self.autopilot.miner_state.lower() == "running"
+        is_healthy = (
+            not self.autopilot.miner_alert
+            and self.autopilot.status.lower()
+            not in ["loading", "syncing", "synced"]
+        )
+
         try:
             data = requests.get(f"https://api.helium.io/v1/hotspots/{self.autopilot.pubkey}").json()
         except Exception as err:
-            self.autopilot._logger.warning(
-                "Unable to get online status from the Helium API.",
-                extra={"description": str(self)} if self.autopilot._verbose else {},
-            )
-            return False
+            if is_running and is_healthy:
+                self.autopilot._logger.warning(
+                    "The Bobcat is running and is healthy but Autopilot was unable to get the online status from the Helium API.",
+                    extra={"description": str(self)} if self.autopilot._verbose else {},
+                )
+                return False
+            else:
+                self.autopilot._logger.error(
+                    "Unable to get the online status from the Helium API.",
+                    extra={"description": str(self)} if self.autopilot._verbose else {},
+                )
+                return True
 
         if (
             is_offline := data.get("data", {}).get("status", {}).get("online", "offline").lower()
             != "online"
         ):
-            self.autopilot._logger.warning(
-                f"{self.name}: Offline",
-                extra={"description": str(self)} if self.autopilot._verbose else {},
-            )
+            if is_running and is_healthy:
+                self.autopilot._logger.warning(
+                    f"{self.name}: Offline",
+                    extra={"description": str(self)} if self.autopilot._verbose else {},
+                )
+            else:
+                self.autopilot._logger.error(
+                    f"{self.name}: Offline",
+                    extra={"description": str(self)} if self.autopilot._verbose else {},
+                )
         else:
             self.autopilot._logger.info(f"{self.name}: Online ⭐")
 
@@ -156,7 +177,7 @@ class SyncStatusCheck(BobcatCheck):
                 msg, extra={"description": str(self)} if self.autopilot._verbose else {}
             )
         else:
-            self.autopilot._logger.info(msg + " ✨")
+            self.autopilot._logger.info(msg + " 💫")
 
         return is_not_synced
 
@@ -206,7 +227,7 @@ class RelayStatusCheck(BobcatCheck):
                 extra={"description": str(self)} if self.autopilot._verbose else {},
             )
         else:
-            self.autopilot._logger.info(f"{self.name}: Not Relayed 💫")
+            self.autopilot._logger.info(f"{self.name}: Not Relayed ✨")
 
         return is_relayed
 

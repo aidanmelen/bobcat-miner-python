@@ -62,7 +62,7 @@ class BobcatConnection(BobcatBase):
             self.__refresh_miner(hostname=_hostname)
         return self
 
-    async def __get_homepage(self, host) -> str:
+    async def _get_homepage(self, host) -> str:
         """Get the home page for the host.
 
         Args:
@@ -80,7 +80,7 @@ class BobcatConnection(BobcatBase):
         except Exception as err:
             return None
 
-    def __does_bobcat_match_animal(self, host) -> bool:
+    def _does_bobcat_match_animal(self, host) -> bool:
         """The host is not the bobcat if the animal name does not match.
 
         Args:
@@ -110,7 +110,7 @@ class BobcatConnection(BobcatBase):
         """
         is_bobcat_verified = False
 
-        homepage = str(await self.__get_homepage(host))
+        homepage = str(await self._get_homepage(host))
 
         if (
             has_bobcat_diagnostic_dashboard := "Diagnoser - Bobcatminer Diagnostic Dashboard"
@@ -120,14 +120,14 @@ class BobcatConnection(BobcatBase):
             self._logger.debug(f"Connected to Bobcat: {host}")
 
             does_bobcat_match_animal = (
-                self.__does_bobcat_match_animal(host) if self._animal else True
+                self._does_bobcat_match_animal(host) if self._animal else True
             )
 
             is_bobcat_verified = has_bobcat_diagnostic_dashboard and does_bobcat_match_animal
 
         return is_bobcat_verified, host
 
-    async def __search(self, hosts) -> (str, None):
+    async def _search(self, hosts) -> (str, None):
         """Concurrently search hosts in network and return the host for the first verified bobcat found.
 
         Args:
@@ -162,7 +162,7 @@ class BobcatConnection(BobcatBase):
             except ValueError as err:
                 raise BobcatSearchNetworkError(str(err))
 
-            if host := asyncio.run(self.__search(hosts)):
+            if host := asyncio.run(self._search(hosts)):
                 self._logger.debug(f"Found to bobcat: {host}")
                 return host
 
