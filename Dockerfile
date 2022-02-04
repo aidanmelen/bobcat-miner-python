@@ -12,10 +12,10 @@ ENTRYPOINT ["poetry", "run"]
 CMD ["bash"]
 
 FROM base as dev
-COPY . .
-RUN poetry install --no-interaction --no-ansi
 RUN apt-get update && apt-get install -y curl jq vim.tiny \
  && ln -s /usr/bin/vim.tiny /usr/bin/vim
+COPY . .
+RUN poetry install --no-interaction --no-ansi
 
 FROM dev as test
 ENTRYPOINT ["poetry", "run"]

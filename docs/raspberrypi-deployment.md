@@ -19,6 +19,13 @@ Install the Docker Community Edition.
 sudo apt install -y docker-ce
 ```
 
+Build the image for raspberry pi
+
+```
+$ git clone https://github.com/aidanmelen/bobcat-miner-python.git
+$ sudo docker build bobcat-miner-python -t bobcat --target release
+```
+
 Create a file called `/home/pi/bobcat-autopilot.env` with your configuration information
 
 ```bash

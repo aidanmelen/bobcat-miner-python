@@ -36,7 +36,6 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
-          platforms: linux/arm/v7 # support for raspberry pi
           target: release
           push: true
           tags: |
