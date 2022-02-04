@@ -95,12 +95,12 @@ Do you want to reboot the Bobcat? [y/N]: y
 
 ## Bobcat SDK
 
-Please see [docs/bobcat_sdk.md](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docs/bobcat_sdk.md) for more information.
+Please see [docs/bobcat_sdk.md](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/bobcat_sdk.md) for more information.
 
 
 ## Contributions
 
-Please see [docs/contributions.md](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docs/contributions.md) for more information.
+Please see [docs/contributions.md](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/contributions.md) for more information.
 
 ## DIY Troubleshooting
 

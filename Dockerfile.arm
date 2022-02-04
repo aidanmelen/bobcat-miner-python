@@ -1,0 +1,5 @@
+ARG PYTHON_VERSION=3.10
+FROM python:${PYTHON_VERSION}-alpine AS release
+RUN mkdir /var/log/bobcat && mkdir /etc/bobcat \
+ && pip install bobcat-miner
+ENTRYPOINT ["bobcat"]

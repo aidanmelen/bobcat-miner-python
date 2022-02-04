@@ -23,7 +23,7 @@ Build the image for raspberry pi
 
 ```
 $ git clone https://github.com/aidanmelen/bobcat-miner-python.git
-$ sudo docker build bobcat-miner-python -t bobcat --target release
+$ sudo docker build -f bobcat-miner-python/Dockerfile.arm -t bobcat .
 ```
 
 Create a file called `/home/pi/bobcat-autopilot.env` with your configuration information
