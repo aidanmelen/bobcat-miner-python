@@ -37,6 +37,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           platforms: linux/arm/v7 # support for raspberry pi
+          target: release
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/bobcat:latest
