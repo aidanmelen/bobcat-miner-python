@@ -17,6 +17,9 @@ build: ## Build
 	docker build . -t $(NAME)-test --target test
 	docker-compose build
 
+build-arm: ## Build for ARM
+	docker buildx build . -t bobcat --platform linux/arm/v7
+
 up: ## Spin up local development stack
 	docker-compose up -d
 
