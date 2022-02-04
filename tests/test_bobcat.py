@@ -1,10 +1,10 @@
-from unittest.mock import patch, AsyncMock
+from unittest.mock import call, patch, AsyncMock, PropertyMock, MagicMock
 
 import unittest
 
-from bobcat_miner import Bobcat
+from bobcat_miner import Bobcat, BobcatConnectionError
 
-import mock_bobcat
+import mock_endpoints
 
 
 DISABLED = 100
@@ -13,10 +13,12 @@ DISABLED = 100
 class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
-    @patch("requests.get", side_effect=mock_bobcat.mock_synced_bobcat)
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
     def setUp(self, mock_requests_get, mock_bobcat_conn_is_bobcat):
-        self.bobcat = Bobcat(hostname="192.168.0.10", log_level=DISABLED)
+        self.mock_hostname = "192.168.0.10"
+        self.mock_animal = "fancy-awesome-bobcat"
+        self.bobcat = Bobcat(hostname=self.mock_hostname, log_level=DISABLED)
         self.bobcat.refresh()
 
     def test_status(self):
@@ -55,11 +57,11 @@ class TestBobcat(unittest.TestCase):
     def test_pubkey(self):
         self.assertEqual(
             self.bobcat.pubkey,
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         )
 
-    def test_state(self):
-        self.assertEqual(self.bobcat.state, "running")
+    def test_miner_state(self):
+        self.assertEqual(self.bobcat.miner_state, "running")
 
     def test_miner_status(self):
         self.assertEqual(self.bobcat.miner_status, "Up 36 hours")
@@ -170,6 +172,180 @@ class TestBobcat(unittest.TestCase):
                 {"A": "3.15.87.218", "dial": "success", "ttl": 16},
             ],
         )
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("bobcat_miner.Bobcat.heartbeat")
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatAPI._BobcatAPI__reboot")
+    def test_reboot(
+        self, mock_api_reboot, mock_wait, mock_heartbeat, mock_requests_get, mock_verify
+    ):
+        Bobcat(hostname=self.mock_hostname, log_level=DISABLED).reboot()
+        mock_api_reboot.assert_called_once_with()
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("bobcat_miner.Bobcat.heartbeat")
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatAPI._BobcatAPI__reset")
+    def test_reset(self, mock_api_reset, mock_wait, mock_heartbeat, mock_requests_get, mock_verify):
+        Bobcat(hostname=self.mock_hostname, log_level=DISABLED).reset()
+        mock_api_reset.assert_called_once_with()
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("bobcat_miner.Bobcat.heartbeat")
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatAPI._BobcatAPI__resync")
+    def test_resync(
+        self, mock_api_resync, mock_wait, mock_heartbeat, mock_requests_get, mock_verify
+    ):
+        Bobcat(hostname=self.mock_hostname, log_level=DISABLED).resync()
+        self.assertFalse(mock_api_resync.called, "Should not resync when Bobcat is healthy.")
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("bobcat_miner.Bobcat.heartbeat")
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatAPI._BobcatAPI__fastsync")
+    def test_fastsync(
+        self, mock_api_fastsync, mock_wait, mock_heartbeat, mock_requests_get, mock_verify
+    ):
+        Bobcat(hostname=self.mock_hostname, log_level=DISABLED).fastsync()
+        self.assertFalse(mock_api_fastsync.called, "Should not fastsync when Bobcat is healthy.")
+
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("time.sleep")
+    def test_wait(self, mock_sleep, mock_verify):
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+        b.wait(duration=300)
+
+        b._logger.debug.assert_called_once_with("Waiting for 5 Minutes ⏳")
+        mock_sleep.assert_called_once_with(300)
+
+    @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatConnection.can_connect", side_effect=[False, False, True])
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_wait_for_connection(self, mock_verify, mock_can_connect, mock_wait, mock_animal):
+        mock_animal.return_value = self.mock_animal
+
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+        b.wait_for_connection(backoff_duration=300, max_attempts=3)
+
+        mock_wait.assert_has_calls(
+            [
+                call(300),
+                call(300),
+            ]
+        )
+        b._logger.warning.assert_has_calls(
+            [
+                call(f"The Bobcat ({self.mock_animal}) is unreachable"),
+                call(f"The Bobcat ({self.mock_animal}) is unreachable"),
+            ]
+        )
+
+    @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.BobcatConnection.can_connect", side_effect=[False, False, False, False])
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_wait_for_connection_throw_connection_error_after_max_tries(
+        self, mock_verify, mock_can_connect, mock_wait, mock_animal
+    ):
+        mock_animal.return_value = self.mock_animal
+
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+
+        with self.assertRaises(BobcatConnectionError) as err:
+            b.wait_for_connection(backoff_duration=300, max_attempts=3)
+
+        mock_wait.assert_called_with(300)
+        self.assertEqual(mock_wait.call_count, 3)
+
+        b._logger.warning.assert_called_with(f"The Bobcat ({self.mock_animal}) is unreachable")
+        self.assertEqual(b._logger.warning.call_count, 3)
+
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
+    @patch("bobcat_miner.Bobcat.miner_state", new_callable=PropertyMock)
+    @patch("bobcat_miner.BobcatAPI.refresh")
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_wait_until_running(
+        self, mock_verify, mock_refresh, mock_miner_state, mock_animal, mock_wait
+    ):
+        mock_miner_state.side_effect = ["None", "", "", "running"]
+        mock_animal.return_value = self.mock_animal
+
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+        b.wait_until_running(backoff_duration=300, max_attempts=12)
+
+        mock_wait.assert_has_calls(
+            [
+                call(300),
+                call(300),
+                call(300),
+            ],
+            any_order=False,
+        )
+
+        b._logger.warning.assert_has_calls(
+            [
+                call("The Bobcat (fancy-awesome-bobcat) is not running"),
+                call("The Bobcat (fancy-awesome-bobcat) is not running"),
+                call("The Bobcat (fancy-awesome-bobcat) is not running"),
+            ],
+            any_order=False,
+        )
+
+    @patch("bobcat_miner.Bobcat.wait")
+    @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
+    @patch("bobcat_miner.Bobcat.miner_state", new_callable=PropertyMock)
+    @patch("bobcat_miner.BobcatAPI.refresh")
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_wait_until_running_logs_warning_after_max_tries(
+        self, mock_verify, mock_refresh, mock_miner_state, mock_animal, mock_wait
+    ):
+        mock_miner_state.side_effect = ["None", "", "", ""]
+        mock_animal.return_value = self.mock_animal
+
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+        b.wait_until_running(backoff_duration=300, max_attempts=2)
+
+        mock_wait.assert_called_with(300)
+        self.assertEqual(mock_wait.call_count, 2)
+
+        b._logger.warning.assert_has_calls(
+            [
+                call("The Bobcat (fancy-awesome-bobcat) is not running"),
+                call("The Bobcat (fancy-awesome-bobcat) is not running"),
+                call("Waited for 10 minutes and still not running"),
+            ],
+            any_order=False,
+        )
+
+    @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
+    @patch("bobcat_miner.Bobcat.wait_for_connection")
+    @patch("bobcat_miner.Bobcat.wait_until_running")
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    def test_heartbeat(
+        self, mock_verify, mock_wait_for_connection, mock_wait_until_running, mock_animal
+    ):
+        mock_animal.return_value = self.mock_animal
+
+        b = Bobcat(hostname=self.mock_hostname)
+        b._logger = MagicMock()
+        b.heartbeat(backoff_duration=300, max_attempts=3)
+
+        mock_wait_for_connection.assert_called_once_with(300, 3)
+        mock_wait_until_running.assert_called_once_with(300, 3)
+        b._logger.info.assert_called_once_with(f"Reconnected to the Bobcat ({self.mock_animal})")
 
 
 if __name__ == "__main__":

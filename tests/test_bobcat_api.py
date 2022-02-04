@@ -15,46 +15,40 @@ class TestBobcatAPI(unittest.TestCase):
         self.mock_hostname = "192.168.0.10"
         self.mock_response = "mocked response text"
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.get")
     def test_refresh_status(self, mock_requests_get, mock_bobcat_conn_is_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_status()
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh_status()
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/status.json")
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
-    @patch("requests.get")
-    def test_refresh_miner(self, mock_requests_get, mock_is_a_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_miner()
-        mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/miner.json")
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection._BobcatConnection__refresh_miner")
+    def test_refresh_miner(self, mock_refresh_miner, mock_verify):
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh_miner()
+        mock_refresh_miner.assert_called_once_with()
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.get")
-    def test_refresh_temp(self, mock_requests_get, mock_is_a_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_temp()
+    def test_refresh_temp(self, mock_requests_get, mock_verify):
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh_temp()
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/temp.json")
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.get")
-    def test_refresh_speed(self, mock_requests_get, mock_is_a_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_speed()
+    def test_refresh_speed(self, mock_requests_get, mock_verify):
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh_speed()
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/speed.json")
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.get")
-    def test_refresh_dig(self, mock_requests_get, mock_is_a_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh_dig()
+    def test_refresh_dig(self, mock_requests_get, mock_verify):
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh_dig()
         mock_requests_get.assert_called_once_with("http://" + self.mock_hostname + "/dig.json")
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.get")
-    def test_refresh(self, mock_requests_get, mock_is_a_bobcat):
-        b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        b.refresh()
+    def test_refresh(self, mock_requests_get, mock_verify):
+        BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED).refresh()
         mock_requests_get.assert_has_calls(
             [
                 call("http://" + self.mock_hostname + "/status.json"),
@@ -66,13 +60,13 @@ class TestBobcatAPI(unittest.TestCase):
             any_order=True,
         )
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.post")
-    def test_reboot(self, mock_requests_post, mock_is_a_bobcat):
+    def test_reboot(self, mock_requests_post, mock_verify):
         mock_requests_post.return_value.text = self.mock_response
 
         b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        actual_response = b.reboot()
+        actual_response = b._BobcatAPI__reboot()
 
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_hostname + "/admin/reboot",
@@ -80,13 +74,13 @@ class TestBobcatAPI(unittest.TestCase):
         )
         self.assertEqual(actual_response, self.mock_response)
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.post")
-    def test_reset(self, mock_requests_post, mock_is_a_bobcat):
+    def test_reset(self, mock_requests_post, mock_verify):
         mock_requests_post.return_value.text = self.mock_response
 
         b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        actual_response = b.reset()
+        actual_response = b._BobcatAPI__reset()
 
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_hostname + "/admin/reset",
@@ -94,13 +88,13 @@ class TestBobcatAPI(unittest.TestCase):
         )
         self.assertEqual(actual_response, self.mock_response)
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.post")
-    def test_resync(self, mock_requests_post, mock_is_a_bobcat):
+    def test_resync(self, mock_requests_post, mock_verify):
         mock_requests_post.return_value.text = self.mock_response
 
         b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        actual_response = b.resync()
+        actual_response = b._BobcatAPI__resync()
 
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_hostname + "/admin/resync",
@@ -108,13 +102,13 @@ class TestBobcatAPI(unittest.TestCase):
         )
         self.assertEqual(actual_response, self.mock_response)
 
-    @patch("bobcat_miner.BobcatConnection.is_a_bobcat", return_value=AsyncMock())
+    @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.post")
-    def test_fastsync(self, mock_requests_post, mock_is_a_bobcat):
+    def test_fastsync(self, mock_requests_post, mock_verify):
         mock_requests_post.return_value.text = self.mock_response
 
         b = BobcatAPI(hostname=self.mock_hostname, log_level=DISABLED)
-        actual_response = b.fastsync()
+        actual_response = b._BobcatAPI__fastsync()
 
         mock_requests_post.assert_called_once_with(
             "http://" + self.mock_hostname + "/admin/fastsync",

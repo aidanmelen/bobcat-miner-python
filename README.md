@@ -24,7 +24,8 @@ The `bobcat autopilot` command will automatically diagnose and repair the Bobcat
 
 ```bash
 $ bobcat autopilot
-✅ Sync Status: Synced (gap:-1) ✨
+✅ Online Status: Online ⭐
+✅ Sync Status: Synced (gap:-1) 💫
 ✅ Relay Status: Not Relayed ✨
 ✅ Network Status: Good 📶
 ✅ Temperature Status: Good (38°C) ☀️
@@ -70,7 +71,8 @@ Monitor your Bobcat remotely by sending events to a Discord channel by specifyin
 
 ```bash
 $ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
-✅ Sync Status: Synced (gap:0) ✨
+✅ Online Status: Online ⭐
+✅ Sync Status: Synced (gap:0) 💫
 ⚠️ Relay Status: Relayed
 ✅ Network Status: Good 📶
 ❌ Temperature Status: Hot (78°C) 🌋
@@ -100,7 +102,7 @@ Please see [docs/bobcat_sdk.md](https://raw.githubusercontent.com/aidanmelen/bob
 
 Please see [docs/contributions.md](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docs/contributions.md) for more information.
 
-## Troubleshooting
+## DIY Troubleshooting
 
 Please see [No Witness's Troubleshooting Guide](https://www.nowitness.org/troubleshooting/) for more information.
 

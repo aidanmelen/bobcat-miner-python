@@ -23,8 +23,6 @@ class BobcatLogger:
         self._logger = logging.getLogger("bobcat")
         self._logger.setLevel(log_level)
 
-        logging.getLogger("backoff").setLevel(10000)
-
         self.add_log_console_handler(log_level_console)
 
         if log_file:
@@ -54,12 +52,15 @@ class BobcatLogger:
 
     def add_log_discord_handler(self, discord_webhook_url: str, log_level: str) -> None:
         """Add the Discord log handler to the logger."""
+
         discord_webhook_handler = DiscordWebhookHandler(
             url=discord_webhook_url,
             level=log_level.upper(),
             message_creator=BobcatEmbedMessageCreator(),
         )
         self._logger.addHandler(discord_webhook_handler)
+
+        logging.getLogger("discord_lumberjack").setLevel(logging.ERROR)
 
 
 @dataclass

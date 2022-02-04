@@ -17,8 +17,8 @@ build: ## Build
 	docker build . -t $(NAME)-test --target test
 	docker-compose build
 
-up: ## Spin up local dev stack
-	docker-compose up -d --remove-orphans
+up: ## Spin up local development stack
+	docker-compose up -d
 
 dev: up ## Build and run dev container
 	docker-compose exec $(NAME)-dev poetry run /bin/bash
@@ -40,7 +40,7 @@ tests: lint test ## Lint and Test
 run: ## Run the 'bobcat autopilot' in a container
 	docker run --rm -it --env-file .env bobcat autopilot
 
-release: all  ## Push tags and trigger Github Actions release.
+release: tests  ## Push tags and trigger Github Actions release.
 	git tag $(VERSION)
 	git push --tags
 

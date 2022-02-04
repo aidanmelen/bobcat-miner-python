@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import List
-from bs4 import BeautifulSoup
+from typing import Tuple
 
 try:
     from base import BobcatBase
@@ -32,9 +31,145 @@ class BobcatConnection(BobcatBase):
         super().__init__(*args, **kwargs)
 
         if self._hostname:
-            _ = asyncio.run(self.is_a_bobcat(self._hostname))
+            if not asyncio.run(self.verify(self._hostname))[0]:
+                raise BobcatVerificationError(
+                    f"The bobcat ({self._hostname}) was either not a bobcat or did not match the bobcat animal."
+                )
         else:
             self._hostname = self.find()
+
+    def __refresh_miner(self, hostname=None) -> BobcatConnection:
+        """Refresh Bobcat miner data.
+
+        Args:
+            hostname (str): The hostname to refresh miner data.
+        """
+
+        _hostname = hostname if hostname else self._hostname
+
+        self._miner_data = self.__get("http://" + _hostname + "/miner.json").json()
+
+        if self._trace:
+            self._logger.debug(
+                "Refresh: Miner Data",
+                extra={"description": f"{json.dumps(self._miner_data, indent=4)}"},
+            )
+        else:
+            self._logger.debug("Refresh: Miner Data")
+
+        if self._miner_data == {"message": "rate limit exceeded"}:
+            time.sleep(30)
+            self.__refresh_miner(hostname=_hostname)
+        return self
+
+    async def _get_homepage(self, host) -> str:
+        """Get the home page for the host.
+
+        Args:
+            host (str): The host to check.
+        """
+        try:
+            timeout = aiohttp.ClientTimeout(sock_connect=1, sock_read=5)
+
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+
+                async with session.get(f"http://{host}/") as response:
+
+                    return await response.text()
+
+        except Exception as err:
+            return None
+
+    def _does_bobcat_match_animal(self, host) -> bool:
+        """The host is not the bobcat if the animal name does not match.
+
+        Args:
+            host (str): The host to check.
+        """
+        self.__refresh_miner(hostname=host)
+
+        bobcat_animal = self._miner_data.get("animal").lower()
+
+        # e.g. normalize "Fancy Awesome Bobcat" to "fancy-awesome-bobcat"
+        normalized_animal = (
+            str(self._animal).strip().strip("'").strip('"').replace(" ", "-").lower()
+        )
+
+        if not (does_bobcat_match_animal := normalized_animal == bobcat_animal):
+            self._logger.debug(
+                f"Connected to the bobcat ({bobcat_animal}) on host ({host}) but we are looking for bobcat ({normalized_animal})"
+            )
+
+        return does_bobcat_match_animal
+
+    async def verify(self, host) -> Tuple[bool, str]:
+        """Verify the host is a Bobcat.
+
+        Args:
+            host (str): The host to check.
+        """
+        is_bobcat_verified = False
+
+        homepage = str(await self._get_homepage(host))
+
+        if (
+            has_bobcat_diagnostic_dashboard := "Diagnoser - Bobcatminer Diagnostic Dashboard"
+            in homepage
+        ):
+
+            self._logger.debug(f"Connected to Bobcat: {host}")
+
+            does_bobcat_match_animal = (
+                self._does_bobcat_match_animal(host) if self._animal else True
+            )
+
+            is_bobcat_verified = has_bobcat_diagnostic_dashboard and does_bobcat_match_animal
+
+        return is_bobcat_verified, host
+
+    async def _search(self, hosts) -> (str, None):
+        """Concurrently search hosts in network and return the host for the first verified bobcat found.
+
+        Args:
+            hosts (List[str]): The hosts to search.
+        """
+
+        tasks = [asyncio.ensure_future(self.verify(host)) for host in hosts]
+
+        for task in asyncio.as_completed(tasks):
+
+            is_bobcat_verified, host = await task
+
+            if is_bobcat_verified:
+                return host
+        else:
+            return None
+
+    def find(self) -> str:
+        """Find a Bobcat on the local network.
+
+        Side Effect:
+            A BobcatNotFoundError is raised when a bobcat is not found in local networks.
+        """
+
+        self._logger.debug(
+            f"Searching for {'(' + self._animal + ')' if self._animal else 'a bobcat'} in these networks: {', '.join(self._networks)}"
+        )
+
+        for network in self._networks:
+            try:
+                hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
+            except ValueError as err:
+                raise BobcatSearchNetworkError(str(err))
+
+            if host := asyncio.run(self._search(hosts)):
+                self._logger.debug(f"Found to bobcat: {host}")
+                return host
+
+        else:
+            raise BobcatNotFoundError(
+                f"Unable to find the bobcat{' (' + self._animal + ')' if self._animal else ''} in these networks: {', '.join(self._networks)}"
+            )
 
     def can_connect(self, port=80, timeout=3) -> bool:
         """Verify network connectivity.
@@ -44,7 +179,7 @@ class BobcatConnection(BobcatBase):
             timeout (int, optional): The socket timeout. Defaults to 3 minutes.
         """
         try:
-            socket.setdefaulttimeout(timeout)  # minutes
+            socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self._hostname, port))
         except OSError as err:
@@ -54,130 +189,6 @@ class BobcatConnection(BobcatBase):
         finally:
             s.close()
             return result
-
-    async def is_a_bobcat(self, host, search_mode=False) -> (bool, str):
-        """Connect to the host and check that it is a Bobcat and or matches the specified animal name.
-
-        Args:
-            host (str): The host to check.
-            search_mode (bool, optional): Running is search mode e.g. return False instead of raising BobcatConnectionError. Defaults to False
-        """
-
-        # The host is not the bobcat if we cannot connect
-        html = None
-        try:
-            timeout = aiohttp.ClientTimeout(sock_connect=1, sock_read=5)
-
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-
-                async with session.get(f"http://{host}/") as response:
-
-                    html = await response.text()
-
-        except Exception as err:
-            if search_mode:
-                return False
-            else:
-                raise BobcatConnectionError(f"Cannot connect to {host}: {err}")
-
-        try:
-            soup = BeautifulSoup(html, "html.parser")
-
-            # The host is not a bobcat if it does not have a bobcat diagnoser page
-            if "Diagnoser - Bobcatminer Diagnostic Dashboard" in soup.title:
-                self._logger.debug(f"Connected to Bobcat: {host}")
-
-            else:
-                if search_mode:
-                    return False
-                else:
-                    raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
-        except Exception as err:
-            raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
-
-        # The host is not the bobcat if the animal name does not match
-        if self._animal:
-            try:
-                self._miner_data = self.__get("http://" + host + "/miner.json").json()
-
-                if self._trace:
-                    self._logger.debug(
-                        "Refresh: Miner Data",
-                        extra={
-                            "description": f"\n```\n{json.dumps(self._miner_data, indent=4)}\n```"
-                        },
-                    )
-                else:
-                    self._logger.debug("Refresh: Miner Data")
-
-                bobcat_animal = self._miner_data.get("animal")
-
-            except Exception as err:
-                self._logger.exception(err)
-                raise BobcatConnectionError(f"Connected to the ({host}) but it is not a Bobcat")
-
-            # normalize from Helium animal name format (e.g. Fancy Awesome Bobcat) to the Bobcat animal name format (e.g. fancy-awesome-bobcat)
-            normalized_animal = (
-                str(self._animal).strip().strip("'").strip('"').lower().replace(" ", "-")
-                if self._animal
-                else None
-            )
-
-            if normalized_animal == bobcat_animal:
-                self._logger.debug(f"Verified Bobcat Animal: {self._animal}")
-
-            else:
-                if search_mode:
-                    return False
-                else:
-                    raise BobcatConnectionError(
-                        f"Connected to the ({bobcat_animal}) bobcat on host ({host}) but we are looking for ({normalized_animal})"
-                    )
-
-        # This is the bobcat we are looking for ✨ 🍰 ✨
-        return host
-
-    def find(self) -> None:
-        """Find a Bobcat in a network. In the case of multiple bobcats, the first occurrence will be returned.
-
-        All hosts in the network will be searched concurrently. Each host will be checked for HTTP connection, followed by a bobcat diagnoser check, and an animal name check if specified.
-        """
-
-        # https://www.twilio.com/blog/asynchronous-http-requests-in-python-with-aiohttp
-
-        self._logger.debug(
-            f"Searching for {'(' + self._animal + ')' if self._animal else 'a bobcat'} in these networks: {', '.join(self._networks)}"
-        )
-
-        async def __find(host) -> (str, None):
-            """Create concurrent futures for is_a_bobcat and process them as they complete. Return when the bobcat is found and do not wait for other futures to complete."""
-
-            # create concurrent future tasks for "is_a_bobcat()"
-            tasks = [
-                asyncio.ensure_future(self.is_a_bobcat(host, search_mode=True)) for host in host
-            ]
-
-            # process tasks as they complete for truthy host
-            for task in asyncio.as_completed(tasks):
-                host = await task
-                if host:
-                    # end the search now that we found the host
-                    return host
-            else:
-                return None
-
-        for network in self._networks:
-            # get list of hosts in the network
-            hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
-
-            # search for bobcat in hosts
-            if hostname := asyncio.run(__find(hosts)):
-                return hostname
-
-        else:
-            raise BobcatConnectionError(
-                f"Unable to find {'the (' + self._animal + ')' if self._animal else 'and connect to a'} bobcat in these networks: {', '.join(self._networks)}"
-            )
 
     @backoff.on_exception(
         backoff.expo,

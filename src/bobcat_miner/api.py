@@ -42,21 +42,9 @@ class BobcatAPI(BobcatConnection):
 
     def refresh_miner(self) -> BobcatAPI:
         """Refresh Bobcat miner data."""
-        self._miner_data = self._BobcatConnection__get(
-            "http://" + self._hostname + "/miner.json"
-        ).json()
 
-        if self._trace:
-            self._logger.debug(
-                "Refresh: Miner Data",
-                extra={"description": f"{json.dumps(self._miner_data, indent=4)}"},
-            )
-        else:
-            self._logger.debug("Refresh: Miner Data")
+        self._BobcatConnection__refresh_miner()
 
-        if self._miner_data == {"message": "rate limit exceeded"}:
-            time.sleep(30)
-            self.refresh_miner()
         return self
 
     def refresh_speed(self) -> BobcatAPI:
@@ -145,44 +133,32 @@ class BobcatAPI(BobcatConnection):
             self.refresh_dig()
         return self
 
-    def reboot(self) -> str:
+    def __reboot(self) -> str:
         """Reboot the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44076
-        if self._dry_run:
-            self._logger.warning("Dry run is enabled: Reboot Skipped")
-        else:
-            self._logger.warning("Rebooting Bobcat")
-            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
-            return self.__parse_html(resp.text)
+        self._logger.warning("Rebooting Bobcat")
+        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
+        return self.__parse_html(resp.text)
 
-    def reset(self) -> str:
+    def __reset(self) -> str:
         """Reset the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4412
-        if self._dry_run:
-            self._logger.warning("Dry run is enabled: Reset Skipped")
-        else:
-            self._logger.warning("Resetting Bobcat")
-            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
-            return self.__parse_html(resp.text)
+        self._logger.warning("Resetting Bobcat")
+        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
+        return self.__parse_html(resp.text)
 
-    def resync(self) -> str:
+    def __resync(self) -> str:
         """Resync the Bobcat."""
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44130
-        if self._dry_run:
-            self._logger.warning("Dry run is enabled: Resync Skipped")
-        else:
-            self._logger.warning("Resyncing Bobcat")
-            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
-            return self.__parse_html(resp.text)
+        self._logger.warning("Resyncing Bobcat")
+        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
+        return self.__parse_html(resp.text)
 
-    def fastsync(self) -> str:
+    def __fastsync(self) -> str:
         """Fastsync the Bobcat."""
-        if self._dry_run:
-            self._logger.warning("Dry run is enabled: Fastsync Skipped")
-        else:
-            self._logger.warning("Fastsyncing Bobcat")
-            resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")
-            return self.__parse_html(resp.text)
+        self._logger.warning("Fastsyncing Bobcat")
+        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")
+        return self.__parse_html(resp.text)
 
     def __parse_html(self, html) -> str:
         """Parse HTML and return a str

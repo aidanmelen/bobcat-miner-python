@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch, call, mock_open
+from unittest.mock import MagicMock, PropertyMock, patch, call, mock_open
 
 import unittest
 
@@ -24,6 +24,80 @@ from bobcat_miner import (
     # NoPlausibleBlocksInBatchErrorCheck,
     # RPCFailedCheck,
 )
+
+import mock_endpoints
+
+
+class TestOnlineStatusCheck(unittest.TestCase):
+    def setUp(self):
+        self.mock_autopilot = MagicMock()
+        self.mock_autopilot._verbose = False
+        self.mock_autopilot._logger = MagicMock()
+        self.check = OnlineStatusCheck(self.mock_autopilot)
+
+    @patch("requests.get", side_effect=mock_endpoints.mock_helium_api_online)
+    def test_OnlineStatusCheck_when_online(self, mock_requests_get):
+        self.assertFalse(self.check.check())
+
+    @patch("requests.get", side_effect=mock_endpoints.mock_helium_api_offline)
+    def test_OnlineStatusCheck_when_offline(self, mock_requests_get):
+        self.assertTrue(self.check.check())
+
+    @patch("requests.get", side_effect=Exception("Unable to Reach Helium API"))
+    def test_OnlineStatusCheck_when_helium_api_is_unreachable_and_not_running(
+        self, mock_requests_get
+    ):
+        self.assertFalse(self.check.check())
+
+
+class TestSyncStatusCheck(unittest.TestCase):
+    def setUp(self):
+        self.mock_autopilot = MagicMock()
+        self.mock_autopilot._verbose = False
+        self.mock_autopilot._logger = MagicMock()
+        self.mock_autopilot.status = "Syncing"
+        self.check = SyncStatusCheck(self.mock_autopilot)
+
+    def test_SyncStatusCheck_when_not_synced(self):
+        self.mock_autopilot.gap = 10000
+        self.assertTrue(self.check.check())
+
+        self.mock_autopilot.gap = 400
+        self.assertTrue(self.check.check())
+
+        self.mock_autopilot._verbose = True
+        self.assertTrue(self.check.check())
+
+        self.mock_autopilot._logger.assert_has_calls(
+            [
+                call.error("Sync Status: Syncing (gap:10000)", extra={}),
+                call.error("Sync Status: Syncing (gap:400)", extra={}),
+                call.error(
+                    "Sync Status: Syncing (gap:400)", extra={"description": str(self.check)}
+                ),
+            ],
+            any_order=False,
+        )
+
+    def test_SyncStatusCheck_when_synced(self):
+        self.mock_autopilot.gap = 300
+        self.assertFalse(self.check.check())
+
+        self.mock_autopilot.gap = 10
+        self.assertFalse(self.check.check())
+
+        self.mock_autopilot.status = "Synced"
+        self.mock_autopilot.gap = -10
+        self.assertFalse(self.check.check())
+
+        self.mock_autopilot._logger.assert_has_calls(
+            [
+                call.info("Sync Status: Syncing (gap:300) 💫"),
+                call.info("Sync Status: Syncing (gap:10) 💫"),
+                call.info("Sync Status: Synced (gap:-10) 💫"),
+            ],
+            any_order=False,
+        )
 
 
 class TestRelayStatusCheck(unittest.TestCase):
@@ -94,56 +168,6 @@ class TestRelayStatusCheck(unittest.TestCase):
         )
         self.assertFalse(self.check.check())
         self.mock_autopilot._logger.info.assert_called_once_with("Relay Status: Not Relayed ✨")
-
-
-class TestSyncStatusCheck(unittest.TestCase):
-    def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._verbose = False
-        self.mock_autopilot._logger = MagicMock()
-        self.mock_autopilot.status = "Syncing"
-        self.check = SyncStatusCheck(self.mock_autopilot)
-
-    def test_SyncStatusCheck_when_not_synced(self):
-        self.mock_autopilot.gap = 10000
-        self.assertTrue(self.check.check())
-
-        self.mock_autopilot.gap = 400
-        self.assertTrue(self.check.check())
-
-        self.mock_autopilot._verbose = True
-        self.assertTrue(self.check.check())
-
-        self.mock_autopilot._logger.assert_has_calls(
-            [
-                call.error("Sync Status: Syncing (gap:10000)", extra={}),
-                call.error("Sync Status: Syncing (gap:400)", extra={}),
-                call.error(
-                    "Sync Status: Syncing (gap:400)", extra={"description": str(self.check)}
-                ),
-            ],
-            any_order=False,
-        )
-
-    def test_SyncStatusCheck_when_synced(self):
-        self.mock_autopilot.gap = 300
-        self.assertFalse(self.check.check())
-
-        self.mock_autopilot.gap = 10
-        self.assertFalse(self.check.check())
-
-        self.mock_autopilot.status = "Synced"
-        self.mock_autopilot.gap = -10
-        self.assertFalse(self.check.check())
-
-        self.mock_autopilot._logger.assert_has_calls(
-            [
-                call.info("Sync Status: Syncing (gap:300) ✨"),
-                call.info("Sync Status: Syncing (gap:10) ✨"),
-                call.info("Sync Status: Synced (gap:-10) ✨"),
-            ],
-            any_order=False,
-        )
 
 
 class TestNetworkStatusCheck(unittest.TestCase):
