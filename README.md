@@ -20,7 +20,7 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 
 ## Quick Start
 
-The `bobcat autopilot` command will automatically diagnose and repair the Bobcat miner!
+Automatically diagnose and repair the Bobcat miner!
 
 ```bash
 $ bobcat autopilot
@@ -31,13 +31,13 @@ $ bobcat autopilot
 ✅ Temperature Status: Good (38°C) ☀️
 ```
 
-or run with the offical Docker image
+or run with the official Docker image
 
 ```bash
 $ docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
-Run `bobcat --help` to learn about the available commands and options.
+Run `bobcat --help` to learn about the available sub-commands and options.
 
 ## Finding your Bobcat
 
