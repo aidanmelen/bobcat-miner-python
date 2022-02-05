@@ -1,4 +1,5 @@
 from typing import List
+from bs4 import BeautifulSoup
 
 import time
 
@@ -309,12 +310,22 @@ class Bobcat(BobcatAPI):
             self.refresh_dig()
         return self._dig_data.get("records", [])
 
+    def _parse_html(self, html) -> str:
+        """Parse HTML and return a str
+        Args:
+            html (str): The HTML to be parsed.
+        Returns:
+            (str): The parsed HTML response payload.
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        return soup.get_text(separator="\n")
+
     def reboot(self) -> None:
         """Reboot the Bobcat and wait."""
         if self._dry_run:
             self._logger.warning("Dry run is enabled: Reboot Skipped")
         else:
-            self._logger.debug(self._BobcatAPI__reboot())
+            self._logger.debug(self._parse_html(self._BobcatAPI__reboot().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
@@ -323,7 +334,7 @@ class Bobcat(BobcatAPI):
         if self._dry_run:
             self._logger.warning("Dry run is enabled: Reset Skipped")
         else:
-            self._logger.debug(self._BobcatAPI__reset())
+            self._logger.debug(self._parse_html(self._BobcatAPI__reset().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
@@ -332,27 +343,26 @@ class Bobcat(BobcatAPI):
         if self._dry_run:
             self._logger.warning("Dry run is enabled: Resync Skipped")
         else:
-            self.refresh_status()
-
-            if not self.gap or isinstance(self.gap, int):
-                self._logger.error(
-                    f"Cancelling the Resync. Unable to read the blockchain gap ({self.gap})"
-                )
-                return
-
-            self._logger.debug(self._BobcatAPI__resync())
+            self._logger.debug(self._parse_html(self._BobcatAPI__resync().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
-            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
 
     def fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
         if self._dry_run:
             self._logger.warning("Dry run is enabled: Fastsync Skipped")
         else:
-            if not self.gap or isinstance(self.gap, int):
+            self.refresh_status()
+
+            if not isinstance(self.gap, int):
                 self._logger.error(
                     f"Cancelling the Fastsync. Unable to read the blockchain gap ({self.gap})"
+                )
+                return
+
+            if self.gap <= 400:
+                self._logger.warning(
+                    f"Cancelling Fastsync because it only works when the gap is larger than 400. The current gap is: {self.gap}"
                 )
                 return
 
@@ -362,16 +372,9 @@ class Bobcat(BobcatAPI):
                 )
                 return
 
-            if self.gap <= 400:
-                self._logger.debug(
-                    f"Cancelling Fastsync because it only works when the gap is larger than 400. The current gap is: {self.gap}"
-                )
-                return
-
-            self._logger.debug(self._BobcatAPI__fastsync())
+            self._logger.debug(self._parse_html(self._BobcatAPI__fastsync().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
-            self.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
 
     def wait(self, duration) -> None:
         """Wait.
@@ -386,8 +389,8 @@ class Bobcat(BobcatAPI):
         """Wait for a Bobcat connection.
 
         Args:
-            backoff_duration (int, optional): A backoff duration of time in seconds to wait after connection attempts.
-            max_attempts (int, optional): The max number of attempts before giving up.
+            backoff_duration int: A backoff duration of time in seconds to wait after connection attempts.
+            max_attempts int: The max number of attempts before giving up.
         """
         attempt_count = 0
         while not self.can_connect():
@@ -405,8 +408,8 @@ class Bobcat(BobcatAPI):
         """Wait until the Bobcat is running.
 
         Args:
-            backoff_duration (int, optional): A backoff duration of time in seconds to wait after status attempts.
-            max_attempts (int, optional): The max number of attempts before giving up.
+            backoff_duration int: A backoff duration of time in seconds to wait after status attempts.
+            max_attempts int: The max number of attempts before giving up.
         """
         refresh_kwargs = {
             "status": True,

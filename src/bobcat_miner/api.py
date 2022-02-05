@@ -1,6 +1,6 @@
 from __future__ import annotations
-from bs4 import BeautifulSoup
 from typing import List
+from requests import Response
 
 import json
 import time
@@ -22,7 +22,10 @@ class BobcatAPI(BobcatConnection):
         super().__init__(*args, **kwargs)
 
     def refresh_status(self) -> BobcatAPI:
-        """Refresh Bobcat status data."""
+        """Refresh Bobcat status data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
         self._status_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/status.json"
         ).json()
@@ -41,14 +44,20 @@ class BobcatAPI(BobcatConnection):
         return self
 
     def refresh_miner(self) -> BobcatAPI:
-        """Refresh Bobcat miner data."""
+        """Refresh Bobcat miner data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
 
         self._BobcatConnection__refresh_miner()
 
         return self
 
     def refresh_speed(self) -> BobcatAPI:
-        """Refresh Bobcat network speed data."""
+        """Refresh Bobcat network speed data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4407606223899-Netspeed-Blockchain-Reboot
         self._speed_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/speed.json"
@@ -75,7 +84,10 @@ class BobcatAPI(BobcatConnection):
         return self
 
     def refresh_temp(self) -> BobcatAPI:
-        """Refresh Bobcat temperature data."""
+        """Refresh Bobcat temperature data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
         self._temp_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/temp.json"
         ).json()
@@ -94,7 +106,10 @@ class BobcatAPI(BobcatConnection):
         return self
 
     def refresh_dig(self) -> BobcatAPI:
-        """Refresh Bobcat DNS data."""
+        """Refresh Bobcat DNS data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
         self._dig_data = self._BobcatConnection__get(
             "http://" + self._hostname + "/dig.json"
         ).json()
@@ -120,7 +135,16 @@ class BobcatAPI(BobcatConnection):
         speed: bool = True,
         dig: bool = True,
     ) -> BobcatAPI:
-        """Refresh data for the Bobcat."""
+        """Refresh data for the Bobcat.
+        Args:
+            status (bool): Whether to refresh the Bobcat status data.
+            miner (bool): Whether to refresh the Bobcat miner data.
+            temp (bool): Whether to refresh the Bobcat temperature data.
+            speed (bool): Whether to refresh the Bobcat network speed data.
+            dig (bool): Whether to refresh the Bobcat DNS data.
+        Returns:
+            (BobcatAPI): The instance of the BobcatAPI.
+        """
         if status:
             self.refresh_status()
         if miner:
@@ -133,38 +157,37 @@ class BobcatAPI(BobcatConnection):
             self.refresh_dig()
         return self
 
-    def __reboot(self) -> str:
-        """Reboot the Bobcat."""
+    def __reboot(self) -> Response:
+        """Reboot the Bobcat.
+        Returns:
+            (str): The response.
+        """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44076
         self._logger.warning("Rebooting Bobcat")
-        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
-        return self.__parse_html(resp.text)
+        return self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
 
-    def __reset(self) -> str:
-        """Reset the Bobcat."""
+    def __reset(self) -> Response:
+        """Reset the Bobcat.
+        Returns:
+            (str): The response.
+        """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4412
         self._logger.warning("Resetting Bobcat")
-        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
-        return self.__parse_html(resp.text)
+        return self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
 
-    def __resync(self) -> str:
-        """Resync the Bobcat."""
+    def __resync(self) -> Response:
+        """Resync the Bobcat.
+        Returns:
+            (Response): The response.
+        """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44130
         self._logger.warning("Resyncing Bobcat")
-        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
-        return self.__parse_html(resp.text)
+        return self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
 
-    def __fastsync(self) -> str:
-        """Fastsync the Bobcat."""
-        self._logger.warning("Fastsyncing Bobcat")
-        resp = self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")
-        return self.__parse_html(resp.text)
-
-    def __parse_html(self, html) -> str:
-        """Parse HTML and return a str
-
-        Args:
-            html (str): The HTML to be parsed.
+    def __fastsync(self) -> Response:
+        """Fastsync the Bobcat.
+        Returns:
+            (str): The response.
         """
-        soup = BeautifulSoup(html, "html.parser")
-        return soup.get_text(separator="\n")
+        self._logger.warning("Fastsyncing Bobcat")
+        return self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")

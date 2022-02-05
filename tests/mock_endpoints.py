@@ -1,4 +1,5 @@
 """Mock bobcat"""
+from unittest.mock import MagicMock
 from requests.models import Response
 
 import json
@@ -119,6 +120,19 @@ def mock_synced_bobcat(*args, **kwargs):
                 ],
             }
         )
+
+    elif "/admin/reboot" in request_url:
+        response_content = "Rebooting hotspot"
+
+    elif "/admin/reset" in request_url:
+        response_content = "1: Your miner is going to rest<br>3: Housekeeper was sent home<br>3: Docker is going to be stopped<br>4: Boom! Old blockchain data gone<br>5: Boom! miner gone<br>6: Housekeeper is back, but everything is gone<br>7: Rebuilding everything<br>8: Cleaning up<br>Bam! Miner successfully restarted, but it may take 30 minutes to load files from internet. Please be patient. 2022-01-20 17:39:06 +0000 UTC<br>"
+
+    elif "/admin/resync" in request_url:
+        response_content = "1: Your miner is going to rest<br>2: Docker is going to be stopped<br>3: Boom! Old blockchain data gone<br>4: Bam! Rebuilding miner data<br>Miner successfully restarted, but it may take 30 minutes to load files from internet, please be patient. 2022-01-20 18:12:28 +0000 UTC<br>"
+
+    elif "/admin/fastsync" in request_url:
+        response_content = "Syncing your miner, please leave your power on."
+
     response = Response()
     response.status_code = 200
     response._content = str.encode(response_content)
@@ -217,6 +231,7 @@ def mock_helium_api_offline(*args, **kwargs):
             }
         }
     )
+
     response = Response()
     response.status_code = 200
     response._content = str.encode(response_content)

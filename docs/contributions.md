@@ -16,10 +16,17 @@ Then get a shell in the `bobcat-miner-python-dev` container.
 
 ```
 $ docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
-root@bobcat-miner-python-dev:/app#
+root@bobcat-miner-python-dev:/app# bobcat --help
+Usage: bobcat [OPTIONS] COMMAND [ARGS]...
+
+  Bobcat miner command line tools.
+
+...
 ```
 
-This dev container is networked with the fake bobcat service call `fancy-awesome-bobcat`.
+This dev container is networked with a fake bobcat service with the hostname: `fancy-awesome-bobcat`.
+
+**Note:** The default environment variable configuration is set in the docker-compose.yml file and can be overridden with command line option.
 
 ```
 $ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
@@ -58,7 +65,7 @@ docker compose down
 
 Please see the [docker-compose.yml](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docker-compose.yml) for more information.
 
-## Tests
+## Test
 
 Run unittests
 

@@ -22,8 +22,8 @@ sudo apt install -y docker-ce
 Build the image for raspberry pi
 
 ```
-$ git clone https://github.com/aidanmelen/bobcat-miner-python.git
-$ sudo docker build -f bobcat-miner-python/Dockerfile.arm -t bobcat .
+$ git clone https://github.com/aidanmelen/bobcat-miner-python.git && cd bobcat-miner-python
+$ sudo docker build -f Dockerfile.arm -t bobcat .
 ```
 
 Create a file called `/home/pi/bobcat-autopilot.env` with your configuration information

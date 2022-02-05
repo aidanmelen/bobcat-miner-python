@@ -40,9 +40,10 @@ class BobcatConnection(BobcatBase):
 
     def __refresh_miner(self, hostname=None) -> BobcatConnection:
         """Refresh Bobcat miner data.
-
         Args:
-            hostname (str): The hostname to refresh miner data.
+            hostname (str): The hostname to refresh miner data. This will override the class variable for hostname.
+        Returns:
+            (BobcatConnection): The instance of the BobcatConnection.
         """
 
         _hostname = hostname if hostname else self._hostname
@@ -64,9 +65,10 @@ class BobcatConnection(BobcatBase):
 
     async def _get_homepage(self, host) -> str:
         """Get the home page for the host.
-
         Args:
             host (str): The host to check.
+        Returns:
+            (str): The homepage content for the host.
         """
         try:
             timeout = aiohttp.ClientTimeout(sock_connect=1, sock_read=5)
@@ -82,9 +84,10 @@ class BobcatConnection(BobcatBase):
 
     def _does_bobcat_match_animal(self, host) -> bool:
         """The host is not the bobcat if the animal name does not match.
-
         Args:
             host (str): The host to check.
+        Returns:
+            (bool): Whether or not the bobcat animal matches the search animal.
         """
         self.__refresh_miner(hostname=host)
 
@@ -104,9 +107,10 @@ class BobcatConnection(BobcatBase):
 
     async def verify(self, host) -> Tuple[bool, str]:
         """Verify the host is a Bobcat.
-
         Args:
             host (str): The host to check.
+        Returns:
+            (Tuple[bool, str]): A tuple containing the verification result and the hostname that was tested.
         """
         is_bobcat_verified = False
 
@@ -129,9 +133,10 @@ class BobcatConnection(BobcatBase):
 
     async def _search(self, hosts) -> (str, None):
         """Concurrently search hosts in network and return the host for the first verified bobcat found.
-
         Args:
             hosts (List[str]): The hosts to search.
+        Returns:
+            (str, None): The IP address for the host when found otherwise None.
         """
 
         tasks = [asyncio.ensure_future(self.verify(host)) for host in hosts]
@@ -147,8 +152,9 @@ class BobcatConnection(BobcatBase):
 
     def find(self) -> str:
         """Find a Bobcat on the local network.
-
-        Side Effect:
+        Returns:
+            (str): The hostname for the bobcat found in the local network.
+        Raises:
             A BobcatNotFoundError is raised when a bobcat is not found in local networks.
         """
 
@@ -173,7 +179,6 @@ class BobcatConnection(BobcatBase):
 
     def can_connect(self, port=80, timeout=3) -> bool:
         """Verify network connectivity.
-
         Args:
             port (int, optional): The socket port. Defaults to port 80.
             timeout (int, optional): The socket timeout. Defaults to 3 minutes.
