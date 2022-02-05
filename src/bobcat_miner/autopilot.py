@@ -46,7 +46,11 @@ class BobcatAutopilot(Bobcat):
             sys.exit(1)  # 👋
 
     @property
-    def checks(self):
+    def checks(self) -> List(BobcatCheck):
+        """Diagnostic checks.
+        Returns:
+            List(BobcatCheck): Diagnostic checks.
+        """
         return (
             OnlineStatusCheck(self),
             SyncStatusCheck(self),
@@ -56,6 +60,9 @@ class BobcatAutopilot(Bobcat):
             OTAVersionStatusCheck(self),
             DownOrErrorCheck(self),
             HeightAPIErrorCheck(self),
+
+            # TODO checks not implemented
+
             # NoActivityCheck(self),
             # NoWitnessesCheck(self),
             # BlockChecksumMismatchErrorCheck(self),
@@ -70,7 +77,7 @@ class BobcatAutopilot(Bobcat):
             # RPCFailedCheck(self),
         )
 
-    def run(self):
+    def run(self) -> None:
         """Automatically diagnose and repair the Bobcat!"""
         self._logger.debug("The Bobcat Autopilot is starting 🚀 🚀 🚀")
 
