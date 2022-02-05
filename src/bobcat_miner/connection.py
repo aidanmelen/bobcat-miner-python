@@ -32,16 +32,19 @@ class BobcatConnection(BobcatBase):
 
         if self._hostname:
             if not asyncio.run(self.verify(self._hostname))[0]:
-                raise BobcatVerificationError(
-                    f"The bobcat ({self._hostname}) was either not a bobcat or did not match the bobcat animal."
-                )
+                if not self.can_connect(self._hostname):
+                    raise BobcatConnectionError(f"Unable to connect to Bobcat: {self._hostname}")
+                else:
+                    raise BobcatVerificationError(
+                        f"The bobcat ({self._hostname}) was either not a bobcat or did not match the bobcat animal."
+                    )
         else:
             self._hostname = self.find()
 
     def __refresh_miner(self, hostname=None) -> BobcatConnection:
         """Refresh Bobcat miner data.
         Args:
-            hostname (str): The hostname to refresh miner data. This will override the class variable for hostname.
+            hostname hostname (str, optional): The hostname to refresh miner data. This will override the hostname instance attribute.
         Returns:
             (BobcatConnection): The instance of the BobcatConnection.
         """
@@ -177,16 +180,18 @@ class BobcatConnection(BobcatBase):
                 f"Unable to find the bobcat{' (' + self._animal + ')' if self._animal else ''} in these networks: {', '.join(self._networks)}"
             )
 
-    def can_connect(self, port=80, timeout=3) -> bool:
+    def can_connect(self, hostname=None, port=80, timeout=3) -> bool:
         """Verify network connectivity.
         Args:
+            hostname (str, optional): The hostname to test for a connection. This will override the hostname instance attribute.
             port (int, optional): The socket port. Defaults to port 80.
             timeout (int, optional): The socket timeout. Defaults to 3 minutes.
         """
+        _hostname = hostname if hostname else self._hostname
         try:
             socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self._hostname, port))
+            s.connect((_hostname, port))
         except OSError as err:
             result = False
         else:

@@ -31,7 +31,7 @@ class BobcatAutopilot(Bobcat):
             self._logger.critical(str(err))
             sys.exit(1)  # 👋
 
-        except (BobcatVerificationError, BobcatNotFoundError) as err:
+        except (BobcatConnectionError, BobcatVerificationError, BobcatNotFoundError) as err:
             msg = "\n".join(
                 [
                     f"{err}",
