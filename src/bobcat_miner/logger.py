@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from logging import LogRecord
 from logging.handlers import TimedRotatingFileHandler
@@ -32,26 +33,40 @@ class BobcatLogger:
             self.add_log_discord_handler(discord_webhook_url, log_level_discord)
 
     @property
-    def logger(self):
-        """Return logger."""
+    def logger(self) -> BobcatLogger:
+        """Return logger.
+        Returns:
+            (BobcatLogger): The instance of the BobcatLogger.
+        """
         return self._logger
 
     def add_log_console_handler(self, log_level: str) -> None:
-        """Add the console log handler to the logger."""
+        """Add the console log handler to the logger.
+        Args:
+            log_level (str): The log level for the console log handler.
+        """
         console_handler = logging.StreamHandler()
         console_handler.setLevel(log_level.upper())
         console_handler.setFormatter(BobcatLogConsoleFormatter())
         self._logger.addHandler(console_handler)
 
     def add_log_file_handler(self, log_file: str, log_level: str) -> None:
-        """Add the file log handler to the logger."""
+        """Add the file log handler to the logger.
+        Args:
+            log_file (str): The log level for the file log handler.
+            log_level (str): The log level for the file log handler.
+        """
         file_handler = TimedRotatingFileHandler(log_file, when="midnight", backupCount=7)
         file_handler.setLevel(log_level.upper())
         file_handler.setFormatter(BobcatLogFileFormatter())
         self._logger.addHandler(file_handler)
 
     def add_log_discord_handler(self, discord_webhook_url: str, log_level: str) -> None:
-        """Add the Discord log handler to the logger."""
+        """Add the Discord log handler to the logger.
+        Args:
+            discord_webhook_url (str): The Discord webhook url where log events will be sent.
+            log_level (str): The log level for the discord channel log handler.
+        """
 
         discord_webhook_handler = DiscordWebhookHandler(
             url=discord_webhook_url,
@@ -110,8 +125,13 @@ class BobcatLogFileFormatter(logging.Formatter):
 
     FORMAT = "%(asctime)s %(name)s %(levelname)s %(msg)s%(description)s"
 
-    def format(self, record: LogRecord):
-        """Format log records with description attribute"""
+    def format(self, record: LogRecord) -> LogRecord:
+        """Format log records with description attribute
+        Args:
+            record (LogRecord): The log record to format.
+        Returns:
+            (LogRecord): The formatted log record.
+        """
 
         if not hasattr(record, "description"):
             record.description = ""
@@ -137,8 +157,13 @@ class BobcatLogConsoleFormatter(logging.Formatter):
     EMOJI_SEPARATOR = " "
     DESCRIPTION_SEPARATOR = " "
 
-    def format(self, record: LogRecord):
-        """Format log records with a default prefix and suffix to terminal color codes that corresponds to the log level name."""
+    def format(self, record: LogRecord) -> LogRecord:
+        """Format log records with a default prefix and suffix to terminal color codes that corresponds to the log level name.
+        Args:
+            record (LogRecord): The log record to format.
+        Returns:
+            (LogRecord): The formatted log record.
+        """
         if not hasattr(record, "prefix"):
             record.prefix = self.LOG_LEVEL_COLOR.get(record.levelname.upper()).get("prefix")
 
