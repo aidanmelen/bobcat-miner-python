@@ -1,3 +1,4 @@
+from typing import List
 from filelock import Timeout, FileLock
 
 import os
@@ -46,7 +47,7 @@ class BobcatAutopilot(Bobcat):
             sys.exit(1)  # 👋
 
     @property
-    def checks(self) -> List(BobcatCheck):
+    def checks(self) -> List[BobcatCheck]:
         """Diagnostic checks.
         Returns:
             List(BobcatCheck): Diagnostic checks.
@@ -60,9 +61,7 @@ class BobcatAutopilot(Bobcat):
             OTAVersionStatusCheck(self),
             DownOrErrorCheck(self),
             HeightAPIErrorCheck(self),
-
             # TODO checks not implemented
-
             # NoActivityCheck(self),
             # NoWitnessesCheck(self),
             # BlockChecksumMismatchErrorCheck(self),
