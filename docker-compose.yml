@@ -3,7 +3,7 @@ services:
   # fake bobcat miner service
   fancy-awesome-bobcat:
     image: fancy-awesome-bobcat
-    hostname: fancy-awesome-bobcat
+    # hostname: fancy-awesome-bobcat
     container_name: fancy-awesome-bobcat
     ports:
       - "80:80"
@@ -12,6 +12,8 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - ./fancy-awesome-bobcat/src/app:/app
+    networks:
+      - bobcatnet
 
   # bobcat-miner-python command line tools
   bobcat-miner-python-dev:
@@ -19,8 +21,9 @@ services:
     hostname: bobcat-miner-python-dev
     container_name: bobcat-miner-python-dev
     environment:
-      BOBCAT_HOSTNAME: "fancy-awesome-bobcat"
+      # BOBCAT_HOSTNAME: "fancy-awesome-bobcat"
       BOBCAT_ANIMAL: "fancy-awesome-bobcat"
+      BOBCAT_NETWORKS: "192.168.0.0/24 10.0.0.0/24 172.16.0.0/24 172.18.0.0/24"
       BOBCAT_DRY_RUN: "TRUE"
       BOBCAT_VERBOSE: "FALSE"
       BOBCAT_TRACE: "FALSE"
@@ -38,3 +41,14 @@ services:
       target: dev
     volumes:
       - .:/app
+    networks:
+      - bobcatnet
+
+networks:
+    bobcatnet:
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 172.18.0.0/24
+            gateway: 172.18.0.1
