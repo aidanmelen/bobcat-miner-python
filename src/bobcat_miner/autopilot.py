@@ -92,8 +92,7 @@ class BobcatAutopilot(Bobcat):
                     self.bobcat.logger.debug(f"Checking: {check.name}")
 
                     if check.check():
-                        pass
-
+                        
                         for step in check.autopilot_repair_steps:
                             func, args, kwargs = (
                                 step["func"],

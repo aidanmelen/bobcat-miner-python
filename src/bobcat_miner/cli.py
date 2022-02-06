@@ -57,14 +57,6 @@ except:
     help="Dry run where actions are skipped and wait times are 1 second long.",
 )
 @click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    envvar="BOBCAT_VERBOSE",
-    show_envvar=True,
-    help="Verbose diagnostic debug logging.",
-)
-@click.option(
     "--trace",
     "-t",
     is_flag=True,
@@ -164,15 +156,49 @@ def cli(*args, **kwargs) -> None:
     # create bobcat instance
     ctx.obj["BOBCAT"] = Bobcat(**kwargs)
 
-    # pass bobcat instance to the autopilot
-    ctx.obj["AUTOPILOT"] = BobcatAutopilot(ctx.obj["BOBCAT"])
 
 
 @cli.command()
 @click.pass_context
-def autopilot(ctx) -> None:
+@click.option(
+    "--lock-file",
+    "-L",
+    required=False,
+    default=".bobcat.lock",
+    show_default=True,
+    type=click.Path(writable=True),
+    envvar="BOBCAT_LOCK_FILE",
+    show_envvar=True,
+    help="The lock file path.",
+)
+@click.option(
+    "--state-file",
+    "-s",
+    required=False,
+    default=".bobcat.json",
+    show_default=True,
+    type=click.Path(writable=True),
+    envvar="BOBCAT_STATE_FILE",
+    show_envvar=True,
+    help="The state file path.",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    envvar="BOBCAT_VERBOSE",
+    show_envvar=True,
+    help="Verbose diagnostic debug logging.",
+)
+def autopilot(*args, **kwargs) -> None:
     """Automatically diagnose and repair the Bobcat miner."""
-    ctx.obj["AUTOPILOT"].run()
+    ctx = args[0]
+
+    bobcat = ctx.obj["BOBCAT"]
+    lock_file = kwargs["lock_file"]
+    state_file = kwargs["state_file"]
+    verbose = kwargs["verbose"]
+    BobcatAutopilot(bobcat, lock_file, state_file, verbose).run()
 
 
 @cli.command()
