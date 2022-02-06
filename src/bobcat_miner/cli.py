@@ -157,7 +157,6 @@ def cli(*args, **kwargs) -> None:
     ctx.obj["BOBCAT"] = Bobcat(**kwargs)
 
 
-
 @cli.command()
 @click.pass_context
 @click.option(
