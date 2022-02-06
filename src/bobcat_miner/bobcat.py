@@ -2,6 +2,7 @@ from typing import List
 from bs4 import BeautifulSoup
 
 import time
+import sys
 
 try:
     from api import BobcatAPI
@@ -21,7 +22,28 @@ class Bobcat(BobcatAPI):
     """A class for the Bobcat miner."""
 
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+
+        try:
+            super().__init__(*args, **kwargs)
+
+        except BobcatSearchNetworkError as err:
+            self.logger.critical(str(err))
+            sys.exit(1)  # 👋
+
+        except (BobcatConnectionError, BobcatVerificationError, BobcatNotFoundError) as err:
+            msg = "\n".join(
+                [
+                    f"{err}",
+                    "Please verify the IP address and network connection",
+                    "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser",
+                ]
+            )
+            self.logger.critical(msg)
+            sys.exit(1)  # 👋
+
+        except Exception as err:
+            self.logger.exception(f"An unexpected error has occurred: {str(err)}")
+            sys.exit(1)  # 👋
 
     @property
     def status(self):
@@ -323,56 +345,56 @@ class Bobcat(BobcatAPI):
     def reboot(self) -> None:
         """Reboot the Bobcat and wait."""
         if self._dry_run:
-            self._logger.warning("Dry run is enabled: Reboot Skipped")
+            self.logger.warning("Dry run is enabled: Reboot Skipped")
         else:
-            self._logger.debug(self._parse_html(self._BobcatAPI__reboot().text))
+            self.logger.debug(self._parse_html(self._BobcatAPI__reboot().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
     def reset(self) -> None:
         """Reset the Bobcat and wait."""
         if self._dry_run:
-            self._logger.warning("Dry run is enabled: Reset Skipped")
+            self.logger.warning("Dry run is enabled: Reset Skipped")
         else:
-            self._logger.debug(self._parse_html(self._BobcatAPI__reset().text))
+            self.logger.debug(self._parse_html(self._BobcatAPI__reset().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
     def resync(self) -> None:
         """Resync the Bobcat and wait."""
         if self._dry_run:
-            self._logger.warning("Dry run is enabled: Resync Skipped")
+            self.logger.warning("Dry run is enabled: Resync Skipped")
         else:
-            self._logger.debug(self._parse_html(self._BobcatAPI__resync().text))
+            self.logger.debug(self._parse_html(self._BobcatAPI__resync().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
     def fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
         if self._dry_run:
-            self._logger.warning("Dry run is enabled: Fastsync Skipped")
+            self.logger.warning("Dry run is enabled: Fastsync Skipped")
         else:
             self.refresh_status()
 
             if not isinstance(self.gap, int):
-                self._logger.error(
+                self.logger.error(
                     f"Cancelling the Fastsync. Unable to read the blockchain gap ({self.gap})"
                 )
                 return
 
             if self.gap <= 400:
-                self._logger.warning(
+                self.logger.warning(
                     f"Cancelling Fastsync because it only works when the gap is larger than 400. The current gap is: {self.gap}"
                 )
                 return
 
             if self.status.upper() in ["ERROR", "DOWN"] or self.error or self.miner_alert:
-                self._logger.warning(
+                self.logger.warning(
                     f"Cancelling Fastsync because it can only be run on a healthy Bobcat. The current status is: {self.status}"
                 )
                 return
 
-            self._logger.debug(self._parse_html(self._BobcatAPI__fastsync().text))
+            self.logger.debug(self._parse_html(self._BobcatAPI__fastsync().text))
             self.wait(FIVE_MINUTES)
             self.heartbeat()
 
@@ -382,10 +404,10 @@ class Bobcat(BobcatAPI):
         Args:
             duration (int, optional): An arbitrary duration of time to wait.
         """
-        self._logger.debug(f"Waiting for {int(duration / 60)} Minutes ⏳")
+        self.logger.debug(f"Waiting for {int(duration / 60)} Minutes ⏳")
         time.sleep(duration)
 
-    def wait_for_connection(self, backoff_duration, max_attempts) -> None:
+    def wait_for_connection(self, backoff_duration: int, max_attempts: int) -> None:
         """Wait for a Bobcat connection.
 
         Args:
@@ -394,7 +416,7 @@ class Bobcat(BobcatAPI):
         """
         attempt_count = 0
         while not self.can_connect():
-            self._logger.warning(f"The Bobcat ({self.animal}) is unreachable")
+            self.logger.warning(f"The Bobcat ({self.animal}) is unreachable")
 
             self.wait(backoff_duration)
 
@@ -404,7 +426,7 @@ class Bobcat(BobcatAPI):
                     f"Waited for {int(int(backoff_duration * max_attempts) / 60)} minute{'s' if backoff_duration > 60 else ''} and still cannot connect to {self._hostname}"
                 )
 
-    def wait_until_running(self, backoff_duration, max_attempts) -> None:
+    def wait_until_running(self, backoff_duration: int, max_attempts: int) -> None:
         """Wait until the Bobcat is running.
 
         Args:
@@ -423,20 +445,20 @@ class Bobcat(BobcatAPI):
         attempt_count = 0
         while self.miner_state.lower() != "running":
 
-            self._logger.warning(f"The Bobcat ({self.animal}) is not running")
+            self.logger.warning(f"The Bobcat ({self.animal}) is not running")
 
             self.wait(backoff_duration)
 
             attempt_count += 1
             if attempt_count >= max_attempts:
-                self._logger.warning(
+                self.logger.warning(
                     f"Waited for {int(int(backoff_duration * max_attempts) / 60)} minute{'s' if backoff_duration > 60 else ''} and still not running"
                 )
                 break
 
             self.refresh(**refresh_kwargs)
 
-    def heartbeat(self, backoff_duration=FIVE_MINUTES, max_attempts=12) -> None:
+    def heartbeat(self, backoff_duration: int = FIVE_MINUTES, max_attempts: int = 12) -> None:
         """Heartbeat check for a Bobcat. Checks connection and running status. Default total wait time is 1 hour (12 attempts * 5 min).
 
         Args:
@@ -445,4 +467,4 @@ class Bobcat(BobcatAPI):
         """
         self.wait_for_connection(backoff_duration, max_attempts)
         self.wait_until_running(backoff_duration, max_attempts)
-        self._logger.info(f"Reconnected to the Bobcat ({self.animal})")
+        self.logger.info(f"Reconnected to the Bobcat ({self.animal})")

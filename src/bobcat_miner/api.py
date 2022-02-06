@@ -31,12 +31,12 @@ class BobcatAPI(BobcatConnection):
         ).json()
 
         if self._trace:
-            self._logger.debug(
+            self.logger.debug(
                 "Refresh: Status Data",
                 extra={"description": f"\n```\n{json.dumps(self._status_data, indent=4)}\n```"},
             )
         else:
-            self._logger.debug("Refresh: Status Data")
+            self.logger.debug("Refresh: Status Data")
 
         if self._status_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -64,12 +64,12 @@ class BobcatAPI(BobcatConnection):
         ).json()
 
         if self._trace:
-            self._logger.debug(
+            self.logger.debug(
                 "Refresh: Network Speed Data",
                 extra={"description": f"\n```\n{json.dumps(self._speed_data, indent=4)}\n```"},
             )
         else:
-            self._logger.debug("Refresh: Network Speed Data")
+            self.logger.debug("Refresh: Network Speed Data")
 
         if (self._speed_data == {"message": "rate limit exceeded"}) or (
             self._speed_data
@@ -93,12 +93,12 @@ class BobcatAPI(BobcatConnection):
         ).json()
 
         if self._trace:
-            self._logger.debug(
+            self.logger.debug(
                 "Refresh: Temperature Data",
                 extra={"description": f"\n```\n{json.dumps(self._temp_data, indent=4)}\n```"},
             )
         else:
-            self._logger.debug("Refresh: Temperature Data")
+            self.logger.debug("Refresh: Temperature Data")
 
         if self._temp_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -115,12 +115,12 @@ class BobcatAPI(BobcatConnection):
         ).json()
 
         if self._trace:
-            self._logger.debug(
+            self.logger.debug(
                 "Refresh: DNS Data",
                 extra={"description": f"\n```\n{json.dumps(self._dig_data, indent=4)}\n```"},
             )
         else:
-            self._logger.debug("Refresh: DNS Data")
+            self.logger.debug("Refresh: DNS Data")
 
         if self._dig_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
@@ -163,7 +163,7 @@ class BobcatAPI(BobcatConnection):
             (str): The response.
         """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44076
-        self._logger.warning("Rebooting Bobcat")
+        self.logger.warning("Rebooting Bobcat")
         return self._BobcatConnection__post("http://" + self._hostname + "/admin/reboot")
 
     def __reset(self) -> Response:
@@ -172,7 +172,7 @@ class BobcatAPI(BobcatConnection):
             (str): The response.
         """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/4412
-        self._logger.warning("Resetting Bobcat")
+        self.logger.warning("Resetting Bobcat")
         return self._BobcatConnection__post("http://" + self._hostname + "/admin/reset")
 
     def __resync(self) -> Response:
@@ -181,7 +181,7 @@ class BobcatAPI(BobcatConnection):
             (Response): The response.
         """
         # https://bobcatminer.zendesk.com/hc/en-us/articles/44130
-        self._logger.warning("Resyncing Bobcat")
+        self.logger.warning("Resyncing Bobcat")
         return self._BobcatConnection__post("http://" + self._hostname + "/admin/resync")
 
     def __fastsync(self) -> Response:
@@ -189,5 +189,5 @@ class BobcatAPI(BobcatConnection):
         Returns:
             (str): The response.
         """
-        self._logger.warning("Fastsyncing Bobcat")
+        self.logger.warning("Fastsyncing Bobcat")
         return self._BobcatConnection__post("http://" + self._hostname + "/admin/fastsync")

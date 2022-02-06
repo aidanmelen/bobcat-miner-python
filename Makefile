@@ -33,7 +33,7 @@ down: ## Spin down local dev stack
 	docker-compose down
 
 lint: ## Lint with black
-	docker run --rm --volume "$$(pwd)":/src --workdir /src pyfound/black:latest_release black --line-length 100 . 
+	docker run --rm --volume "$$(pwd)":/app --workdir /app pyfound/black:latest_release black --line-length 100 .
 
 test: ## Build and run dev container
 	docker run --rm -it -v "$$(pwd)":/app $(NAME)-test

@@ -13,5 +13,6 @@ WORKDIR /app
 ENV FLASK_APP /app/server.py
 
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod 0777 /entrypoint.sh
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

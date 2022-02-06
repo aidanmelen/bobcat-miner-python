@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bobcat-miner"
-version = "0.14.9"
+version = "0.14.10"
 authors = ["Aidan Melen <aidanmelen@protonmail.com>"]
 license = "MIT"
 description = "A command line tool used to automate the Bobcat miner. This project also offers a robust python SDK's for interacting with the Bobcat miner."
@@ -21,9 +21,6 @@ requests = "^2.27.0"
 
 [tool.poetry.scripts]
 bobcat = "bobcat_miner.cli:cli"
-
-[tool.poetry.dev-dependencies]
-black = "^21.12b0"
 
 [build-system]
 requires = ["poetry>=0.12"]

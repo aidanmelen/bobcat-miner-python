@@ -41,7 +41,7 @@ class BobcatConnection(BobcatBase):
         else:
             self._hostname = self.find()
 
-    def __refresh_miner(self, hostname=None) -> BobcatConnection:
+    def __refresh_miner(self, hostname: str = None) -> BobcatConnection:
         """Refresh Bobcat miner data.
         Args:
             hostname hostname (str, optional): The hostname to refresh miner data. This will override the hostname instance attribute.
@@ -54,19 +54,19 @@ class BobcatConnection(BobcatBase):
         self._miner_data = self.__get("http://" + _hostname + "/miner.json").json()
 
         if self._trace:
-            self._logger.debug(
+            self.logger.debug(
                 "Refresh: Miner Data",
                 extra={"description": f"{json.dumps(self._miner_data, indent=4)}"},
             )
         else:
-            self._logger.debug("Refresh: Miner Data")
+            self.logger.debug("Refresh: Miner Data")
 
         if self._miner_data == {"message": "rate limit exceeded"}:
             time.sleep(30)
             self.__refresh_miner(hostname=_hostname)
         return self
 
-    async def _get_homepage(self, host) -> str:
+    async def _get_homepage(self, host: str) -> str:
         """Get the home page for the host.
         Args:
             host (str): The host to check.
@@ -85,7 +85,7 @@ class BobcatConnection(BobcatBase):
         except Exception as err:
             return None
 
-    def _does_bobcat_match_animal(self, host) -> bool:
+    def _does_bobcat_match_animal(self, host: str) -> bool:
         """The host is not the bobcat if the animal name does not match.
         Args:
             host (str): The host to check.
@@ -102,13 +102,13 @@ class BobcatConnection(BobcatBase):
         )
 
         if not (does_bobcat_match_animal := normalized_animal == bobcat_animal):
-            self._logger.debug(
+            self.logger.debug(
                 f"Connected to the bobcat ({bobcat_animal}) on host ({host}) but we are looking for bobcat ({normalized_animal})"
             )
 
         return does_bobcat_match_animal
 
-    async def verify(self, host) -> Tuple[bool, str]:
+    async def verify(self, host: str) -> Tuple[bool, str]:
         """Verify the host is a Bobcat.
         Args:
             host (str): The host to check.
@@ -124,7 +124,7 @@ class BobcatConnection(BobcatBase):
             in homepage
         ):
 
-            self._logger.debug(f"Connected to Bobcat: {host}")
+            self.logger.debug(f"Connected to Bobcat: {host}")
 
             does_bobcat_match_animal = (
                 self._does_bobcat_match_animal(host) if self._animal else True
@@ -134,7 +134,7 @@ class BobcatConnection(BobcatBase):
 
         return is_bobcat_verified, host
 
-    async def _search(self, hosts) -> (str, None):
+    async def _search(self, hosts: List[str]) -> (str, None):
         """Concurrently search hosts in network and return the host for the first verified bobcat found.
         Args:
             hosts (List[str]): The hosts to search.
@@ -161,7 +161,7 @@ class BobcatConnection(BobcatBase):
             A BobcatNotFoundError is raised when a bobcat is not found in local networks.
         """
 
-        self._logger.debug(
+        self.logger.debug(
             f"Searching for {'(' + self._animal + ')' if self._animal else 'a bobcat'} in these networks: {', '.join(self._networks)}"
         )
 
@@ -172,7 +172,7 @@ class BobcatConnection(BobcatBase):
                 raise BobcatSearchNetworkError(str(err))
 
             if host := asyncio.run(self._search(hosts)):
-                self._logger.debug(f"Found to bobcat: {host}")
+                self.logger.debug(f"Found to bobcat: {host}")
                 return host
 
         else:
@@ -180,7 +180,7 @@ class BobcatConnection(BobcatBase):
                 f"Unable to find the bobcat{' (' + self._animal + ')' if self._animal else ''} in these networks: {', '.join(self._networks)}"
             )
 
-    def can_connect(self, hostname=None, port=80, timeout=3) -> bool:
+    def can_connect(self, hostname: str = "", port: int = 80, timeout: int = 3) -> bool:
         """Verify network connectivity.
         Args:
             hostname (str, optional): The hostname to test for a connection. This will override the hostname instance attribute.
