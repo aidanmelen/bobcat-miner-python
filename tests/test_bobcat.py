@@ -14,7 +14,7 @@ class TestBobcat(unittest.TestCase):
     """Test Bobcat."""
 
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
-    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.get", side_effect=mock_endpoints.mock_online)
     def setUp(self, mock_requests_get, mock_bobcat_conn_is_bobcat):
         self.mock_hostname = "192.168.0.10"
         self.mock_animal = "fancy-awesome-bobcat"
@@ -40,7 +40,7 @@ class TestBobcat(unittest.TestCase):
         self.assertEqual(self.bobcat.tip, None)
 
     def test_ota_version(self):
-        self.assertEqual(self.bobcat.ota_version, "1.0.2.66")
+        self.assertEqual(self.bobcat.ota_version, "1.0.2.76")
 
     def test_region(self):
         self.assertEqual(self.bobcat.region, "region_us915")
@@ -175,7 +175,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_reboot(self, mock_verify, mock_requests_post, mock_wait, mock_heartbeat):
         Bobcat(hostname=self.mock_hostname, log_level=DISABLED).reboot()
@@ -186,7 +186,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_reset(self, mock_verify, mock_requests_post, mock_wait, mock_heartbeat):
         Bobcat(hostname=self.mock_hostname, log_level=DISABLED).reset()
@@ -197,7 +197,7 @@ class TestBobcat(unittest.TestCase):
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_resync(self, mock_verify, mock_requests_post, mock_wait, mock_heartbeat):
         Bobcat(hostname=self.mock_hostname, log_level=DISABLED).resync()
@@ -208,8 +208,8 @@ class TestBobcat(unittest.TestCase):
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
-    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
+    @patch("requests.get", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.Bobcat.gap", new_callable=PropertyMock, return_value=1000)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_fastsync(
@@ -222,20 +222,20 @@ class TestBobcat(unittest.TestCase):
         mock_heartbeat,
     ):
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.fastsync()
         mock_requests_post.assert_called_once_with(
             f"http://{self.mock_hostname}/admin/fastsync",
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
-        b._logger.debug.assert_has_calls(
+        b.logger.debug.assert_has_calls(
             [call("Refresh: Miner Data"), call("Syncing your miner, please leave your power on.")]
         )
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
-    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
+    @patch("requests.get", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.Bobcat.gap", new_callable=PropertyMock, return_value="mock bad gap")
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_fastsync_should_skip_when_unable_to_read_gap(
@@ -248,18 +248,18 @@ class TestBobcat(unittest.TestCase):
         mock_heartbeat,
     ):
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.fastsync()
-        b._logger.debug.assert_called_once_with("Refresh: Status Data")
-        b._logger.error.assert_called_once_with(
+        b.logger.debug.assert_called_once_with("Refresh: Status Data")
+        b.logger.error.assert_called_once_with(
             "Cancelling the Fastsync. Unable to read the blockchain gap (mock bad gap)"
         )
         self.assertFalse(mock_requests_post.called)
 
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
-    @patch("requests.post", side_effect=mock_endpoints.mock_synced_bobcat)
-    @patch("requests.get", side_effect=mock_endpoints.mock_synced_bobcat)
+    @patch("requests.post", side_effect=mock_endpoints.mock_online)
+    @patch("requests.get", side_effect=mock_endpoints.mock_online)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_fastsync_should_skip_when_gap_is_less_than_400(
         self,
@@ -270,10 +270,10 @@ class TestBobcat(unittest.TestCase):
         mock_heartbeat,
     ):
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.fastsync()
-        b._logger.debug.assert_called_once_with("Refresh: Status Data")
-        b._logger.warning.assert_called_once_with(
+        b.logger.debug.assert_called_once_with("Refresh: Status Data")
+        b.logger.warning.assert_called_once_with(
             "Cancelling Fastsync because it only works when the gap is larger than 400. The current gap is: 0"
         )
         self.assertFalse(mock_requests_post.called)
@@ -282,9 +282,9 @@ class TestBobcat(unittest.TestCase):
     @patch("time.sleep")
     def test_wait(self, mock_sleep, mock_verify):
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.wait(duration=300)
-        b._logger.debug.assert_called_once_with("Waiting for 5 Minutes ⏳")
+        b.logger.debug.assert_called_once_with("Waiting for 5 Minutes ⏳")
         mock_sleep.assert_called_once_with(300)
 
     @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
@@ -295,11 +295,11 @@ class TestBobcat(unittest.TestCase):
         mock_animal.return_value = self.mock_animal
 
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.wait_for_connection(backoff_duration=300, max_attempts=3)
 
         mock_wait.assert_has_calls([call(300), call(300)])
-        b._logger.warning.assert_has_calls(
+        b.logger.warning.assert_has_calls(
             [
                 call(f"The Bobcat ({self.mock_animal}) is unreachable"),
                 call(f"The Bobcat ({self.mock_animal}) is unreachable"),
@@ -316,7 +316,7 @@ class TestBobcat(unittest.TestCase):
         mock_animal.return_value = self.mock_animal
 
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
 
         with self.assertRaises(BobcatConnectionError) as err:
             b.wait_for_connection(backoff_duration=300, max_attempts=3)
@@ -324,8 +324,8 @@ class TestBobcat(unittest.TestCase):
         mock_wait.assert_called_with(300)
         self.assertEqual(mock_wait.call_count, 3)
 
-        b._logger.warning.assert_called_with(f"The Bobcat ({self.mock_animal}) is unreachable")
-        self.assertEqual(b._logger.warning.call_count, 3)
+        b.logger.warning.assert_called_with(f"The Bobcat ({self.mock_animal}) is unreachable")
+        self.assertEqual(b.logger.warning.call_count, 3)
 
     @patch("bobcat_miner.Bobcat.wait")
     @patch("bobcat_miner.Bobcat.animal", new_callable=PropertyMock)
@@ -339,12 +339,12 @@ class TestBobcat(unittest.TestCase):
         mock_animal.return_value = self.mock_animal
 
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.wait_until_running(backoff_duration=300, max_attempts=12)
 
         mock_wait.assert_has_calls([call(300), call(300), call(300)], any_order=False)
 
-        b._logger.warning.assert_has_calls(
+        b.logger.warning.assert_has_calls(
             [
                 call("The Bobcat (fancy-awesome-bobcat) is not running"),
                 call("The Bobcat (fancy-awesome-bobcat) is not running"),
@@ -365,13 +365,13 @@ class TestBobcat(unittest.TestCase):
         mock_animal.return_value = self.mock_animal
 
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.wait_until_running(backoff_duration=300, max_attempts=2)
 
         mock_wait.assert_called_with(300)
         self.assertEqual(mock_wait.call_count, 2)
 
-        b._logger.warning.assert_has_calls(
+        b.logger.warning.assert_has_calls(
             [
                 call("The Bobcat (fancy-awesome-bobcat) is not running"),
                 call("The Bobcat (fancy-awesome-bobcat) is not running"),
@@ -390,12 +390,12 @@ class TestBobcat(unittest.TestCase):
         mock_animal.return_value = self.mock_animal
 
         b = Bobcat(hostname=self.mock_hostname)
-        b._logger = MagicMock()
+        b.logger = MagicMock()
         b.heartbeat(backoff_duration=300, max_attempts=3)
 
         mock_wait_for_connection.assert_called_once_with(300, 3)
         mock_wait_until_running.assert_called_once_with(300, 3)
-        b._logger.info.assert_called_once_with(f"Reconnected to the Bobcat ({self.mock_animal})")
+        b.logger.info.assert_called_once_with(f"Reconnected to the Bobcat ({self.mock_animal})")
 
 
 if __name__ == "__main__":

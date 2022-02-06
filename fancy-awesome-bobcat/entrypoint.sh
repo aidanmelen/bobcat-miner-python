@@ -1,2 +1,2 @@
 #!/bin/bash
-/bin/bash start.sh && sleep infinity
+/bin/bash /app/start.sh; sleep infinity

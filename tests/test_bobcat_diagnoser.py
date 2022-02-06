@@ -1,8 +1,9 @@
-from unittest.mock import MagicMock, PropertyMock, patch, call, mock_open
+from unittest.mock import PropertyMock, AsyncMock, MagicMock, patch, call, mock_open
 
 import unittest
 
 from bobcat_miner import (
+    Bobcat,
     OnlineStatusCheck,
     RelayStatusCheck,
     SyncStatusCheck,
@@ -30,16 +31,15 @@ import mock_endpoints
 
 class TestOnlineStatusCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._verbose = False
-        self.mock_autopilot._logger = MagicMock()
-        self.check = OnlineStatusCheck(self.mock_autopilot)
+        mock_bobcat = MagicMock(spec=Bobcat)
+        mock_bobcat.logger = MagicMock()
+        self.check = OnlineStatusCheck(mock_bobcat, False)
 
-    @patch("requests.get", side_effect=mock_endpoints.mock_helium_api_online)
+    @patch("requests.get", side_effect=mock_endpoints.mock_online)
     def test_OnlineStatusCheck_when_online(self, mock_requests_get):
         self.assertFalse(self.check.check())
 
-    @patch("requests.get", side_effect=mock_endpoints.mock_helium_api_offline)
+    @patch("requests.get", side_effect=mock_endpoints.mock_offline)
     def test_OnlineStatusCheck_when_offline(self, mock_requests_get):
         self.assertTrue(self.check.check())
 
@@ -52,23 +52,23 @@ class TestOnlineStatusCheck(unittest.TestCase):
 
 class TestSyncStatusCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._verbose = False
-        self.mock_autopilot._logger = MagicMock()
-        self.mock_autopilot.status = "Syncing"
-        self.check = SyncStatusCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        self.mock_bobcat.status = "Syncing"
+        mock_verbose = False
+        self.check = SyncStatusCheck(self.mock_bobcat, mock_verbose)
 
     def test_SyncStatusCheck_when_not_synced(self):
-        self.mock_autopilot.gap = 10000
+        self.mock_bobcat.gap = 10000
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot.gap = 400
+        self.mock_bobcat.gap = 400
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Sync Status: Syncing (gap:10000)", extra={}),
                 call.error("Sync Status: Syncing (gap:400)", extra={}),
@@ -80,17 +80,17 @@ class TestSyncStatusCheck(unittest.TestCase):
         )
 
     def test_SyncStatusCheck_when_synced(self):
-        self.mock_autopilot.gap = 300
+        self.mock_bobcat.gap = 300
         self.assertFalse(self.check.check())
 
-        self.mock_autopilot.gap = 10
+        self.mock_bobcat.gap = 10
         self.assertFalse(self.check.check())
 
-        self.mock_autopilot.status = "Synced"
-        self.mock_autopilot.gap = -10
+        self.mock_bobcat.status = "Synced"
+        self.mock_bobcat.gap = -10
         self.assertFalse(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.info("Sync Status: Syncing (gap:300) 💫"),
                 call.info("Sync Status: Syncing (gap:10) 💫"),
@@ -102,13 +102,14 @@ class TestSyncStatusCheck(unittest.TestCase):
 
 class TestRelayStatusCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._logger = MagicMock()
-        self.mock_autopilot.public_ip = "33.117.96.28"
-        self.check = RelayStatusCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        self.mock_bobcat.public_ip = "33.117.96.28"
+        mock_verbose = False
+        self.check = RelayStatusCheck(self.mock_bobcat, mock_verbose)
 
     def test_RelayStatusCheck_when_not_relayed(self):
-        self.mock_autopilot.p2p_status = "\n".join(
+        self.mock_bobcat.p2p_status = "\n".join(
             [
                 "+---------+---------+",
                 "|  name   |result   |",
@@ -120,7 +121,7 @@ class TestRelayStatusCheck(unittest.TestCase):
                 "+---------+---------+",
             ]
         )
-        self.mock_autopilot.peerbook = "\n".join(
+        self.mock_bobcat.peerbook = "\n".join(
             [
                 "+---------------------------------------------+",
                 "|listen_addrs (prioritized)                   |",
@@ -130,13 +131,12 @@ class TestRelayStatusCheck(unittest.TestCase):
             ]
         )
 
-        self.mock_autopilot._verbose = False
         self.assertFalse(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertFalse(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Relay Status: Relayed"),
                 call.error("Relay Status: Relayed", extra={"description": str(self.check)}),
@@ -145,7 +145,7 @@ class TestRelayStatusCheck(unittest.TestCase):
         )
 
     def test_RelayStatusCheck_when_not_relayed(self):
-        self.mock_autopilot.p2p_status = "\n".join(
+        self.mock_bobcat.p2p_status = "\n".join(
             [
                 "+---------+-------+",
                 "|  name   |result |",
@@ -157,7 +157,7 @@ class TestRelayStatusCheck(unittest.TestCase):
                 "+---------+-------+",
             ]
         )
-        self.mock_autopilot.peerbook = "\n".join(
+        self.mock_bobcat.peerbook = "\n".join(
             [
                 "+---------------------------+",
                 "|listen_addrs (prioritized) |",
@@ -167,29 +167,29 @@ class TestRelayStatusCheck(unittest.TestCase):
             ]
         )
         self.assertFalse(self.check.check())
-        self.mock_autopilot._logger.info.assert_called_once_with("Relay Status: Not Relayed ✨")
+        self.mock_bobcat.logger.info.assert_called_once_with("Relay Status: Not Relayed ✨")
 
 
 class TestNetworkStatusCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._logger = MagicMock()
-        self.check = NetworkStatusCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = NetworkStatusCheck(self.mock_bobcat, mock_verbose)
 
     def test_NetworkStatusCheck_when_slow(self):
-        self.mock_autopilot._verbose = False
-        self.mock_autopilot.download_speed = "5 Mbit/s"
-        self.mock_autopilot.upload_speed = "3 Mbit/s"
-        self.mock_autopilot.latency = "130.669083ms"
+        self.mock_bobcat.download_speed = "5 Mbit/s"
+        self.mock_bobcat.upload_speed = "3 Mbit/s"
+        self.mock_bobcat.latency = "130.669083ms"
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
-        self.mock_autopilot.download_speed = "5 Mbit/s"
-        self.mock_autopilot.upload_speed = "3 Mbit/s"
-        self.mock_autopilot.latency = "130.669083ms"
+        self.check.verbose = True
+        self.mock_bobcat.download_speed = "5 Mbit/s"
+        self.mock_bobcat.upload_speed = "3 Mbit/s"
+        self.mock_bobcat.latency = "130.669083ms"
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.warning("Network Status: Download Slow (5 Mbit/s)", extra={}),
                 call.warning("Network Status: Upload Slow (3 Mbit/s)", extra={}),
@@ -210,30 +210,30 @@ class TestNetworkStatusCheck(unittest.TestCase):
         )
 
     def test_NetworkStatusCheck_when_good(self):
-        self.mock_autopilot.download_speed = "94 Mbit/s"
-        self.mock_autopilot.upload_speed = "57 Mbit/s"
-        self.mock_autopilot.latency = "7.669083ms"
+        self.mock_bobcat.download_speed = "94 Mbit/s"
+        self.mock_bobcat.upload_speed = "57 Mbit/s"
+        self.mock_bobcat.latency = "7.669083ms"
         self.assertFalse(self.check.check())
-        self.mock_autopilot._logger.info.assert_called_once_with("Network Status: Good 📶")
+        self.mock_bobcat.logger.info.assert_called_once_with("Network Status: Good 📶")
 
 
 class TestTemperatureStatusCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._logger = MagicMock()
-        self.check = TemperatureStatusCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = TemperatureStatusCheck(self.mock_bobcat, mock_verbose)
 
     def test_TemperatureStatusCheck_when_cold(self):
-        self.mock_autopilot.coldest_temp = -5
-        self.mock_autopilot.hottest_temp = -4
+        self.mock_bobcat.coldest_temp = -5
+        self.mock_bobcat.hottest_temp = -4
 
-        self.mock_autopilot._verbose = False
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Temperature Status: Cold (-5°C) ❄️", extra={}),
                 call.error(
@@ -244,24 +244,21 @@ class TestTemperatureStatusCheck(unittest.TestCase):
         )
 
     def test_TemperatureStatusCheck_when_good(self):
-        self.mock_autopilot.coldest_temp = 30
-        self.mock_autopilot.hottest_temp = 32
+        self.mock_bobcat.coldest_temp = 30
+        self.mock_bobcat.hottest_temp = 32
         self.assertFalse(self.check.check())
-        self.mock_autopilot._logger.info.assert_called_once_with(
-            "Temperature Status: Good (32°C) ☀️"
-        )
+        self.mock_bobcat.logger.info.assert_called_once_with("Temperature Status: Good (32°C) ☀️")
 
     def test_TemperatureStatusCheck_when_warm(self):
-        self.mock_autopilot.coldest_temp = 67
-        self.mock_autopilot.hottest_temp = 68
+        self.mock_bobcat.coldest_temp = 67
+        self.mock_bobcat.hottest_temp = 68
 
-        self.mock_autopilot._verbose = False
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.warning("Temperature Status: Warm (68°C) 🔥", extra={}),
                 call.warning(
@@ -272,17 +269,16 @@ class TestTemperatureStatusCheck(unittest.TestCase):
         )
 
     def test_TemperatureStatusCheck_when_hot(self):
-        self.mock_autopilot.coldest_temp = 79
-        self.mock_autopilot.hottest_temp = 80
+        self.mock_bobcat.coldest_temp = 79
+        self.mock_bobcat.hottest_temp = 80
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = False
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Temperature Status: Hot (80°C) 🌋", extra={}),
                 call.error(
@@ -294,28 +290,26 @@ class TestTemperatureStatusCheck(unittest.TestCase):
 
 
 class TestOTAVersionStatusCheck(unittest.TestCase):
-    def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._logger = MagicMock()
-        self.mock_autopilot._state_file = "/etc/bobcat/autopilot.json"
-        self.mock_autopilot.ota_version = "1.0.2.77"
-        self.check = OTAVersionStatusCheck(self.mock_autopilot)
-
     @patch("os.path.exists", return_value=True)
     @patch("os.path.isfile", return_value=True)
-    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.76"}')
+    def setUp(self, mock_os_path_isfile, mock_os_path_exists):
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        self.mock_bobcat.ota_version = "1.0.2.77"
+        mock_verbose = False
+        mock_state_file = "/etc/bobcat/autopilot.json"
+        self.check = OTAVersionStatusCheck(self.mock_bobcat, mock_verbose, mock_state_file)
+
     @patch("json.dump")
-    def test_OTAVersionStatusCheck_when_version_changed(
-        self, mock_json_dump, mock_open, mock_os_path_isfile, mock_os_path_exists
-    ):
-        self.mock_autopilot._verbose = False
+    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.76"}')
+    def test_OTAVersionStatusCheck_when_version_changed(self, mock_open, mock_json_dump):
         self.assertTrue(self.check.check())
         mock_json_dump.called_once_with({"ota_version": "1.0.2.77"}, mock_open)
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.warning("New OTA Version: 1.0.2.77", extra={}),
                 call.warning("New OTA Version: 1.0.2.77", extra={"description": str(self.check)}),
@@ -323,37 +317,32 @@ class TestOTAVersionStatusCheck(unittest.TestCase):
             any_order=False,
         )
 
-    @patch("os.path.exists", return_value=True)
-    @patch("os.path.isfile", return_value=True)
-    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.77"}')
     @patch("json.dump")
-    def test_OTAVersionStatusCheck_when_version_not_changed(
-        self, mock_json_dump, mock_open, mock_os_path_isfile, mock_os_path_exists
-    ):
-        mock_logger = MagicMock()
+    @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.77"}')
+    def test_OTAVersionStatusCheck_when_version_not_changed(self, mock_open, mock_json_dump):
+        mocklogger = MagicMock()
         self.assertFalse(self.check.check())
-        self.assertFalse(self.mock_autopilot._logger.called)
+        self.assertFalse(self.mock_bobcat.logger.called)
         mock_json_dump.called_once_with({"ota_version": "1.0.2.77"}, mock_open)
 
 
 class TestDownOrErrorCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._verbose = False
-        self.mock_autopilot._logger = MagicMock()
-        self.check = DownOrErrorCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = DownOrErrorCheck(self.mock_bobcat, mock_verbose)
 
     def test_DownOrErrorCheck_when_error(self):
-        self.mock_autopilot.status = "Error"
-        self.mock_autopilot.tip = " Error response from daemon: Container 49dd5fae6f3094e240e9aa339947bc9f6336d5f997c495a37696095fc306f3d1 is restarting, wait until the container is running exit status 1"
+        self.mock_bobcat.status = "Error"
+        self.mock_bobcat.tip = " Error response from daemon: Container 49dd5fae6f3094e240e9aa339947bc9f6336d5f997c495a37696095fc306f3d1 is restarting, wait until the container is running exit status 1"
 
-        self.mock_autopilot._verbose = False
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Bobcat Status: Error", extra={}),
                 call.error("Bobcat Status: Error", extra={"description": str(self.check)}),
@@ -362,15 +351,13 @@ class TestDownOrErrorCheck(unittest.TestCase):
         )
 
     def test_DownOrErrorCheck_when_down(self):
-        self.mock_autopilot.status = "Down"
-
-        self.mock_autopilot._verbose = False
+        self.mock_bobcat.status = "Down"
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Bobcat Status: Down", extra={}),
                 call.error("Bobcat Status: Down", extra={"description": str(self.check)}),
@@ -379,28 +366,28 @@ class TestDownOrErrorCheck(unittest.TestCase):
         )
 
     def test_DownOrErrorCheck_when_synced(self):
-        self.mock_autopilot.status = "Synced"
-        self.mock_autopilot.tip = ""
+        self.mock_bobcat.status = "Synced"
+        self.mock_bobcat.tip = ""
         self.assertFalse(self.check.check())
-        self.assertFalse(self.mock_autopilot._logger.called)
+        self.assertFalse(self.mock_bobcat.logger.called)
 
 
 class TestHeightAPIErrorCheck(unittest.TestCase):
     def setUp(self):
-        self.mock_autopilot = MagicMock()
-        self.mock_autopilot._logger = MagicMock()
-        self.check = HeightAPIErrorCheck(self.mock_autopilot)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = HeightAPIErrorCheck(self.mock_bobcat, mock_verbose)
 
     def test_HeightAPIErrorCheck_when_error(self):
-        self.mock_autopilot.status = "Height API Error"
+        self.mock_bobcat.status = "Height API Error"
 
-        self.mock_autopilot._verbose = False
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._verbose = True
+        self.check.verbose = True
         self.assertTrue(self.check.check())
 
-        self.mock_autopilot._logger.assert_has_calls(
+        self.check.bobcat.logger.assert_has_calls(
             [
                 call.error("Bobcat Status: Height API Error", extra={}),
                 call.error(
@@ -411,9 +398,9 @@ class TestHeightAPIErrorCheck(unittest.TestCase):
         )
 
     def test_HeightAPIErrorCheck_when_synced(self):
-        self.mock_autopilot.status = "Synced"
+        self.mock_bobcat.status = "Synced"
         self.assertFalse(self.check.check())
-        self.assertFalse(self.mock_autopilot._logger.called)
+        self.assertFalse(self.mock_bobcat.logger.called)
 
 
 if __name__ == "__main__":

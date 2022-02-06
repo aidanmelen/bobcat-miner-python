@@ -9,7 +9,6 @@ try:
     from .bobcat import Bobcat
 except:
     from bobcat import Bobcat
-
 try:
     from .autopilot import BobcatAutopilot
 except:
@@ -43,7 +42,7 @@ except:
     "-n",
     required=False,
     multiple=True,
-    default=["192.168.0.0/24", "10.0.0.0/24"],
+    default=["192.168.0.0/24", "10.0.0.0/24", "172.16.0.0/24"],
     metavar="CIDR",
     envvar="BOBCAT_NETWORKS",
     show_envvar=True,
@@ -58,20 +57,12 @@ except:
     help="Dry run where actions are skipped and wait times are 1 second long.",
 )
 @click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    envvar="BOBCAT_VERBOSE",
-    show_envvar=True,
-    help="Verbosely log Bobcat Checks.",
-)
-@click.option(
     "--trace",
     "-t",
     is_flag=True,
     envvar="BOBCAT_TRACE",
     show_envvar=True,
-    help="Trace and log Bobcat endpoint data when it is refreshed.",
+    help="Trace logging when Bobcat endpoint data is refreshed.",
 )
 @click.option(
     "--log-file",
@@ -162,28 +153,65 @@ def cli(*args, **kwargs) -> None:
     # The CLI users should instead adjust the handler's log level e.g. --log-level-console, --log-level-file, and --log-level-discord
     kwargs["log_level"] = "DEBUG"
 
-    ctx.obj["AUTOPILOT"] = BobcatAutopilot(**kwargs)
+    # create bobcat instance
+    ctx.obj["BOBCAT"] = Bobcat(**kwargs)
 
 
 @cli.command()
 @click.pass_context
-def autopilot(ctx) -> None:
+@click.option(
+    "--lock-file",
+    "-L",
+    required=False,
+    default=".bobcat.lock",
+    show_default=True,
+    type=click.Path(writable=True),
+    envvar="BOBCAT_LOCK_FILE",
+    show_envvar=True,
+    help="The lock file path.",
+)
+@click.option(
+    "--state-file",
+    "-s",
+    required=False,
+    default=".bobcat.json",
+    show_default=True,
+    type=click.Path(writable=True),
+    envvar="BOBCAT_STATE_FILE",
+    show_envvar=True,
+    help="The state file path.",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    envvar="BOBCAT_VERBOSE",
+    show_envvar=True,
+    help="Verbose diagnostic debug logging.",
+)
+def autopilot(*args, **kwargs) -> None:
     """Automatically diagnose and repair the Bobcat miner."""
-    ctx.obj["AUTOPILOT"].run()
+    ctx = args[0]
+
+    bobcat = ctx.obj["BOBCAT"]
+    lock_file = kwargs["lock_file"]
+    state_file = kwargs["state_file"]
+    verbose = kwargs["verbose"]
+    BobcatAutopilot(bobcat, lock_file, state_file, verbose).run()
 
 
 @cli.command()
 @click.pass_context
 def find(ctx) -> None:
     """Search local network and find the Bobcat miner."""
-    click.echo(ctx.obj["AUTOPILOT"]._hostname)
+    click.echo(ctx.obj["BOBCAT"]._hostname)
 
 
 @cli.command()
 @click.pass_context
 def status(ctx) -> None:
     """Print Bobcat status data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_status()._status_data)
+    click.echo(ctx.obj["BOBCAT"].refresh_status()._status_data)
 
 
 @cli.command()
@@ -192,10 +220,10 @@ def miner(ctx) -> None:
     """Print Bobcat miner data."""
 
     # miner data is initialized in the BobcatConnection constructor during bobcat verification
-    if miner_data := ctx.obj["AUTOPILOT"]._miner_data:
+    if miner_data := ctx.obj["BOBCAT"]._miner_data:
         click.echo(miner_data)
     else:
-        click.echo(ctx.obj["AUTOPILOT"].refresh_miner()._miner_data)
+        click.echo(ctx.obj["BOBCAT"].refresh_miner()._miner_data)
 
 
 @cli.command()
@@ -203,7 +231,7 @@ def miner(ctx) -> None:
 def speed(ctx) -> None:
     """Print Bobcat network speed data."""
 
-    click.echo(ctx.obj["AUTOPILOT"].refresh_speed()._speed_data)
+    click.echo(ctx.obj["BOBCAT"].refresh_speed()._speed_data)
 
 
 @cli.command()
@@ -211,46 +239,55 @@ def speed(ctx) -> None:
 def temp(ctx) -> None:
     """Print Bobcat CPU temperature data."""
 
-    click.echo(ctx.obj["AUTOPILOT"].refresh_temp()._temp_data)
+    click.echo(ctx.obj["BOBCAT"].refresh_temp()._temp_data)
 
 
 @cli.command()
 @click.pass_context
 def dig(ctx) -> None:
     """Print Bobcat DNS data."""
-    click.echo(ctx.obj["AUTOPILOT"].refresh_dig()._dig_data)
+    click.echo(ctx.obj["BOBCAT"].refresh_dig()._dig_data)
 
 
 @cli.command()
 @click.pass_context
 def reboot(ctx) -> None:
     """Reboot the Bobcat."""
-    if click.confirm("Do you want to reboot the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_reboot())
+    if click.confirm("Are you sure you want to restart your hotspot?"):
+        click.echo(ctx.obj["BOBCAT"].reboot())
 
 
 @cli.command()
 @click.pass_context
 def reset(ctx) -> None:
     """Reset the Bobcat."""
-    if click.confirm("Do you want to reset the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_reset())
+    click.echo(
+        "This action will delete all the Helium software and blockchain data and let your miner start resyncing from 0. If your hotspot out of sync, please use Resync/Fastsync. Make sure you don't lose power or internet connectivity during the reset."
+    )
+    if click.confirm("Are you sure you want to reset it now?"):
+        click.echo(ctx.obj["BOBCAT"].reset())
 
 
 @cli.command()
 @click.pass_context
 def resync(ctx) -> None:
     """Resync the Bobcat."""
-    if click.confirm("Do you want to resync the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_resync())
+    click.echo(
+        "This action will delete all blockchain data and let your miner start resyncing from 0. Make sure you don't lose power or internet connectivity during the resync."
+    )
+    if click.confirm("Are you sure you want to resync it now?"):
+        click.echo(ctx.obj["BOBCAT"].resync())
 
 
 @cli.command()
 @click.pass_context
 def fastsync(ctx) -> None:
     """Fastsync the Bobcat."""
-    if click.confirm("Do you want to fastsync the Bobcat?"):
-        click.echo(ctx.obj["AUTOPILOT"].managed_fastsync())
+    click.echo(
+        'Use Fast Sync only if you just used "Resync" / "Reset" (after 30 minutes) and the LED has turned green, if the miner had recently been fully synced but out of sync again for a long time, you need to play some catch-up now.'
+    )
+    if click.confirm("Are you sure you want to fastsync it now?"):
+        click.echo(ctx.obj["BOBCAT"].fastsync())
 
 
 if __name__ == "__main__":

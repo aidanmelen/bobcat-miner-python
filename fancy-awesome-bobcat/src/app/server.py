@@ -289,7 +289,7 @@ def dashboard():
                 <span>Dig</span>
                 </a>
                 <footer>
-                <a target="_blank" href="https://www.bobcatminer.com" title="1.2.9.220126.0047">©2021 by Bobcatminer. v1.0.2.66</a>
+                <a target="_blank" href="https://www.bobcatminer.com" title="1.2.9.220126.0047">©2021 by Bobcatminer. v1.0.2.76</a>
                 </footer>
         </div>
 </body>
@@ -314,7 +314,7 @@ def status():
 def miner():
     return jsonify(
         {
-            "ota_version": "1.0.2.66",
+            "ota_version": "1.0.2.76",
             "region": "region_us915",
             "frequency_plan": "us915",
             "animal": "fancy-awesome-bobcat",
@@ -427,28 +427,28 @@ def dig():
 @app.route("/admin/reboot", methods=["POST"])
 @basic_auth.required
 def reboot():
-    subprocess.run(["/bin/bash", "/bobcat/reboot.sh"])
+    subprocess.run(["/bin/bash", "/app/reboot.sh"])
     return "Rebooting hotspot"
 
 
 @app.route("/admin/reset", methods=["POST"])
 @basic_auth.required
 def reset():
-    subprocess.run(["/bin/bash", "/bobcat/reset.sh"])
+    subprocess.run(["/bin/bash", "/app/reset.sh"])
     return "1: Your miner is going to rest<br>3: Housekeeper was sent home<br>3: Docker is going to be stopped<br>4: Boom! Old blockchain data gone<br>5: Boom! miner gone<br>6: Housekeeper is back, but everything is gone<br>7: Rebuilding everything<br>8: Cleaning up<br>Bam! Miner successfully restarted, but it may take 30 minutes to load files from internet. Please be patient. 2022-01-20 17:39:06 +0000 UTC<br>"
 
 
 @app.route("/admin/resync", methods=["POST"])
 @basic_auth.required
 def resync():
-    subprocess.run(["/bin/bash", "/bobcat/resync.sh"])
+    subprocess.run(["/bin/bash", "/app/resync.sh"])
     return "1: Your miner is going to rest<br>2: Docker is going to be stopped<br>3: Boom! Old blockchain data gone<br>4: Bam! Rebuilding miner data<br>Miner successfully restarted, but it may take 30 minutes to load files from internet, please be patient. 2022-01-20 18:12:28 +0000 UTC<br>"
 
 
 @app.route("/admin/fastsync", methods=["POST"])
 @basic_auth.required
 def fastsync():
-    subprocess.run(["/bin/bash", "/bobcat/fastsync.sh"])
+    subprocess.run(["/bin/bash", "/app/fastsync.sh"])
     return "Syncing your miner, please leave your power on."
 
 
