@@ -16,7 +16,7 @@ app.config["BASIC_AUTH_PASSWORD"] = "miner"
 
 basic_auth = BasicAuth(app)
 
-hostname = socket.gethostname()   
+hostname = socket.gethostname()
 ip_addr = socket.gethostbyname(hostname)
 
 
