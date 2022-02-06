@@ -34,8 +34,8 @@ class Bobcat(BobcatAPI):
             msg = "\n".join(
                 [
                     f"{err}",
-                    "Please verify the IP address and network connection",
-                    "Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser",
+                    "   Please verify the IP address and network connection",
+                    "   Troubleshooting Guide: https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser",
                 ]
             )
             self.logger.critical(msg)

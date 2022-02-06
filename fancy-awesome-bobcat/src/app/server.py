@@ -5,6 +5,7 @@ from flask_basicauth import BasicAuth
 from flask import jsonify
 
 import subprocess
+import socket
 import os
 
 app = Flask(__name__)
@@ -14,6 +15,9 @@ app.config["BASIC_AUTH_USERNAME"] = "bobcat"
 app.config["BASIC_AUTH_PASSWORD"] = "miner"
 
 basic_auth = BasicAuth(app)
+
+hostname = socket.gethostname()
+ip_addr = socket.gethostbyname(hostname)
 
 
 @app.route("/")
@@ -342,12 +346,12 @@ def miner():
             "epoch": "30157",
             "ports_desc": "only need to port forward 44158. For 22, only when need remote support. public port open/close isn't accurate here, if your listen_addr is IP address, it should be OK",
             "ports": {
-                "192.168.0.10:22": "open",
-                "192.168.0.10:44158": "open",
+                f"{ip_addr}:22": "open",
+                f"{ip_addr}:44158": "open",
                 "33.117.96.28:22": "closed/timeout",
                 "33.117.96.28:44158": "closed/timeout",
             },
-            "private_ip": "192.168.0.10",
+            "private_ip": f"{ip_addr}",
             "public_ip": "33.117.96.28",
             "peerbook": [
                 "+-----------------------------------------------+--------------+----------+---------+---+----------+",
