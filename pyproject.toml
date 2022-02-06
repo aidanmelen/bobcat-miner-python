@@ -19,6 +19,9 @@ discord-lumberjack = "^1.0.4"
 filelock = "^3.4.2"
 requests = "^2.27.0"
 
+[tool.poetry.dev-dependencies]
+black = "^21.12b0"
+
 [tool.poetry.scripts]
 bobcat = "bobcat_miner.cli:cli"
 
