@@ -42,7 +42,7 @@ except:
     "-n",
     required=False,
     multiple=True,
-    default=["192.168.0.0/24", "10.0.0.0/24"],
+    default=["192.168.0.0/24", "10.0.0.0/24", "172.16.0.0/24"],
     metavar="CIDR",
     envvar="BOBCAT_NETWORKS",
     show_envvar=True,
