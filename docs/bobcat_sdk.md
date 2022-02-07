@@ -13,7 +13,7 @@ bobcat.refresh_temp()
 bobcat.refresh_dig()
 bobcat.refresh() # all endpoints
 
-# properties
+# attributes
 bobcat.status
 bobcat.gap
 bobcat.blockchain_height

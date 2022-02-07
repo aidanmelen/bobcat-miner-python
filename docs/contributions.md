@@ -5,7 +5,7 @@
 The containerized development environment can be spun up with `docker compose`.
 
 ```bash
-$ docker compose up --detach
+docker compose up --detach
 [+] Running 3/3
  ⠿ Network bobcat-miner-python_default  Created
  ⠿ Container bobcat-miner-python-dev    Started
@@ -15,7 +15,7 @@ $ docker compose up --detach
 Then get a shell in the `bobcat-miner-python-dev` container.
 
 ```
-$ docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
+docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
 root@bobcat-miner-python-dev:/app# bobcat --help
 Usage: bobcat [OPTIONS] COMMAND [ARGS]...
 
@@ -26,10 +26,8 @@ Usage: bobcat [OPTIONS] COMMAND [ARGS]...
 
 This dev container is networked with a fake bobcat service with the hostname: `fancy-awesome-bobcat`.
 
-**Note:** The default environment variable configuration is set in the docker-compose.yml file and can be overridden with command line option.
-
 ```
-$ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
+docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
 🐛 Connected to Bobcat: fancy-awesome-bobcat
 🐛 Refresh: Miner Data
 🐛 Verified Bobcat Animal: fancy-awesome-bobcat
@@ -63,7 +61,7 @@ docker compose down
  ⠿ Network bobcat-miner-python_default  Removed 
 ```
 
-Please see the [docker-compose.yml](https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/docker-compose.yml) for more information.
+Please see the [docker-compose.yml](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docker-compose.yml) for more information.
 
 ## Test
 
@@ -85,11 +83,13 @@ docker run --rm --volume $(pwd):/src --workdir /src pyfound/black:latest_release
 Read the version from `poetry`, tag, and push.
 
 ```bash
-$ git checkout main
-$ git pull
+# ensure we are tagging the main branch
+git checkout main
+git pull
 
-$ git tag $(poetry version -s)
-$ git push --tags
+# tag with version from the pyproject.toml and push to remote
+git tag $(poetry version -s)
+git push --tags
 ```
 
 This will trigger the [Release Github Action](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/release.yaml).

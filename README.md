@@ -13,7 +13,7 @@ A command line tool used to automate the Bobcat miner. This project also offers 
 ## Install
 
 ```bash
-$ pipx install bobcat-miner
+pipx install bobcat-miner
 ```
 
 Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
@@ -23,7 +23,7 @@ Please see this [guide](https://packaging.python.org/en/latest/guides/installing
 Automatically diagnose and repair the Bobcat miner!
 
 ```bash
-$ bobcat autopilot
+bobcat autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:-1) 💫
 ✅ Relay Status: Not Relayed ✨
@@ -34,7 +34,7 @@ $ bobcat autopilot
 or run with the official Docker image
 
 ```bash
-$ docker run --rm -it aidanmelen/bobcat autopilot
+docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
 Run `bobcat --help` to learn about the available sub-commands and options.
@@ -48,7 +48,7 @@ By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10
 This will connect to the Bobcat on your network that matches the animal name.
 
 ```bash
-$ bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
+bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 Refresh: Miner Data
 🐛 Verified Bobcat Animal: fancy-awesome-bobcat
@@ -57,10 +57,10 @@ $ bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
 
 ### Specify the Hostname / IP Address
 
-Otherwise, you can follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and specify it with:
+Otherwise, follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and specify it with:
 
 ```bash
-$ bobcat --hostname 192.168.0.10 -C DEBUG autopilot
+bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 ```
@@ -70,7 +70,7 @@ $ bobcat --hostname 192.168.0.10 -C DEBUG autopilot
 Monitor your Bobcat remotely by sending events to a Discord channel by specifying a [webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks). No need for VPN or SSH agent setup!
 
 ```bash
-$ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
+bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:0) 💫
 ⚠️ Relay Status: Relayed
@@ -88,8 +88,8 @@ By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be
 This example is admittedly contrived, but it demonstrates how the `--dry-run` option can be used show what actions would normally be performed against the bobcat without actually running them.
 
 ```bash
-$ bobcat --dry-run reboot
-Do you want to reboot the Bobcat? [y/N]: y
+bobcat --dry-run reboot
+Are you sure you want to restart your hotspot? [y/N]: y
 ⚠️ Dry run is enabled: Reboot Skipped
 ```
 

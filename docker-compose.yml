@@ -13,7 +13,10 @@ services:
     volumes:
       - ./fancy-awesome-bobcat/src/app:/app
     networks:
-      - bobcatnet
+      bobcatnet:
+
+        # set the service to a static IP to simulate a Bobcat with a DHCP reservation
+        ipv4_address: 172.18.0.10
 
   # bobcat-miner-python command line tools
   bobcat-miner-python-dev:

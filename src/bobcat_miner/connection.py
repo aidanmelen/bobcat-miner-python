@@ -40,7 +40,7 @@ class BobcatConnection(BobcatBase):
                     )
         else:
             self._hostname = self.find()
-
+    
     def __refresh_miner(self, hostname: str = None) -> BobcatConnection:
         """Refresh Bobcat miner data.
         Args:
@@ -101,9 +101,11 @@ class BobcatConnection(BobcatBase):
             str(self._animal).strip().strip("'").strip('"').replace(" ", "-").lower()
         )
 
-        if not (does_bobcat_match_animal := normalized_animal == bobcat_animal):
+        if does_bobcat_match_animal := normalized_animal == bobcat_animal:
+            self.logger.debug(f"Verified Bobcat Animal: {bobcat_animal}")
+        else:
             self.logger.debug(
-                f"Connected to the bobcat ({bobcat_animal}) on host ({host}) but we are looking for bobcat ({normalized_animal})"
+                f"Verification Failed: ({bobcat_animal}) on host ({host}) does not match ({normalized_animal})"
             )
 
         return does_bobcat_match_animal
@@ -166,13 +168,16 @@ class BobcatConnection(BobcatBase):
         )
 
         for network in self._networks:
+
+            self.logger.debug(f"Searching network: {network}")
+
             try:
                 hosts = [str(host) for host in ipaddress.ip_network(network, strict=False).hosts()]
             except ValueError as err:
                 raise BobcatSearchNetworkError(str(err))
 
             if host := asyncio.run(self._search(hosts)):
-                self.logger.debug(f"Found to bobcat: {host}")
+                self.logger.debug(f"Found Bobcat: {host}")
                 return host
 
         else:

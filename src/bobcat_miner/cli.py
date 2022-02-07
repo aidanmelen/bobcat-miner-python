@@ -20,6 +20,7 @@ except:
 @click.pass_context
 @click.option(
     "--hostname",
+    "--ip-address",
     "-h",
     required=False,
     metavar="NAME",
@@ -42,7 +43,7 @@ except:
     "-n",
     required=False,
     multiple=True,
-    default=["192.168.0.0/24", "10.0.0.0/24", "172.16.0.0/24"],
+    default=["192.168.0.0/24", "10.0.0.0/24", "172.16.0.0/24", "192.168.0.1/16", "10.0.0.1/16", "172.16.0.1/16"],
     metavar="CIDR",
     envvar="BOBCAT_NETWORKS",
     show_envvar=True,
