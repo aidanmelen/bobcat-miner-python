@@ -40,7 +40,7 @@ class BobcatConnection(BobcatBase):
                     )
         else:
             self._hostname = self.find()
-    
+
     def __refresh_miner(self, hostname: str = None) -> BobcatConnection:
         """Refresh Bobcat miner data.
         Args:

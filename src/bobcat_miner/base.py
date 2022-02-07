@@ -18,7 +18,17 @@ class BobcatBase:
         self._animal = kwargs.pop("animal", None)
         self._dry_run = kwargs.pop("dry_run", None)
         self._trace = kwargs.pop("trace", False)
-        self._networks = kwargs.pop("networks", ["192.168.0.0/24", "10.0.0.0/24", "172.16.0.0/24", "192.168.0.1/16", "10.0.0.1/16", "172.16.0.1/16"])
+        self._networks = kwargs.pop(
+            "networks",
+            [
+                "192.168.0.0/24",
+                "10.0.0.0/24",
+                "172.16.0.0/24",
+                "192.168.0.1/16",
+                "10.0.0.1/16",
+                "172.16.0.1/16",
+            ],
+        )
 
         self.logger = BobcatLogger(
             log_file=kwargs.pop("log_file", None),
