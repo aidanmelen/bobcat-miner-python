@@ -15,6 +15,6 @@ jobs:
       with:
         python-version: "3.10"
         architecture: x64
-    - run: pip install poetry==1.1.4
+    - run: pip install poetry==1.1.12
     - run: poetry install --no-interaction --no-ansi 
     - run: poetry run black --line-length 100 --check src tests

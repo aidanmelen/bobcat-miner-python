@@ -27,6 +27,6 @@ RUN poetry build --format wheel
 # package up tiny release image
 FROM python:${PYTHON_VERSION}-alpine AS release
 COPY --from=build /app/dist /app/dist
-RUN mkdir /var/log/bobcat && mkdir /etc/bobcat \
- && pip install /app/dist/*.whl
+RUN pip install /app/dist/*.whl \
+ && mkdir /var/log/bobcat && mkdir /etc/bobcat
 ENTRYPOINT ["bobcat"]
