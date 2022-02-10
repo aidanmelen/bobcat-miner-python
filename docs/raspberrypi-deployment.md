@@ -19,14 +19,14 @@ Install the Docker Community Edition.
 sudo apt install -y docker-ce
 ```
 
-Build the image for raspberry pi
+Pull and tag the `bobcat` image
 
 ```
-$ git clone https://github.com/aidanmelen/bobcat-miner-python.git && cd bobcat-miner-python
-$ sudo docker build -f Dockerfile.arm -t bobcat .
+sudo docker pull aidanmelen/bobcat
+sudo docker tag aidanmelen/bobcat bobcat
 ```
 
-Create a file called `/home/pi/bobcat-autopilot.env` with your configuration information
+Create a file called `/home/pi/bobcat.env` with your configuration information
 
 ```bash
 BOBCAT_HOSTNAME=192.168.0.10
@@ -39,17 +39,17 @@ BOBCAT_LOG_LEVEL_FILE=INFO
 BOBCAT_LOG_LEVEL_DISCORD=WARNING
 ```
 
-Please run `sudo docker run --rm -it aidanmelen/bobcat --help` for more information about the environment variables.
+ℹ️ Run `sudo docker run bobcat --help` for more information about the environment variables.
 
 Next we will verify the configuration file with a dry run
 
 ```bash
-$ sudo docker run --rm -it \
+$ sudo docker run \
 -v /etc/bobcat:/etc/bobcat \
 -v /var/log/bobcat:/var/log/bobcat \
---env-file /home/pi/bobcat-autopilot.env \
+--env-file /home/pi/bobcat.env \
 --env BOBCAT_DRY_RUN=TRUE \
-aidanmelen/bobcat autopilot
+bobcat autopilot
 ```
 
 Finally schedule Bobcat Autopilot with Cron
@@ -59,12 +59,12 @@ Finally schedule Bobcat Autopilot with Cron
 crontab -l > mycron 2>/dev/null
 
 # append the bobcat autopilot command to the crontab
-# this will run 4 times a day: at minute 0 past hour 0, 6, 12, and 18.
-echo "0 0,6,12,18 * * * sudo docker run --rm -it \
+# AKA 4 times a day: at minute 0 past hour 0, 6, 12, and 18.
+echo "0 0,6,12,18 * * * sudo docker run \
 -v /etc/bobcat:/etc/bobcat \
 -v /var/log/bobcat:/var/log/bobcat \
---env-file /home/pi/bobcat-autopilot.env \
-aidanmelen/bobcat autopilot &> /dev/null" >> mycron
+--env-file /home/pi/bobcat.env \
+bobcat autopilot &> /dev/null" >> mycron
 
 # install new cron file
 crontab mycron
@@ -73,4 +73,4 @@ crontab mycron
 rm mycron
 ```
 
-Now the Bobcat Autopilot will run on the first minute of every hour and will send logs events to Discord for remote monitoring. ✨ 🍰 ✨
+Now the Bobcat Autopilot will run 4 times a day and will send logs events to Discord for remote monitoring ✨ 🍰 ✨

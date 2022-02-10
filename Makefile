@@ -12,30 +12,31 @@ help: ## This help.
 
 all: build tests run
 
-build: ## Build
-	docker build . -t bobcat
-	docker build . -t $(NAME)-test --target test
+# linux/amd64
+build: ## Build lint and test images and build Docker Compose services
+	docker build -f Dockerfile.dev . -t $(NAME)-lint --target lint
+	docker build -f Dockerfile.dev . -t $(NAME)-test --target test
 	docker-compose build
 
-build-arm: ## Build for ARM
-	docker buildx build . -t bobcat --platform linux/arm/v7
+build-release: ## Build multi-platform release images
+	docker buildx build . -t bobcat --platform linux/amd64,linux/arm/v7
 
 up: ## Spin up local development stack
 	docker-compose up -d
 
-dev: up ## Build and run dev container
+dev: up ## Attach to the bobcat-miner-python dev container
 	docker-compose exec $(NAME)-dev poetry run /bin/bash
 
-dev-fancy-awesome-bobcat: up ## Build and run dev container
+dev-bobcat: up ## Attach to the fancy-awesome-bobcat dev container
 	docker-compose exec fancy-awesome-bobcat /bin/bash
 
-down: ## Spin down local dev stack
+down: ## Spin down local dev services
 	docker-compose down
 
 lint: ## Lint with black
-	docker run --rm --volume "$$(pwd)":/app --workdir /app pyfound/black:latest_release black --line-length 100 .
+	docker run --rm -it -v "$$(pwd)":/app $(NAME)-lint
 
-test: ## Build and run dev container
+test: ## Run unittests
 	docker run --rm -it -v "$$(pwd)":/app $(NAME)-test
 
 tests: lint test ## Lint and Test
