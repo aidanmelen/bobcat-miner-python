@@ -23,7 +23,6 @@ Pull and tag the `bobcat` image
 
 ```
 sudo docker pull aidanmelen/bobcat
-sudo docker tag aidanmelen/bobcat bobcat
 ```
 
 Create a file called `/home/pi/bobcat.env` with your configuration information
@@ -39,7 +38,7 @@ BOBCAT_LOG_LEVEL_FILE=INFO
 BOBCAT_LOG_LEVEL_DISCORD=WARNING
 ```
 
-ℹ️ Run `sudo docker run bobcat --help` for more information about the environment variables.
+ℹ️ Run `sudo docker run aidanmelen:bobcat --help` for more information about the environment variables.
 
 Next we will verify the configuration file with a dry run
 
@@ -49,7 +48,7 @@ $ sudo docker run \
 -v /var/log/bobcat:/var/log/bobcat \
 --env-file /home/pi/bobcat.env \
 --env BOBCAT_DRY_RUN=TRUE \
-bobcat autopilot
+aidanmelen:bobcat autopilot
 ```
 
 Finally schedule Bobcat Autopilot with Cron
