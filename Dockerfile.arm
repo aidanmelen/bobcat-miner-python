@@ -1,9 +1,0 @@
-ARG VERSION=latest
-ARG PYTHON_VERSION=3.10
-FROM python:${PYTHON_VERSION}-alpine AS release
-RUN apk update && apk add python3-dev gcc libc-dev \
- && pip install --upgrade pip \
- && pip install bobcat-miner${VERSION+==$VERSION} \
- && mkdir /var/log/bobcat \
- && mkdir /etc/bobcat
-ENTRYPOINT ["bobcat"]

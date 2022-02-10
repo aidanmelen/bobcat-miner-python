@@ -41,6 +41,7 @@ services:
     command: "-f /dev/null"
     build:
       context: .
+      dockerfile: ./Dockerfile.dev
       target: dev
     volumes:
       - .:/app
