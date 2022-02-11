@@ -34,9 +34,10 @@ BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
 BOBCAT_LOG_STATE=/etc/bobcat/autopilot.json
 BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
 BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
+BOBCAT_LOG_LEVEL_FILE=DEBUG
 BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
-BOBCAT_LOG_LEVEL_FILE=INFO
 BOBCAT_LOG_LEVEL_DISCORD=WARNING
+BOBCAT_TRACE=TRUE
 ```
 
 ℹ️ Run `sudo docker run aidanmelen/bobcat --help` for more information about the environment variables.
