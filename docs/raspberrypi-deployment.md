@@ -25,12 +25,13 @@ Pull and tag the `bobcat` image
 sudo docker pull aidanmelen/bobcat
 ```
 
-Create a file called `/home/pi/bobcat.env` with your configuration information
+Create a file called `/home/pi/bobcat.env` with your configuration information. For Example:
 
 ```bash
 BOBCAT_HOSTNAME=192.168.0.10
 BOBCAT_ANIMAL='Fancy Awesome Bobcat'
 BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
+BOBCAT_LOG_STATE=/etc/bobcat/autopilot.json
 BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
 BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
 BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
@@ -38,7 +39,7 @@ BOBCAT_LOG_LEVEL_FILE=INFO
 BOBCAT_LOG_LEVEL_DISCORD=WARNING
 ```
 
-ℹ️ Run `sudo docker run aidanmelen:bobcat --help` for more information about the environment variables.
+ℹ️ Run `sudo docker run aidanmelen/bobcat --help` for more information about the environment variables.
 
 Next we will verify the configuration file with a dry run
 
@@ -48,7 +49,7 @@ $ sudo docker run \
 -v /var/log/bobcat:/var/log/bobcat \
 --env-file /home/pi/bobcat.env \
 --env BOBCAT_DRY_RUN=TRUE \
-aidanmelen:bobcat autopilot
+aidanmelen/bobcat autopilot
 ```
 
 Finally schedule Bobcat Autopilot with Cron
@@ -63,7 +64,7 @@ echo "0 0,6,12,18 * * * sudo docker run \
 -v /etc/bobcat:/etc/bobcat \
 -v /var/log/bobcat:/var/log/bobcat \
 --env-file /home/pi/bobcat.env \
-bobcat autopilot &> /dev/null" >> mycron
+aidanmelen/bobcat autopilot &> /dev/null" >> mycron
 
 # install new cron file
 crontab mycron
