@@ -173,6 +173,9 @@ class TestBobcat(unittest.TestCase):
             ],
         )
 
+    def test_is_healthy(self):
+        self.assertTrue(self.bobcat.is_healthy)
+
     @patch("bobcat_miner.Bobcat.heartbeat")
     @patch("bobcat_miner.Bobcat.wait")
     @patch("requests.post", side_effect=mock_endpoints.mock_online)
@@ -210,12 +213,14 @@ class TestBobcat(unittest.TestCase):
     @patch("bobcat_miner.Bobcat.wait")
     @patch("requests.post", side_effect=mock_endpoints.mock_online)
     @patch("requests.get", side_effect=mock_endpoints.mock_online)
+    @patch("bobcat_miner.Bobcat.is_healthy", new_callable=PropertyMock, return_value=True)
     @patch("bobcat_miner.Bobcat.gap", new_callable=PropertyMock, return_value=1000)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     def test_fastsync(
         self,
         mock_verify,
         mock_gap,
+        mock_is_healthy,
         mock_requests_get,
         mock_requests_post,
         mock_wait,
@@ -229,7 +234,7 @@ class TestBobcat(unittest.TestCase):
             headers={"Authorization": "Basic Ym9iY2F0Om1pbmVy"},
         )
         b.logger.debug.assert_has_calls(
-            [call("Refresh: Miner Data"), call("Syncing your miner, please leave your power on.")]
+            [call("Refresh: Status Data"), call("Syncing your miner, please leave your power on.")]
         )
 
     @patch("bobcat_miner.Bobcat.heartbeat")

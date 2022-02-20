@@ -336,9 +336,9 @@ class Bobcat(BobcatAPI):
     def is_healthy(self):
         """Check the health of the Bobcat."""
         return (
-            self.bobcat.status.lower() in ["loading", "syncing", "synced"]
-            and not self.bobcat.miner_alert
-            and not self.bobcat.error
+            self.status.lower() in ["loading", "syncing", "synced"]
+            and not self.miner_alert
+            and not self.error
         )
 
     def _parse_html(self, html) -> str:
@@ -397,7 +397,7 @@ class Bobcat(BobcatAPI):
                 )
                 return
 
-            if self.is_healthy:
+            if not self.is_healthy:
                 self.logger.warning(
                     f"Cancelling Fastsync because it can only be run on a healthy Bobcat. The current status is: {self.status}"
                 )
