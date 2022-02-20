@@ -258,43 +258,82 @@ def dig(ctx) -> None:
 
 
 @cli.command()
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Automatically say yes to confirmation prompt.",
+)
 @click.pass_context
-def reboot(ctx) -> None:
+def reboot(ctx, yes) -> None:
     """Reboot the Bobcat."""
-    if click.confirm("Are you sure you want to restart your hotspot?"):
+    if yes:
+        click.echo(ctx.obj["BOBCAT"].reboot())
+
+    elif click.confirm("Are you sure you want to restart your hotspot?"):
         click.echo(ctx.obj["BOBCAT"].reboot())
 
 
 @cli.command()
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Automatically say yes to confirmation prompt.",
+)
 @click.pass_context
-def reset(ctx) -> None:
+def reset(ctx, yes) -> None:
     """Reset the Bobcat."""
     click.echo(
         "This action will delete all the Helium software and blockchain data and let your miner start resyncing from 0. If your hotspot out of sync, please use Resync/Fastsync. Make sure you don't lose power or internet connectivity during the reset."
     )
-    if click.confirm("Are you sure you want to reset it now?"):
+
+    if yes:
+        click.echo(ctx.obj["BOBCAT"].reset())
+
+    elif click.confirm("Are you sure you want to reset it now?"):
         click.echo(ctx.obj["BOBCAT"].reset())
 
 
 @cli.command()
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Automatically say yes to confirmation prompt.",
+)
 @click.pass_context
-def resync(ctx) -> None:
+def resync(ctx, yes) -> None:
     """Resync the Bobcat."""
     click.echo(
         "This action will delete all blockchain data and let your miner start resyncing from 0. Make sure you don't lose power or internet connectivity during the resync."
     )
-    if click.confirm("Are you sure you want to resync it now?"):
+
+    if yes:
+        click.echo(ctx.obj["BOBCAT"].resync())
+
+    elif click.confirm("Are you sure you want to resync it now?"):
         click.echo(ctx.obj["BOBCAT"].resync())
 
 
 @cli.command()
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Automatically say yes to confirmation prompt.",
+)
 @click.pass_context
-def fastsync(ctx) -> None:
+def fastsync(ctx, yes) -> None:
     """Fastsync the Bobcat."""
     click.echo(
         'Use Fast Sync only if you just used "Resync" / "Reset" (after 30 minutes) and the LED has turned green, if the miner had recently been fully synced but out of sync again for a long time, you need to play some catch-up now.'
     )
-    if click.confirm("Are you sure you want to fastsync it now?"):
+
+    if yes:
+        click.echo(ctx.obj["BOBCAT"].fastsync())
+
+    elif click.confirm("Are you sure you want to fastsync it now?"):
         click.echo(ctx.obj["BOBCAT"].fastsync())
 
 
