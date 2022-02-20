@@ -56,7 +56,7 @@ class BobcatConnection(BobcatBase):
         if self._trace:
             self.logger.debug(
                 "Refresh: Miner Data",
-                extra={"description": f"{json.dumps(self._miner_data, indent=4)}"},
+                extra={"description": f"\n```\n{json.dumps(self._miner_data, indent=4)}\n```"},
             )
         else:
             self.logger.debug("Refresh: Miner Data")

@@ -61,6 +61,9 @@ class TestAutopilot(unittest.TestCase):
                 call.debug("Refresh: DNS Data"),
                 call.debug("The Bobcat Autopilot is starting 🚀 🚀 🚀"),
                 call.debug("Lock Acquired: .mock.lock"),
+                call.debug("Checking: Down or Error Status"),
+                call.debug("Checking: Height API Error Status"),
+                call.debug("Checking: Unknown Status"),
                 call.debug("Checking: Online Status"),
                 call.warning(
                     "Online Status: Bobcat is running and the Helium API is stale", extra={}
@@ -74,8 +77,6 @@ class TestAutopilot(unittest.TestCase):
                 call.debug("Checking: Temperature Status"),
                 call.info("Temperature Status: Good (38°C) ☀️"),
                 call.debug("Checking: OTA Version Change"),
-                call.debug("Checking: Down or Error Status"),
-                call.debug("Checking: Height API Error Status"),
                 call.debug("Lock Released: .mock.lock"),
                 call.debug("The Bobcat Autopilot is finished ✨ 🍰 ✨"),
             ],

@@ -52,7 +52,7 @@ class BobcatCheck(ABC):
         self.name = name
         self.root_cause = root_cause
         self.description = description
-        self.bobcat_repair_steps = autopilot_repair_steps
+        self.autopilot_repair_steps = autopilot_repair_steps
         self.manual_repair_steps = manual_repair_steps
         self.customer_support_steps = customer_support_steps
         self.troubleshooting_guides = troubleshooting_guides
@@ -86,308 +86,6 @@ class BobcatCheck(ABC):
 **Troublesooting Guides:**
 {troubleshooting_guides}
 """
-
-
-class OnlineStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="Online Status",
-            root_cause="The Helium Network sees your Bobcat as Offline.",
-            description="This shows the hotspot information that is currently available in the Helium blockchain. Note that this might differ from the actual status of your hotpsot as it takes time for information to propagate from your hotspot to the blockchain.",
-            autopilot_repair_steps=[],
-            manual_repair_steps=[
-                "Check the Diagnoser to see if the Bobcat is running and is healthy.",
-                "Give the Helium Network more time to propagate from your hotspot to the blockchain. Wait 24 hours and check again.",
-            ],
-            customer_support_steps=[
-                "If possible, send screenshots of your Diagnoser.",
-                "Tell us what color your LED is.",
-                "If you can't access your Diagnoser, please open port 22",
-                "Provide the miner's public IP address.",
-                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
-            ],
-            troubleshooting_guides=["https://www.nowitness.org/troubleshooting/"],
-        )
-
-    def _is_offline(self) -> (Dict, None):
-        """Get Hotspot data from Helium API."""
-        data = requests.get(f"https://api.helium.io/v1/hotspots/{self.bobcat.pubkey}").json()
-        return data.get("data", {}).get("status", {}).get("online", "offline").lower() != "online"
-
-    def _is_running(self) -> bool:
-        """Check if the Bobcat is running."""
-        is_running = self.bobcat.miner_state.lower() == "running"
-
-        return is_running
-
-    def check(self) -> bool:
-        try:
-            is_offline = self._is_offline()
-        except Exception as err:
-            self.bobcat.logger.warning(
-                "The Helium API is not responding. Skipping Online Status Check",
-                extra={"description": str(self)} if self.verbose else {},
-            )
-            return False
-
-        else:
-            if is_offline:
-                if self._is_running():
-                    self.bobcat.logger.warning(
-                        f"{self.name}: Bobcat is running and the Helium API is stale",
-                        extra={"description": str(self)} if self.verbose else {},
-                    )
-                    return False
-                else:
-                    self.bobcat.logger.error(
-                        f"{self.name}: Offline",
-                        extra={"description": str(self)} if self.verbose else {},
-                    )
-                    return True
-            else:
-                self.bobcat.logger.info(f"{self.name}: Online ⭐")
-                return False
-
-
-class SyncStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="Sync Status",
-            root_cause="Internet connection or snapshot not loading.",
-            description="If the gap keeps getting larger, it could be the case that the internet connection to the miner is unstable. It is always recommended that you sync into the blockchain for the first time with an ethernet cable. Other reasons why you may be experiencing syncing issues include a network bug or a snapshot not loading. If the gap has not changed in over 24 hours, your miner is likely having an issue with the snapshot.",
-            autopilot_repair_steps=[
-                {"func": bobcat.wait, "args": [ONE_DAY]},
-                {"func": bobcat.resync},
-                {"func": bobcat.fastsync},
-                {"func": bobcat.wait, "args": [ONE_DAY]},
-            ],
-            manual_repair_steps=[
-                "Give the miner more time to sync.",
-                "Connect the miner to an ethernet cable for the first time sync.",
-                "Resync then fast sync from the Diagnoser, allow at least 24 hours after fully syncing. If the problem persists, proceed to step 4.",
-                "Reset then fast sync, allow at least 24 hours after fully syncing before reassessing.",
-            ],
-            customer_support_steps=[
-                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic...",
-                "Provide more details about your Network set up; are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6...?",
-            ],
-            troubleshooting_guides=[
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
-            ],
-        )
-
-    def check(self) -> bool:
-        is_synced = self.bobcat.status.upper() == "SYNCED"
-        syncing_and_caught_up = self.bobcat.status.upper() == "SYNCING" and self.bobcat.gap <= 300
-
-        msg = f"{self.name}: {self.bobcat.status.capitalize()} (gap:{self.bobcat.gap})"
-
-        if is_not_synced := not is_synced and not syncing_and_caught_up:
-            self.bobcat.logger.error(msg, extra={"description": str(self)} if self.verbose else {})
-        else:
-            self.bobcat.logger.info(msg + " 💫")
-
-        return is_not_synced
-
-
-class RelayStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="Relay Status",
-            root_cause="Your Internet Router Settings",
-            description="The Relay status is determined by lib_p2p. Hotspot's connection is being relayed through another Hotspot on the network which may affect mining. If port 44158 is closed, opening the port should solve the relay. A Relayed hotspot may show 'NAT Type Symmetric' or  'NAT Type Restricted' in your Bobcat Diagnoser. Non Relayed hotspot shows 'NAT Type None'. If it's showing 'NAT Type Unknown', that means you need to wait until the NAT Type is found by the miner. To confirm if your hotspot is relayed, you can click the 'Helium Api' menu in your Diagnoser and see if the address is p2p, your hotspot is relayed.",
-            autopilot_repair_steps=[],
-            manual_repair_steps=[
-                "Set Static IP to the Device.",
-                "Enable UPnP or Open Port 44158 to the Device.",
-            ],
-            customer_support_steps=[
-                "For quickest results start by contacting your ISP technician.",
-                "If still unresolved after calling ISP tech please provide:",
-                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc.",
-                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN...",
-                "Provide the following screenshots:",
-                "Router's port forward settings",
-                "Router's UPnP settings, if available",
-                "Router's Firewall Settings",
-                "Any additional router settings you think might help",
-            ],
-            troubleshooting_guides=[
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser",
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409239473691-Relayed-Miner",
-            ],
-        )
-
-    def check(self) -> bool:
-        is_pub_ip_over_44158 = re.search(
-            f"(/ip4/)({self.bobcat.public_ip})(/tcp/44158)",
-            self.bobcat.peerbook,
-            re.IGNORECASE,
-        )
-        is_nat_type_none = re.search(
-            r"\|.*(nat_type).*\|.*(none).*\|", self.bobcat.p2p_status, re.IGNORECASE
-        )
-
-        if is_relayed := not is_pub_ip_over_44158 and not is_nat_type_none:
-            self.bobcat.logger.warning(
-                f"{self.name}: Relayed",
-                extra={"description": str(self)} if self.verbose else {},
-            )
-        else:
-            self.bobcat.logger.info(f"{self.name}: Not Relayed ✨")
-
-        return is_relayed
-
-
-class NetworkStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="Network Status",
-            root_cause="The internet connection is slow.",
-            description="A hard wired internet connection with an ethernet cable will reduce syncing issues and will maximize earning potential. Wifi can be unstable and may cause syncing issues.",
-            autopilot_repair_steps=[],
-            manual_repair_steps=[
-                "Connect the Bobcat to the internet with a hard wired ethernet cable."
-            ],
-            customer_support_steps=[
-                "For quickest results start by contacting your ISP technician.",
-                "If still unresolved after calling ISP tech please provide:",
-                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc.",
-                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN...",
-            ],
-            troubleshooting_guides=[
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409231342363-Miner-is-Offline"
-            ],
-        )
-
-    def check(self) -> bool:
-        download_speed = int(self.bobcat.download_speed.strip(" Mbit/s"))
-        upload_speed = int(self.bobcat.upload_speed.strip(" Mbit/s"))
-        latency = float(self.bobcat.latency.strip("ms"))
-
-        extra = {"description": str(self)} if self.verbose else {}
-
-        if is_download_speed_slow := download_speed <= 5:
-            self.bobcat.logger.warning(
-                f"Network Status: Download Slow ({self.bobcat.download_speed})", extra=extra
-            )
-
-        if is_upload_speed_slow := upload_speed <= 5:
-            self.bobcat.logger.warning(
-                f"Network Status: Upload Slow ({self.bobcat.upload_speed})", extra=extra
-            )
-
-        if is_latency_high := latency > 100.0:
-            self.bobcat.logger.warning(
-                f"Network Status: Latency High ({self.bobcat.latency})", extra=extra
-            )
-
-        is_network_speed_slow = any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
-
-        if not is_network_speed_slow:
-            self.bobcat.logger.info(f"Network Status: Good 📶")
-
-        return is_network_speed_slow
-
-
-class TemperatureStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="Temperature Status",
-            root_cause="Red = Above 70°C | Yellow = Between 65°C and 70°C | White = Below 65°C)",
-            description="If the temperature is above 65°C, the Diagnoser will show an 'alert' by changing the color of the temperature label on the menu.",
-            autopilot_repair_steps=[],
-            manual_repair_steps=["https://www.nowitness.org/diy-enclosure/"],
-            customer_support_steps=["None"],
-            troubleshooting_guides=[
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring"
-            ],
-        )
-
-    def check(self) -> bool:
-
-        extra = {"description": str(self)} if self.verbose else {}
-
-        if is_too_cold := self.bobcat.coldest_temp < 0:
-            self.bobcat.logger.error(
-                f"Temperature Status: Cold ({self.bobcat.coldest_temp}°C) ❄️", extra=extra
-            )
-
-        if is_getting_hot := self.bobcat.hottest_temp >= 65 and self.bobcat.hottest_temp < 70:
-            self.bobcat.logger.warning(
-                f"Temperature Status: Warm ({self.bobcat.hottest_temp}°C) 🔥", extra=extra
-            )
-
-        if is_too_hot := self.bobcat.hottest_temp >= 70 or self.bobcat.hottest_temp >= 70:
-            self.bobcat.logger.error(
-                f"Temperature Status: Hot ({self.bobcat.hottest_temp}°C) 🌋", extra=extra
-            )
-
-        is_temperature_dangerous = is_too_cold or (is_getting_hot or is_too_hot)
-
-        if not is_temperature_dangerous:
-            self.bobcat.logger.info(f"Temperature Status: Good ({self.bobcat.hottest_temp}°C) ☀️")
-
-        return is_temperature_dangerous
-
-
-class OTAVersionStatusCheck(BobcatCheck):
-    def __init__(self, bobcat: Bobcat, verbose: str, state_file: str):
-        super().__init__(
-            bobcat=bobcat,
-            verbose=verbose,
-            name="OTA Version Change",
-            root_cause="The Bobcat OTA Updates may cause the Helium hotspot firmware to crash.",
-            description="The Bobcat OTA (Over the Air) Updates are periodic installations of new firmware on your Bobcat Miner that help optimize your miner's functions.",
-            autopilot_repair_steps=[],
-            manual_repair_steps=[],
-            customer_support_steps=[
-                "If Possible, Screenshots of Your Diagnoser.",
-                "Indicate Miner's LED Color",
-                "Open Port 22, if Unable to Access the Diagnoser",
-                "Provide Miner's IP Address",
-                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
-            ],
-            troubleshooting_guides=[
-                "https://bobcatminer.zendesk.com/hc/en-us/articles/4410155816987-Changes-to-My-Miner-During-an-OTA"
-            ],
-        )
-
-        self.state_file = state_file
-
-        if not os.path.exists(os.path.abspath(os.path.dirname(self.state_file))):
-            os.makedirs(os.path.dirname(self.state_file))
-
-        if not os.path.isfile(self.state_file):
-            with open(self.state_file, "w") as f:
-                json.dump({"ota_version": self.bobcat.ota_version}, f)
-
-    def check(self) -> bool:
-        with open(self.state_file, "r") as f:
-            state = json.load(f)
-            previous_ota_version = state.get("ota_version", self.bobcat.ota_version)
-
-        if did_ota_version_change := previous_ota_version != self.bobcat.ota_version:
-            state["ota_version"] = self.bobcat.ota_version
-            self.bobcat.logger.warning(
-                f"New OTA Version: {self.bobcat.ota_version}",
-                extra={"description": str(self)} if self.verbose else {},
-            )
-
-        with open(self.state_file, "w") as f:
-            json.dump(state, f)
-
-        return did_ota_version_change
 
 
 class DownOrErrorCheck(BobcatCheck):
@@ -843,3 +541,348 @@ class RPCFailedCheck(BobcatCheck):
 
     def check():
         raise NotImplemented
+
+
+class UnknownErrorCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Unknown Status",
+            root_cause="Miner's Docker Container",
+            description="This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.",
+            autopilot_repair_steps=[
+                {"func": bobcat.reboot},
+                {"func": bobcat.reset},
+                {"func": bobcat.fastsync},
+            ],
+            manual_repair_steps=[
+                "First Try Reboot",
+                "Try Reset",
+                "Then Fastsync",
+                "Make Sure Your Miner is Connected to the Internet. What color is your miner's LED?",
+            ],
+            customer_support_steps=[
+                "If Possible, Screenshots of Your Diagnoser.",
+                "Indicate Miner's LED Color",
+                "Open Port 22, if Unable to Access the Diagnoser",
+                "Provide Miner's IP Address",
+                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-"
+            ],
+        )
+
+    def check(self) -> bool:
+        is_unhealthy = not self.bobcat.is_healthy
+
+        if is_unhealthy:
+            self.bobcat.logger.error(
+                f"Bobcat Status: {self.bobcat.status.capitalize()}",
+                extra={"description": str(self)} if self.verbose else {},
+            )
+
+        return is_unhealthy
+
+
+class OnlineStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Online Status",
+            root_cause="The Helium Network sees your Bobcat as Offline.",
+            description="This shows the hotspot information that is currently available in the Helium blockchain. Note that this might differ from the actual status of your hotpsot as it takes time for information to propagate from your hotspot to the blockchain.",
+            autopilot_repair_steps=[],
+            manual_repair_steps=[
+                "Check the Diagnoser to see if the Bobcat is running and is healthy.",
+                "Give the Helium Network more time to propagate from your hotspot to the blockchain. Wait 24 hours and check again.",
+            ],
+            customer_support_steps=[
+                "If possible, send screenshots of your Diagnoser.",
+                "Tell us what color your LED is.",
+                "If you can't access your Diagnoser, please open port 22",
+                "Provide the miner's public IP address.",
+                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
+            ],
+            troubleshooting_guides=["https://www.nowitness.org/troubleshooting/"],
+        )
+
+    def _is_offline(self) -> (Dict, None):
+        """Get Hotspot data from Helium API."""
+        data = requests.get(f"https://api.helium.io/v1/hotspots/{self.bobcat.pubkey}").json()
+        return data.get("data", {}).get("status", {}).get("online", "offline").lower() != "online"
+
+    def _is_running(self) -> bool:
+        """Check if the Bobcat is running."""
+        is_running = self.bobcat.miner_state.lower() == "running"
+
+        return is_running
+
+    def check(self) -> bool:
+        try:
+            is_offline = self._is_offline()
+        except Exception as err:
+            self.bobcat.logger.warning(
+                "The Helium API is not responding. Skipping Online Status Check",
+                extra={"description": str(self)} if self.verbose else {},
+            )
+            return False
+
+        else:
+            if is_offline:
+                if self._is_running():
+                    self.bobcat.logger.warning(
+                        f"{self.name}: Bobcat is running and the Helium API is stale",
+                        extra={"description": str(self)} if self.verbose else {},
+                    )
+                    return False
+                else:
+                    self.bobcat.logger.error(
+                        f"{self.name}: Offline",
+                        extra={"description": str(self)} if self.verbose else {},
+                    )
+                    return True
+            else:
+                self.bobcat.logger.info(f"{self.name}: Online ⭐")
+                return False
+
+
+class SyncStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Sync Status",
+            root_cause="Internet connection or snapshot not loading.",
+            description="If the gap keeps getting larger, it could be the case that the internet connection to the miner is unstable. It is always recommended that you sync into the blockchain for the first time with an ethernet cable. Other reasons why you may be experiencing syncing issues include a network bug or a snapshot not loading. If the gap has not changed in over 24 hours, your miner is likely having an issue with the snapshot.",
+            autopilot_repair_steps=[
+                {"func": bobcat.wait, "args": [ONE_DAY]},
+                {"func": bobcat.resync},
+                {"func": bobcat.fastsync},
+                {"func": bobcat.wait, "args": [ONE_DAY]},
+            ],
+            manual_repair_steps=[
+                "Give the miner more time to sync.",
+                "Connect the miner to an ethernet cable for the first time sync.",
+                "Resync then fast sync from the Diagnoser, allow at least 24 hours after fully syncing. If the problem persists, proceed to step 4.",
+                "Reset then fast sync, allow at least 24 hours after fully syncing before reassessing.",
+            ],
+            customer_support_steps=[
+                "What type of internet service is the miner using, for example: Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic...",
+                "Provide more details about your Network set up; are you on a mesh network, are there additional miners on that network, are you using a VPN, IPV4, IPV6...?",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4414476039451-Syncing-Issues"
+            ],
+        )
+
+    def check(self) -> bool:
+        is_synced = self.bobcat.status.upper() == "SYNCED"
+        syncing_and_caught_up = self.bobcat.status.upper() == "SYNCING" and self.bobcat.gap <= 300
+
+        msg = f"{self.name}: {self.bobcat.status.capitalize()} (gap:{self.bobcat.gap})"
+
+        if is_not_synced := not is_synced and not syncing_and_caught_up:
+            self.bobcat.logger.error(msg, extra={"description": str(self)} if self.verbose else {})
+        else:
+            self.bobcat.logger.info(msg + " 💫")
+
+        return is_not_synced
+
+
+class RelayStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Relay Status",
+            root_cause="Your Internet Router Settings",
+            description="The Relay status is determined by lib_p2p. Hotspot's connection is being relayed through another Hotspot on the network which may affect mining. If port 44158 is closed, opening the port should solve the relay. A Relayed hotspot may show 'NAT Type Symmetric' or  'NAT Type Restricted' in your Bobcat Diagnoser. Non Relayed hotspot shows 'NAT Type None'. If it's showing 'NAT Type Unknown', that means you need to wait until the NAT Type is found by the miner. To confirm if your hotspot is relayed, you can click the 'Helium Api' menu in your Diagnoser and see if the address is p2p, your hotspot is relayed.",
+            autopilot_repair_steps=[],
+            manual_repair_steps=[
+                "Set Static IP to the Device.",
+                "Enable UPnP or Open Port 44158 to the Device.",
+            ],
+            customer_support_steps=[
+                "For quickest results start by contacting your ISP technician.",
+                "If still unresolved after calling ISP tech please provide:",
+                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc.",
+                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN...",
+                "Provide the following screenshots:",
+                "Router's port forward settings",
+                "Router's UPnP settings, if available",
+                "Router's Firewall Settings",
+                "Any additional router settings you think might help",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413699764763-Confirming-Relay-Status-in-Diagnoser",
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409239473691-Relayed-Miner",
+            ],
+        )
+
+    def check(self) -> bool:
+        is_pub_ip_over_44158 = re.search(
+            f"(/ip4/)({self.bobcat.public_ip})(/tcp/44158)",
+            self.bobcat.peerbook,
+            re.IGNORECASE,
+        )
+        is_nat_type_none = re.search(
+            r"\|.*(nat_type).*\|.*(none).*\|", self.bobcat.p2p_status, re.IGNORECASE
+        )
+
+        if is_relayed := not is_pub_ip_over_44158 and not is_nat_type_none:
+            self.bobcat.logger.warning(
+                f"{self.name}: Relayed",
+                extra={"description": str(self)} if self.verbose else {},
+            )
+        else:
+            self.bobcat.logger.info(f"{self.name}: Not Relayed ✨")
+
+        return is_relayed
+
+
+class NetworkStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Network Status",
+            root_cause="The internet connection is slow.",
+            description="A hard wired internet connection with an ethernet cable will reduce syncing issues and will maximize earning potential. Wifi can be unstable and may cause syncing issues.",
+            autopilot_repair_steps=[],
+            manual_repair_steps=[
+                "Connect the Bobcat to the internet with a hard wired ethernet cable."
+            ],
+            customer_support_steps=[
+                "For quickest results start by contacting your ISP technician.",
+                "If still unresolved after calling ISP tech please provide:",
+                "What type of internet service is the miner using for example Mobile, Hotspot, Broadband, Cable, DSL Satellite, Fiber Optic, etc.",
+                "Provide more details about your Network set up, are you on a mesh network, are there additional miners on that network, are you using a VPN...",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4409231342363-Miner-is-Offline"
+            ],
+        )
+
+    def check(self) -> bool:
+        download_speed = int(self.bobcat.download_speed.strip(" Mbit/s"))
+        upload_speed = int(self.bobcat.upload_speed.strip(" Mbit/s"))
+        latency = float(self.bobcat.latency.strip("ms"))
+
+        extra = {"description": str(self)} if self.verbose else {}
+
+        if is_download_speed_slow := download_speed <= 5:
+            self.bobcat.logger.warning(
+                f"Network Status: Download Slow ({self.bobcat.download_speed})", extra=extra
+            )
+
+        if is_upload_speed_slow := upload_speed <= 5:
+            self.bobcat.logger.warning(
+                f"Network Status: Upload Slow ({self.bobcat.upload_speed})", extra=extra
+            )
+
+        if is_latency_high := latency > 100.0:
+            self.bobcat.logger.warning(
+                f"Network Status: Latency High ({self.bobcat.latency})", extra=extra
+            )
+
+        is_network_speed_slow = any([is_download_speed_slow, is_upload_speed_slow, is_latency_high])
+
+        if not is_network_speed_slow:
+            self.bobcat.logger.info(f"Network Status: Good 📶")
+
+        return is_network_speed_slow
+
+
+class TemperatureStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Temperature Status",
+            root_cause="Red = Above 70°C | Yellow = Between 65°C and 70°C | White = Below 65°C)",
+            description="If the temperature is above 65°C, the Diagnoser will show an 'alert' by changing the color of the temperature label on the menu.",
+            autopilot_repair_steps=[],
+            manual_repair_steps=["https://www.nowitness.org/diy-enclosure/"],
+            customer_support_steps=["None"],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4407605756059-Sync-Status-Temp-Monitoring"
+            ],
+        )
+
+    def check(self) -> bool:
+
+        extra = {"description": str(self)} if self.verbose else {}
+
+        if is_too_cold := self.bobcat.coldest_temp < 0:
+            self.bobcat.logger.error(
+                f"Temperature Status: Cold ({self.bobcat.coldest_temp}°C) ❄️", extra=extra
+            )
+
+        if is_getting_hot := self.bobcat.hottest_temp >= 65 and self.bobcat.hottest_temp < 70:
+            self.bobcat.logger.warning(
+                f"Temperature Status: Warm ({self.bobcat.hottest_temp}°C) 🔥", extra=extra
+            )
+
+        if is_too_hot := self.bobcat.hottest_temp >= 70 or self.bobcat.hottest_temp >= 70:
+            self.bobcat.logger.error(
+                f"Temperature Status: Hot ({self.bobcat.hottest_temp}°C) 🌋", extra=extra
+            )
+
+        is_temperature_dangerous = is_too_cold or (is_getting_hot or is_too_hot)
+
+        if not is_temperature_dangerous:
+            self.bobcat.logger.info(f"Temperature Status: Good ({self.bobcat.hottest_temp}°C) ☀️")
+
+        return is_temperature_dangerous
+
+
+class OTAVersionStatusCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str, state_file: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="OTA Version Change",
+            root_cause="The Bobcat OTA Updates may cause the Helium hotspot firmware to crash.",
+            description="The Bobcat OTA (Over the Air) Updates are periodic installations of new firmware on your Bobcat Miner that help optimize your miner's functions.",
+            autopilot_repair_steps=[],
+            manual_repair_steps=[],
+            customer_support_steps=[
+                "If Possible, Screenshots of Your Diagnoser.",
+                "Indicate Miner's LED Color",
+                "Open Port 22, if Unable to Access the Diagnoser",
+                "Provide Miner's IP Address",
+                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4410155816987-Changes-to-My-Miner-During-an-OTA"
+            ],
+        )
+
+        self.state_file = state_file
+
+        if not os.path.exists(os.path.abspath(os.path.dirname(self.state_file))):
+            os.makedirs(os.path.dirname(self.state_file))
+
+        if not os.path.isfile(self.state_file):
+            with open(self.state_file, "w") as f:
+                json.dump({"ota_version": self.bobcat.ota_version}, f)
+
+    def check(self) -> bool:
+        with open(self.state_file, "r") as f:
+            state = json.load(f)
+            previous_ota_version = state.get("ota_version", self.bobcat.ota_version)
+
+        if did_ota_version_change := previous_ota_version != self.bobcat.ota_version:
+            state["ota_version"] = self.bobcat.ota_version
+            self.bobcat.logger.warning(
+                f"New OTA Version: {self.bobcat.ota_version}",
+                extra={"description": str(self)} if self.verbose else {},
+            )
+
+        with open(self.state_file, "w") as f:
+            json.dump(state, f)
+
+        return did_ota_version_change

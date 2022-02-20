@@ -54,12 +54,6 @@ class BobcatAutopilot(Bobcat):
         args = [self.bobcat, self.verbose]
 
         return (
-            OnlineStatusCheck(*args),
-            SyncStatusCheck(*args),
-            RelayStatusCheck(*args),
-            NetworkStatusCheck(*args),
-            TemperatureStatusCheck(*args),
-            OTAVersionStatusCheck(*args, self.state_file),
             DownOrErrorCheck(*args),
             HeightAPIErrorCheck(*args),
             # TODO checks not implemented
@@ -75,6 +69,13 @@ class BobcatAutopilot(Bobcat):
             # SnapshotDownloadOrLoadingFailedErrorCheck(*args),
             # NoPlausibleBlocksInBatchErrorCheck(*args),
             # RPCFailedCheck(*args),
+            UnknownErrorCheck(*args),
+            OnlineStatusCheck(*args),
+            SyncStatusCheck(*args),
+            RelayStatusCheck(*args),
+            NetworkStatusCheck(*args),
+            TemperatureStatusCheck(*args),
+            OTAVersionStatusCheck(*args, self.state_file),
         )
 
     def run(self) -> None:
@@ -106,13 +107,7 @@ class BobcatAutopilot(Bobcat):
                             )
 
                             is_running = self.bobcat.miner_state.lower() == "running"
-                            is_healthy = (
-                                not self.bobcat.miner_alert
-                                and self.bobcat.status.lower()
-                                not in ["loading", "syncing", "synced"]
-                            )
-
-                            if is_running and is_healthy:
+                            if is_running and self.bobcat.is_healthy:
                                 self.bobcat.logger.info("Repair Status: Complete")
 
         except Timeout:
