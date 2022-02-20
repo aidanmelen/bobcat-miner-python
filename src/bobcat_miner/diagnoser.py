@@ -543,6 +543,49 @@ class RPCFailedCheck(BobcatCheck):
         raise NotImplemented
 
 
+class UnknownErrorCheck(BobcatCheck):
+    def __init__(self, bobcat: Bobcat, verbose: str):
+        super().__init__(
+            bobcat=bobcat,
+            verbose=verbose,
+            name="Unknown Status",
+            root_cause="Miner's Docker Container",
+            description="This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.",
+            autopilot_repair_steps=[
+                {"func": bobcat.reboot},
+                {"func": bobcat.reset},
+                {"func": bobcat.fastsync},
+            ],
+            manual_repair_steps=[
+                "First Try Reboot",
+                "Try Reset",
+                "Then Fastsync",
+                "Make Sure Your Miner is Connected to the Internet. What color is your miner's LED?",
+            ],
+            customer_support_steps=[
+                "If Possible, Screenshots of Your Diagnoser.",
+                "Indicate Miner's LED Color",
+                "Open Port 22, if Unable to Access the Diagnoser",
+                "Provide Miner's IP Address",
+                "Confirm Port 22 is Open (Include a Screenshot of this Page)",
+            ],
+            troubleshooting_guides=[
+                "https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-"
+            ],
+        )
+
+    def check(self) -> bool:
+        is_unhealthy = not self.bobcat.is_healthy
+
+        if is_unhealthy:
+            self.bobcat.logger.error(
+                f"Bobcat Status: {self.bobcat.status.capitalize()}",
+                extra={"description": str(self)} if self.verbose else {},
+            )
+
+        return is_unhealthy
+
+
 class OnlineStatusCheck(BobcatCheck):
     def __init__(self, bobcat: Bobcat, verbose: str):
         super().__init__(

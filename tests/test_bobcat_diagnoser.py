@@ -4,12 +4,6 @@ import unittest
 
 from bobcat_miner import (
     Bobcat,
-    OnlineStatusCheck,
-    RelayStatusCheck,
-    SyncStatusCheck,
-    NetworkStatusCheck,
-    TemperatureStatusCheck,
-    OTAVersionStatusCheck,
     DownOrErrorCheck,
     HeightAPIErrorCheck,
     # NoActivityCheck,
@@ -24,9 +18,138 @@ from bobcat_miner import (
     # SnapshotDownloadOrLoadingFailedErrorCheck,
     # NoPlausibleBlocksInBatchErrorCheck,
     # RPCFailedCheck,
+    UnknownErrorCheck,
+    OnlineStatusCheck,
+    RelayStatusCheck,
+    SyncStatusCheck,
+    NetworkStatusCheck,
+    TemperatureStatusCheck,
+    OTAVersionStatusCheck,
 )
 
 import mock_endpoints
+
+
+class TestDownOrErrorCheck(unittest.TestCase):
+    def setUp(self):
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = DownOrErrorCheck(self.mock_bobcat, mock_verbose)
+
+    def test_DownOrErrorCheck_when_error(self):
+        self.mock_bobcat.status = "Error"
+        self.mock_bobcat.tip = " Error response from daemon: Container 49dd5fae6f3094e240e9aa339947bc9f6336d5f997c495a37696095fc306f3d1 is restarting, wait until the container is running exit status 1"
+
+        self.assertTrue(self.check.check())
+
+        self.check.verbose = True
+        self.assertTrue(self.check.check())
+
+        self.check.bobcat.logger.assert_has_calls(
+            [
+                call.error("Bobcat Status: Error", extra={}),
+                call.error("Bobcat Status: Error", extra={"description": str(self.check)}),
+            ],
+            any_order=False,
+        )
+
+    def test_DownOrErrorCheck_when_down(self):
+        self.mock_bobcat.status = "Down"
+        self.assertTrue(self.check.check())
+
+        self.check.verbose = True
+        self.assertTrue(self.check.check())
+
+        self.check.bobcat.logger.assert_has_calls(
+            [
+                call.error("Bobcat Status: Down", extra={}),
+                call.error("Bobcat Status: Down", extra={"description": str(self.check)}),
+            ],
+            any_order=False,
+        )
+
+    def test_DownOrErrorCheck_when_synced(self):
+        self.mock_bobcat.status = "Synced"
+        self.mock_bobcat.tip = ""
+        self.assertFalse(self.check.check())
+        self.assertFalse(self.mock_bobcat.logger.called)
+
+
+class TestHeightAPIErrorCheck(unittest.TestCase):
+    def setUp(self):
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = HeightAPIErrorCheck(self.mock_bobcat, mock_verbose)
+
+    def test_HeightAPIErrorCheck_when_error(self):
+        self.mock_bobcat.status = "Height API Error"
+
+        self.assertTrue(self.check.check())
+
+        self.check.verbose = True
+        self.assertTrue(self.check.check())
+
+        self.check.bobcat.logger.assert_has_calls(
+            [
+                call.error("Bobcat Status: Height API Error", extra={}),
+                call.error(
+                    "Bobcat Status: Height API Error", extra={"description": str(self.check)}
+                ),
+            ],
+            any_order=False,
+        )
+
+    def test_HeightAPIErrorCheck_when_synced(self):
+        self.mock_bobcat.status = "Synced"
+        self.assertFalse(self.check.check())
+        self.assertFalse(self.mock_bobcat.logger.called)
+
+
+class TestUnknownErrorCheck(unittest.TestCase):
+    def setUp(self):
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = UnknownErrorCheck(self.mock_bobcat, mock_verbose)
+
+    def test_UnknownErrorCheck_when_error(self):
+
+        # Please see observations docs for more information about test setup:
+        # https://github.com/aidanmelen/bobcat-miner-python/tree/main/docs/observations/errors/unknown-error.md
+        self.mock_bobcat.is_healthy = False
+        self.mock_bobcat.status = "Unkown"
+        self.mock_bobcat.gap = "-"
+        self.mock_bobcat.region = ("error: usage in",)
+        self.mock_bobcat.p2p_status = [
+            "Error: Usage information not found for the given command",
+            "",
+            "",
+            "",
+        ]
+        self.epoch = "Error:"
+        self.mock_bobcat.height = [
+            "Error: Usage information not found for the given command",
+            "",
+            "",
+            "",
+        ]
+        self.miner_alert = None
+        self.error = ""
+
+        self.assertTrue(self.check.check())
+
+        self.check.verbose = True
+        self.assertTrue(self.check.check())
+
+        self.check.bobcat.logger.assert_has_calls(
+            [
+                call.error("Bobcat Status: Unkown", extra={}),
+                call.error("Bobcat Status: Unkown", extra={"description": str(self.check)}),
+            ],
+            any_order=False,
+        )
 
 
 class TestOnlineStatusCheck(unittest.TestCase):
@@ -324,83 +447,6 @@ class TestOTAVersionStatusCheck(unittest.TestCase):
         self.assertFalse(self.check.check())
         self.assertFalse(self.mock_bobcat.logger.called)
         mock_json_dump.called_once_with({"ota_version": "1.0.2.77"}, mock_open)
-
-
-class TestDownOrErrorCheck(unittest.TestCase):
-    def setUp(self):
-        self.mock_bobcat = MagicMock(spec=Bobcat)
-        self.mock_bobcat.logger = MagicMock()
-        mock_verbose = False
-        self.check = DownOrErrorCheck(self.mock_bobcat, mock_verbose)
-
-    def test_DownOrErrorCheck_when_error(self):
-        self.mock_bobcat.status = "Error"
-        self.mock_bobcat.tip = " Error response from daemon: Container 49dd5fae6f3094e240e9aa339947bc9f6336d5f997c495a37696095fc306f3d1 is restarting, wait until the container is running exit status 1"
-
-        self.assertTrue(self.check.check())
-
-        self.check.verbose = True
-        self.assertTrue(self.check.check())
-
-        self.check.bobcat.logger.assert_has_calls(
-            [
-                call.error("Bobcat Status: Error", extra={}),
-                call.error("Bobcat Status: Error", extra={"description": str(self.check)}),
-            ],
-            any_order=False,
-        )
-
-    def test_DownOrErrorCheck_when_down(self):
-        self.mock_bobcat.status = "Down"
-        self.assertTrue(self.check.check())
-
-        self.check.verbose = True
-        self.assertTrue(self.check.check())
-
-        self.check.bobcat.logger.assert_has_calls(
-            [
-                call.error("Bobcat Status: Down", extra={}),
-                call.error("Bobcat Status: Down", extra={"description": str(self.check)}),
-            ],
-            any_order=False,
-        )
-
-    def test_DownOrErrorCheck_when_synced(self):
-        self.mock_bobcat.status = "Synced"
-        self.mock_bobcat.tip = ""
-        self.assertFalse(self.check.check())
-        self.assertFalse(self.mock_bobcat.logger.called)
-
-
-class TestHeightAPIErrorCheck(unittest.TestCase):
-    def setUp(self):
-        self.mock_bobcat = MagicMock(spec=Bobcat)
-        self.mock_bobcat.logger = MagicMock()
-        mock_verbose = False
-        self.check = HeightAPIErrorCheck(self.mock_bobcat, mock_verbose)
-
-    def test_HeightAPIErrorCheck_when_error(self):
-        self.mock_bobcat.status = "Height API Error"
-
-        self.assertTrue(self.check.check())
-
-        self.check.verbose = True
-        self.assertTrue(self.check.check())
-
-        self.check.bobcat.logger.assert_has_calls(
-            [
-                call.error("Bobcat Status: Height API Error", extra={}),
-                call.error(
-                    "Bobcat Status: Height API Error", extra={"description": str(self.check)}
-                ),
-            ],
-            any_order=False,
-        )
-
-    def test_HeightAPIErrorCheck_when_synced(self):
-        self.mock_bobcat.status = "Synced"
-        self.assertFalse(self.check.check())
-        self.assertFalse(self.mock_bobcat.logger.called)
 
 
 if __name__ == "__main__":

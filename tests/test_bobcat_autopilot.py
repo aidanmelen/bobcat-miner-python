@@ -63,10 +63,13 @@ class TestAutopilot(unittest.TestCase):
                 call.debug("Lock Acquired: .mock.lock"),
                 call.debug("Checking: Down or Error Status"),
                 call.debug("Checking: Height API Error Status"),
+                call.debug("Checking: Unknown Status"),
                 call.debug("Checking: Online Status"),
                 call.warning(
                     "Online Status: Bobcat is running and the Helium API is stale", extra={}
                 ),
+                call.debug("Checking: Sync Status"),
+                call.info("Sync Status: Synced (gap:0) 💫"),
                 call.debug("Checking: Relay Status"),
                 call.info("Relay Status: Not Relayed ✨"),
                 call.debug("Checking: Network Status"),
