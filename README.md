@@ -12,14 +12,15 @@ A command line tool used to automate the Bobcat miner. This project also offers 
 
 ## Install
 
-### Pipx
+**Pipx**
+
 ```bash
 pipx install bobcat-miner
 ```
 
 Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
-### Docker
+**Docker**
 
 ```bash
 docker pull aidanmelen/bobcat
