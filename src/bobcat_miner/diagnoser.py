@@ -548,7 +548,7 @@ class UnknownErrorCheck(BobcatCheck):
         super().__init__(
             bobcat=bobcat,
             verbose=verbose,
-            name="Unknown Status",
+            name="Unknown Error Status",
             root_cause="Miner's Docker Container",
             description="This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.",
             autopilot_repair_steps=[
