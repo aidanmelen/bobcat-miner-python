@@ -108,7 +108,7 @@ class BobcatAutopilot(Bobcat):
 
                             if self.bobcat.is_healthy:
                                 self.bobcat.logger.info("Repair Status: Complete")
-                                continue
+                                break
 
         except Timeout:
             self.bobcat.logger.warning(
