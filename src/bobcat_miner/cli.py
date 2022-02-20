@@ -287,6 +287,7 @@ def reset(ctx, yes) -> None:
     click.echo(
         "This action will delete all the Helium software and blockchain data and let your miner start resyncing from 0. If your hotspot out of sync, please use Resync/Fastsync. Make sure you don't lose power or internet connectivity during the reset."
     )
+    
     if yes:
         click.echo(ctx.obj["BOBCAT"].reset())
 
@@ -307,6 +308,7 @@ def resync(ctx, yes) -> None:
     click.echo(
         "This action will delete all blockchain data and let your miner start resyncing from 0. Make sure you don't lose power or internet connectivity during the resync."
     )
+
     if yes:
         click.echo(ctx.obj["BOBCAT"].resync())
 
@@ -327,6 +329,7 @@ def fastsync(ctx, yes) -> None:
     click.echo(
         'Use Fast Sync only if you just used "Resync" / "Reset" (after 30 minutes) and the LED has turned green, if the miner had recently been fully synced but out of sync again for a long time, you need to play some catch-up now.'
     )
+
     if yes:
         click.echo(ctx.obj["BOBCAT"].fastsync())
 
