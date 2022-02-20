@@ -287,7 +287,7 @@ def reset(ctx, yes) -> None:
     click.echo(
         "This action will delete all the Helium software and blockchain data and let your miner start resyncing from 0. If your hotspot out of sync, please use Resync/Fastsync. Make sure you don't lose power or internet connectivity during the reset."
     )
-    
+
     if yes:
         click.echo(ctx.obj["BOBCAT"].reset())
 

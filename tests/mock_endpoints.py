@@ -266,7 +266,7 @@ def mock_online(*args, **kwargs):
         response_content = fastsync_response_data
 
     # helium endpoints
-    elif "api.helium.io/v1/hotspots/" in request_url:
+    elif "api.helium.io/v1/hotspots" in request_url:
         response_content = json.dumps(online_helium_api_response_data)
 
     response = Response()
@@ -290,6 +290,40 @@ def mock_offline(*args, **kwargs):
         response_content = json.dumps(down_speed_data)
     elif "/dig.json" in request_url:
         response_content = json.dumps(down_dig_data)
+    elif "/admin/reboot" in request_url:
+        response_content = reboot_response_data
+    elif "/admin/reset" in request_url:
+        response_content = reset_response_data
+    elif "/admin/resync" in request_url:
+        response_content = resync_response_data
+    elif "/admin/fastsync" in request_url:
+        response_content = fastsync_response_data
+
+    # helium endpoints
+    elif "api.helium.io/v1/hotspots" in request_url:
+        response_content = json.dumps(offline_helium_api_response_data)
+
+    response = Response()
+    response.status_code = 200
+    response._content = str.encode(response_content)
+    return response
+
+
+def mock_healthy_and_helium_api_is_stale(*args, **kwargs):
+    response_content = None
+    request_url = args[0]
+
+    # bobcat endpoints
+    if "/status.json" in request_url:
+        response_content = json.dumps(synced_status_data)
+    elif "/miner.json" in request_url:
+        response_content = json.dumps(synced_miner_data)
+    elif "/temp.json" in request_url:
+        response_content = json.dumps(synced_temp_data)
+    elif "/speed.json" in request_url:
+        response_content = json.dumps(synced_speed_data)
+    elif "/dig.json" in request_url:
+        response_content = json.dumps(synced_dig_data)
     elif "/admin/reboot" in request_url:
         response_content = reboot_response_data
     elif "/admin/reset" in request_url:

@@ -154,17 +154,27 @@ class TestUnknownErrorCheck(unittest.TestCase):
 
 class TestOnlineStatusCheck(unittest.TestCase):
     def setUp(self):
-        mock_bobcat = MagicMock(spec=Bobcat)
-        mock_bobcat.logger = MagicMock()
-        self.check = OnlineStatusCheck(mock_bobcat, False)
+        self.mock_bobcat = MagicMock(spec=Bobcat)
+        self.mock_bobcat.logger = MagicMock()
+        mock_verbose = False
+        self.check = OnlineStatusCheck(self.mock_bobcat, mock_verbose)
 
     @patch("requests.get", side_effect=mock_endpoints.mock_online)
     def test_OnlineStatusCheck_when_online(self, mock_requests_get):
+        self.mock_bobcat.is_healthy = True
+        self.mock_bobcat.miner_state = "running"
         self.assertFalse(self.check.check())
 
     @patch("requests.get", side_effect=mock_endpoints.mock_offline)
     def test_OnlineStatusCheck_when_offline(self, mock_requests_get):
+        self.mock_bobcat.is_healthy = False
         self.assertTrue(self.check.check())
+
+    @patch("requests.get", side_effect=mock_endpoints.mock_healthy_and_helium_api_is_stale)
+    def test_OnlineStatusCheck_when_healthy_but_helium_api_is_stale(self, mock_requests_get):
+        self.mock_bobcat.is_healthy = True
+        self.mock_bobcat.miner_state = "running"
+        self.assertFalse(self.check.check())
 
     @patch("requests.get", side_effect=Exception("Unable to Reach Helium API"))
     def test_OnlineStatusCheck_when_helium_api_is_unreachable_and_not_running(
