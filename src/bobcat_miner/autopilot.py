@@ -93,28 +93,27 @@ class BobcatAutopilot(Bobcat):
 
                     if check.check():
 
-                        if hasattr(check, "autopilot_repair_steps"):
-                            for step in check.autopilot_repair_steps:
-                                func, args, kwargs = (
-                                    step["func"],
-                                    step.get("args", []),
-                                    step.get("kwargs", {}),
-                                )
-                                func(*args, **kwargs)
+                        for step in check.autopilot_repair_steps:
+                            func, args, kwargs = (
+                                step["func"],
+                                step.get("args", []),
+                                step.get("kwargs", {}),
+                            )
+                            func(*args, **kwargs)
 
-                                self.bobcat.refresh(
-                                    status=True, miner=True, temp=False, speed=False, dig=False
-                                )
+                            self.bobcat.refresh(
+                                status=True, miner=True, temp=False, speed=False, dig=False
+                            )
 
-                                is_running = self.bobcat.miner_state.lower() == "running"
-                                is_healthy = (
-                                    not self.bobcat.miner_alert
-                                    and self.bobcat.status.lower()
-                                    in ["loading", "syncing", "synced"]
-                                )
+                            is_running = self.bobcat.miner_state.lower() == "running"
+                            is_healthy = (
+                                self.bobcat.status.lower() in ["loading", "syncing", "synced"]
+                                and not self.bobcat.miner_alert
+                                and not self.bobcat.errors
+                            )
 
-                                if is_running and is_healthy:
-                                    self.bobcat.logger.info("Repair Status: Complete")
+                            if is_running and is_healthy:
+                                self.bobcat.logger.info("Repair Status: Complete")
 
         except Timeout:
             self.bobcat.logger.warning(
