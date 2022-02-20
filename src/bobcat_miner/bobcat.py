@@ -331,7 +331,7 @@ class Bobcat(BobcatAPI):
         if not self._dig_data:
             self.refresh_dig()
         return self._dig_data.get("records", [])
-    
+
     @property
     def is_healthy(self):
         """Check the health of the Bobcat."""
