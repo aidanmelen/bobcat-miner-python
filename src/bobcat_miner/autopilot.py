@@ -106,13 +106,7 @@ class BobcatAutopilot(Bobcat):
                             )
 
                             is_running = self.bobcat.miner_state.lower() == "running"
-                            is_healthy = (
-                                self.bobcat.status.lower() in ["loading", "syncing", "synced"]
-                                and not self.bobcat.miner_alert
-                                and not self.bobcat.errors
-                            )
-
-                            if is_running and is_healthy:
+                            if is_running and self.bobcat.is_healthy:
                                 self.bobcat.logger.info("Repair Status: Complete")
 
         except Timeout:

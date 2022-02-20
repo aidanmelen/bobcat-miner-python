@@ -331,6 +331,15 @@ class Bobcat(BobcatAPI):
         if not self._dig_data:
             self.refresh_dig()
         return self._dig_data.get("records", [])
+    
+    @property
+    def is_healthy(self):
+        """Check the health of the Bobcat."""
+        return (
+            self.bobcat.status.lower() in ["loading", "syncing", "synced"]
+            and not self.bobcat.miner_alert
+            and not self.bobcat.error
+        )
 
     def _parse_html(self, html) -> str:
         """Parse HTML and return a str
@@ -388,12 +397,7 @@ class Bobcat(BobcatAPI):
                 )
                 return
 
-            is_healthy = (
-                self.bobcat.status.lower() in ["loading", "syncing", "synced"]
-                and not self.bobcat.miner_alert
-                and not self.bobcat.errors
-            )
-            if is_healthy:
+            if self.is_healthy:
                 self.logger.warning(
                     f"Cancelling Fastsync because it can only be run on a healthy Bobcat. The current status is: {self.status}"
                 )
