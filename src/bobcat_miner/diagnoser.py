@@ -871,9 +871,15 @@ class OTAVersionStatusCheck(BobcatCheck):
                 json.dump({"ota_version": self.bobcat.ota_version}, f)
 
     def check(self) -> bool:
-        with open(self.state_file, "r") as f:
-            state = json.load(f)
+        try:
+            with open(self.state_file, "r") as f:
+                state = json.load(f)
+                previous_ota_version = state.get("ota_version", self.bobcat.ota_version)
+
+        except json.decoder.JSONDecodeError as err:
             previous_ota_version = state.get("ota_version", self.bobcat.ota_version)
+            with open(self.state_file, "w") as f:
+                json.dump({"ota_version": previous_ota_version}, f)
 
         if did_ota_version_change := previous_ota_version != self.bobcat.ota_version:
             state["ota_version"] = self.bobcat.ota_version
