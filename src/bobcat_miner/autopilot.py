@@ -54,12 +54,6 @@ class BobcatAutopilot(Bobcat):
         args = [self.bobcat, self.verbose]
 
         return (
-            OnlineStatusCheck(*args),
-            SyncStatusCheck(*args),
-            RelayStatusCheck(*args),
-            NetworkStatusCheck(*args),
-            TemperatureStatusCheck(*args),
-            OTAVersionStatusCheck(*args, self.state_file),
             DownOrErrorCheck(*args),
             HeightAPIErrorCheck(*args),
             # TODO checks not implemented
@@ -75,6 +69,12 @@ class BobcatAutopilot(Bobcat):
             # SnapshotDownloadOrLoadingFailedErrorCheck(*args),
             # NoPlausibleBlocksInBatchErrorCheck(*args),
             # RPCFailedCheck(*args),
+            OnlineStatusCheck(*args),
+            # SyncStatusCheck(*args),
+            RelayStatusCheck(*args),
+            NetworkStatusCheck(*args),
+            TemperatureStatusCheck(*args),
+            OTAVersionStatusCheck(*args, self.state_file),
         )
 
     def run(self) -> None:
@@ -93,27 +93,28 @@ class BobcatAutopilot(Bobcat):
 
                     if check.check():
 
-                        for step in check.autopilot_repair_steps:
-                            func, args, kwargs = (
-                                step["func"],
-                                step.get("args", []),
-                                step.get("kwargs", {}),
-                            )
-                            func(*args, **kwargs)
+                        if hasattr(check, "autopilot_repair_steps"):
+                            for step in check.autopilot_repair_steps:
+                                func, args, kwargs = (
+                                    step["func"],
+                                    step.get("args", []),
+                                    step.get("kwargs", {}),
+                                )
+                                func(*args, **kwargs)
 
-                            self.bobcat.refresh(
-                                status=True, miner=True, temp=False, speed=False, dig=False
-                            )
+                                self.bobcat.refresh(
+                                    status=True, miner=True, temp=False, speed=False, dig=False
+                                )
 
-                            is_running = self.bobcat.miner_state.lower() == "running"
-                            is_healthy = (
-                                not self.bobcat.miner_alert
-                                and self.bobcat.status.lower()
-                                not in ["loading", "syncing", "synced"]
-                            )
+                                is_running = self.bobcat.miner_state.lower() == "running"
+                                is_healthy = (
+                                    not self.bobcat.miner_alert
+                                    and self.bobcat.status.lower()
+                                    in ["loading", "syncing", "synced"]
+                                )
 
-                            if is_running and is_healthy:
-                                self.bobcat.logger.info("Repair Status: Complete")
+                                if is_running and is_healthy:
+                                    self.bobcat.logger.info("Repair Status: Complete")
 
         except Timeout:
             self.bobcat.logger.warning(

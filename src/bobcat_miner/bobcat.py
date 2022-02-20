@@ -388,6 +388,7 @@ class Bobcat(BobcatAPI):
                 )
                 return
 
+            # TODO should be not healthy. there are too many error states to catch...
             if self.status.upper() in ["ERROR", "DOWN"] or self.error or self.miner_alert:
                 self.logger.warning(
                     f"Cancelling Fastsync because it can only be run on a healthy Bobcat. The current status is: {self.status}"

@@ -52,7 +52,7 @@ class BobcatCheck(ABC):
         self.name = name
         self.root_cause = root_cause
         self.description = description
-        self.bobcat_repair_steps = autopilot_repair_steps
+        self.autopilot_repair_steps = autopilot_repair_steps
         self.manual_repair_steps = manual_repair_steps
         self.customer_support_steps = customer_support_steps
         self.troubleshooting_guides = troubleshooting_guides
