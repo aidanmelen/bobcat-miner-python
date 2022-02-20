@@ -630,7 +630,7 @@ class OnlineStatusCheck(BobcatCheck):
                 is_running = self.bobcat.miner_state.lower() == "running"
                 if is_running and self.bobcat.is_healthy:
                     self.bobcat.logger.warning(
-                        f"{self.name}: Bobcat is running and the Helium API is stale",
+                        f"{self.name}: Bobcat is healthy and the Helium API is stale",
                         extra={"description": str(self)} if self.verbose else {},
                     )
                     return False

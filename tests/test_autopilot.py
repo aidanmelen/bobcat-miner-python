@@ -66,7 +66,7 @@ class TestAutopilot(unittest.TestCase):
                 call.debug("Checking: Unknown Error Status"),
                 call.debug("Checking: Online Status"),
                 call.warning(
-                    "Online Status: Bobcat is running and the Helium API is stale", extra={}
+                    "Online Status: Bobcat is healthy and the Helium API is stale", extra={}
                 ),
                 call.debug("Checking: Sync Status"),
                 call.info("Sync Status: Synced (gap:0) 💫"),
