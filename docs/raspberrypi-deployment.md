@@ -19,7 +19,7 @@ Install the Docker Community Edition.
 sudo apt install -y docker-ce
 ```
 
-Pull and tag the `bobcat` image
+Pull the `bobcat` image
 
 ```
 sudo docker pull aidanmelen/bobcat
