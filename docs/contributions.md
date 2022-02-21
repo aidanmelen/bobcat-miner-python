@@ -31,7 +31,7 @@ Usage: bobcat [OPTIONS] COMMAND [ARGS]...
 This dev container is networked with a fake bobcat service called `fancy-awesome-bobcat`.
 
 ```
-docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
+root@bobcat-miner-python-dev:/app# bobcat autopilot
 🐛 Connected to Bobcat: fancy-awesome-bobcat
 🐛 Refresh: Miner Data
 🐛 Verified Bobcat Animal: fancy-awesome-bobcat
@@ -60,21 +60,21 @@ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
 `fancy-awesome-bobcat` has a special test endpoint for simulating a `Down` state
 
 ```bash
-curl -X post fancy-awesome-bobcat/set/down
+root@bobcat-miner-python-dev:/app# curl -X post fancy-awesome-bobcat/set/down
 Set Status: Down
 ```
 
 The bobcat is now in a `Down` state
 
 ```bash
-bobcat -C INFO status
+root@bobcat-miner-python-dev:/app# bobcat -C INFO status
 {'blockchain_height': '1234527', 'epoch': 'Error:', 'gap': '-', 'miner_height': 'command', 'status': 'Down'}
 ```
 
 Now we can simulate a `bobcat autopilot` repair run
 
 ```
-bobcat -C INFO autopilot
+root@bobcat-miner-python-dev:/app# bobcat -C INFO autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
 ⚠️ Rebooting Bobcat
