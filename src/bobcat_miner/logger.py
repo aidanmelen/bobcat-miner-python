@@ -80,7 +80,7 @@ class BobcatLogger:
 
 @dataclass
 class Color:
-    """A class for terminal color codes."""
+    """A class for console color codes."""
 
     BOLD = "\033[1m"
     BLUE = "\033[94m"

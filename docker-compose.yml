@@ -27,7 +27,7 @@ services:
       BOBCAT_HOSTNAME: "fancy-awesome-bobcat"
       BOBCAT_ANIMAL: "fancy-awesome-bobcat"
       BOBCAT_NETWORKS: "192.168.0.0/24 10.0.0.0/24 172.16.0.0/24 172.18.0.0/24"
-      BOBCAT_DRY_RUN: "TRUE"
+      BOBCAT_DRY_RUN: "FALSE"
       BOBCAT_VERBOSE: "FALSE"
       BOBCAT_TRACE: "FALSE"
       BOBCAT_LOCK_FILE: "/etc/bobcat/autopilot.lock"

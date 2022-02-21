@@ -413,6 +413,9 @@ class Bobcat(BobcatAPI):
         Args:
             duration (int, optional): An arbitrary duration of time to wait.
         """
+        if self._dry_run:
+            duration = 1
+
         self.logger.debug(f"Waiting for {int(duration / 60)} Minutes ⏳")
         time.sleep(duration)
 
@@ -423,6 +426,9 @@ class Bobcat(BobcatAPI):
             backoff_duration int: A backoff duration of time in seconds to wait after connection attempts.
             max_attempts int: The max number of attempts before giving up.
         """
+        if self._dry_run:
+            backoff_duration = 1
+
         attempt_count = 0
         while not self.can_connect():
             self.logger.warning(f"The Bobcat ({self.animal}) is unreachable")
@@ -442,6 +448,9 @@ class Bobcat(BobcatAPI):
             backoff_duration int: A backoff duration of time in seconds to wait after status attempts.
             max_attempts int: The max number of attempts before giving up.
         """
+        if self._dry_run:
+            backoff_duration = 1
+
         refresh_kwargs = {
             "status": True,
             "miner": True,
