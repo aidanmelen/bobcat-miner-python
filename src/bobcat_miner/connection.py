@@ -160,7 +160,7 @@ class BobcatConnection(BobcatBase):
         Returns:
             (str): The hostname for the bobcat found in the local network.
         Raises:
-            A BobcatNotFoundError is raised when a bobcat is not found in local networks.
+            BobcatNotFoundError: When a bobcat is not found in the local networks.
         """
 
         self.logger.debug(

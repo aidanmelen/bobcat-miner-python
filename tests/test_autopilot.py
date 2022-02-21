@@ -38,7 +38,7 @@ class TestAutopilot(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data='{"ota_version": "1.0.2.76"}')
     @patch("os.path.exists", return_value=True)
     @patch("os.path.isfile", return_value=True)
-    @patch("filelock.FileLock")
+    @patch("filelock.FileLock.acquire")
     def test_run(
         self,
         mock_filelock,

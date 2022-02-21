@@ -79,36 +79,42 @@ class BobcatAutopilot(Bobcat):
         )
 
     def run(self) -> None:
-        """Automatically diagnose and repair the Bobcat!"""
+        """Automatically diagnose and repair the Bobcat!
+        Raises:
+            Timeout: If fails to acquire lock within the timeout period
+            BobcatConnectionError: If a bobcat connection cannot be established.
+            Exception: Catch all.
+        """
         self.bobcat.logger.debug("The Bobcat Autopilot is starting 🚀 🚀 🚀")
 
+        lock = FileLock(self.lock_file, timeout=0)
+
         try:
-            lock = FileLock(self.lock_file, timeout=ONE_DAY)
+            lock.acquire()
+            self.bobcat.logger.debug(f"Lock Acquired: {self.lock_file}")
 
-            with lock:
-                self.bobcat.logger.debug(f"Lock Acquired: {self.lock_file}")
+            for check in self.checks:
 
-                for check in self.checks:
+                self.bobcat.logger.debug(f"Checking: {check.name}")
 
-                    self.bobcat.logger.debug(f"Checking: {check.name}")
+                if check.check():
 
-                    if check.check():
+                    for step in check.autopilot_repair_steps:
 
-                        for step in check.autopilot_repair_steps:
-                            func, args, kwargs = (
-                                step["func"],
-                                step.get("args", []),
-                                step.get("kwargs", {}),
-                            )
-                            func(*args, **kwargs)
+                        func, args, kwargs = (
+                            step["func"],
+                            step.get("args", []),
+                            step.get("kwargs", {}),
+                        )
+                        func(*args, **kwargs)
 
-                            self.bobcat.refresh(
-                                status=True, miner=True, temp=False, speed=False, dig=False
-                            )
+                        self.bobcat.refresh(
+                            status=True, miner=True, temp=False, speed=False, dig=False
+                        )
 
-                            if self.bobcat.is_healthy:
-                                self.bobcat.logger.info("Repair Status: Complete")
-                                break
+                        if self.bobcat.is_healthy:
+                            self.bobcat.logger.info("Repair Status: Complete")
+                            break
 
         except Timeout:
             self.bobcat.logger.warning(
@@ -125,9 +131,7 @@ class BobcatAutopilot(Bobcat):
             sys.exit(1)  # 👋
 
         finally:
-            # clean up lock file
-            if os.path.exists(self.lock_file):
-                os.remove(self.lock_file)
-                self.bobcat.logger.debug(f"Lock Released: {self.lock_file}")
+            lock.release()
+            self.bobcat.logger.debug(f"Lock Released: {self.lock_file}")
 
             self.bobcat.logger.debug("The Bobcat Autopilot is finished ✨ 🍰 ✨")
