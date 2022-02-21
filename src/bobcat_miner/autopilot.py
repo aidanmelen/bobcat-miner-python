@@ -46,8 +46,8 @@ class BobcatAutopilot(Bobcat):
         self.verbose = verbose
 
     @property
-    def checks(self) -> List[BobcatCheck]:
-        """Diagnostic checks.
+    def error_checks(self) -> List[BobcatCheck]:
+        """Error checks.
         Returns:
             List(BobcatCheck): Diagnostic checks.
         """
@@ -70,13 +70,41 @@ class BobcatAutopilot(Bobcat):
             # NoPlausibleBlocksInBatchErrorCheck(*args),
             # RPCFailedCheck(*args),
             UnknownErrorCheck(*args),
-            OnlineStatusCheck(*args),
             SyncStatusCheck(*args),
+        )
+
+    @property
+    def status_checks(self) -> List[BobcatCheck]:
+        """Status checks.
+        Returns:
+            List(BobcatCheck): Diagnostic checks.
+        """
+        args = [self.bobcat, self.verbose]
+
+        return (
             RelayStatusCheck(*args),
             NetworkStatusCheck(*args),
             TemperatureStatusCheck(*args),
             OTAVersionStatusCheck(*args, self.state_file),
         )
+
+    def run_autopilot_repair_steps(self, check):
+        """Run autopilot repair steps."""
+        for step in check.autopilot_repair_steps:
+
+            func, args, kwargs = (
+                step["func"],
+                step.get("args", []),
+                step.get("kwargs", {}),
+            )
+            func(*args, **kwargs)
+
+            self.bobcat.refresh(status=True, miner=True, temp=False, speed=False, dig=False)
+
+            if isinstance(self.bobcat.gap, int):
+                if self.bobcat.is_healthy and self.bobcat.gap < 400:
+                    self.bobcat.logger.info("Repair Status: Complete")
+                    break
 
     def run(self) -> None:
         """Automatically diagnose and repair the Bobcat!
@@ -93,28 +121,22 @@ class BobcatAutopilot(Bobcat):
             lock.acquire()
             self.bobcat.logger.debug(f"Lock Acquired: {self.lock_file}")
 
-            for check in self.checks:
+            OnlineStatusCheck(self.bobcat, self.verbose).check()
 
+            for check in self.error_checks:
                 self.bobcat.logger.debug(f"Checking: {check.name}")
 
                 if check.check():
+                    self.run_autopilot_repair_steps(check)
 
-                    for step in check.autopilot_repair_steps:
+                    # skip remaining error checks since bobcat was repaired
+                    break
 
-                        func, args, kwargs = (
-                            step["func"],
-                            step.get("args", []),
-                            step.get("kwargs", {}),
-                        )
-                        func(*args, **kwargs)
+            for check in self.status_checks:
+                self.bobcat.logger.debug(f"Checking: {check.name}")
 
-                        self.bobcat.refresh(
-                            status=True, miner=True, temp=False, speed=False, dig=False
-                        )
-
-                        if self.bobcat.is_healthy:
-                            self.bobcat.logger.info("Repair Status: Complete")
-                            break
+                if check.check():
+                    self.run_autopilot_repair_steps(check)
 
         except Timeout:
             self.bobcat.logger.warning(

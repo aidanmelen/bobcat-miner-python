@@ -630,7 +630,7 @@ class OnlineStatusCheck(BobcatCheck):
                 is_running = self.bobcat.miner_state.lower() == "running"
                 if is_running and self.bobcat.is_healthy:
                     self.bobcat.logger.warning(
-                        f"{self.name}: Bobcat is healthy and the Helium API is stale",
+                        f"{self.name}: Bobcat is healthy. Helium API needs time to update.",
                         extra={"description": str(self)} if self.verbose else {},
                     )
                     return False
@@ -719,6 +719,10 @@ class RelayStatusCheck(BobcatCheck):
         )
 
     def check(self) -> bool:
+        if not self.bobcat.is_healthy:
+            # do not evaluate relay status if the bobcat is unhealthy
+            return False
+
         is_pub_ip_over_44158 = re.search(
             f"(/ip4/)({self.bobcat.public_ip})(/tcp/44158)",
             self.bobcat.peerbook,

@@ -68,7 +68,7 @@ bobcat --hostname x.x.x.x --trace --animal fancy-awesome-bobcat autopilot
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 🐛 Lock Acquired: /etc/bobcat/autopilot.lock
 🐛 Checking: Online Status
-⚠️ Online Status: Bobcat is running and the Helium API is stale
+⚠️ Online Status: Bobcat is running. The Helium API needs time to update.
 🐛 Checking: Sync Status
 🐛 Refresh: Status Data
 {

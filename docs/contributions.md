@@ -2,6 +2,8 @@
 
 ## Development
 
+### Setup
+
 The containerized development environment can be spun up with `docker compose`.
 
 ```bash
@@ -12,7 +14,9 @@ docker compose up --detach
  ⠿ Container fancy-awesome-bobcat       Started 
 ```
 
-Then get a shell in the `bobcat-miner-python-dev` container.
+### Usage
+
+Get a shell in the `bobcat-miner-python-dev` container.
 
 ```
 docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
@@ -24,7 +28,7 @@ Usage: bobcat [OPTIONS] COMMAND [ARGS]...
 ...
 ```
 
-This dev container is networked with a fake bobcat service with the hostname: `fancy-awesome-bobcat`.
+This dev container is networked with a fake bobcat service called `fancy-awesome-bobcat`.
 
 ```
 docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
@@ -33,11 +37,15 @@ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
 🐛 Verified Bobcat Animal: fancy-awesome-bobcat
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 🐛 Lock Acquired: /etc/bobcat/autopilot.lock
+🐛 Refresh: Status Data
+⚠️ Online Status: Bobcat is healthy. Helium API needs time to update.
+🐛 Checking: Down or Error Status
+🐛 Checking: Height API Error Status
+🐛 Checking: Unknown Error Status
+🐛 Checking: Sync Status
+✅ Sync Status: Synced (gap:0) 💫
 🐛 Checking: Relay Status
 ✅ Relay Status: Not Relayed ✨
-🐛 Checking: Sync Status
-🐛 Refresh: Status Data
-✅ Sync Status: Synced (gap:0) ✨
 🐛 Checking: Network Status
 🐛 Refresh: Network Speed Data
 ✅ Network Status: Good 📶
@@ -45,13 +53,56 @@ docker-compose exec bobcat-miner-python-dev poetry run bobcat autopilot
 🐛 Refresh: Temperature Data
 ✅ Temperature Status: Good (38°C) ☀️
 🐛 Checking: OTA Version Change
-🐛 Checking: Down or Error Status
-🐛 Checking: Height API Error Status
 🐛 Lock Released: /etc/bobcat/autopilot.lock
 🐛 The Bobcat Autopilot is finished ✨ 🍰 ✨
 ```
 
-and bring the development environment down.
+`fancy-awesome-bobcat` has a special test endpoint for simulating a `Down` state
+
+```bash
+curl -X post fancy-awesome-bobcat/set/down
+Set Status: Down
+```
+
+The bobcat is now in a `Down` state
+
+```bash
+bobcat -C INFO status
+{'blockchain_height': '1234527', 'epoch': 'Error:', 'gap': '-', 'miner_height': 'command', 'status': 'Down'}
+```
+
+Now we can simulate a `bobcat autopilot` repair run
+
+```
+bobcat -C INFO autopilot
+❌ Online Status: Offline
+❌ Bobcat Status: Down
+⚠️ Rebooting Bobcat
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+⚠️ Resetting Bobcat
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+⚠️ The Bobcat (fancy-awesome-bobcat) is unreachable
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+⚠️ Fastsyncing Bobcat
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+✅ Repair Status: Complete
+✅ Relay Status: Not Relayed ✨
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
+
+### Teardown
+
+```
+Run the following to tear down the development environment
 
 ```bash
 docker compose down

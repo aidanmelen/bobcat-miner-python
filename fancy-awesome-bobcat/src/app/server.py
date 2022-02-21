@@ -30,7 +30,7 @@ def __set_bobcat_status(status="Synced"):
 def __get_bobcat_status():
     if not os.path.exists("state.txt"):
         __set_bobcat_status()
-    
+
     with open("state.txt") as f:
         return f.read()
 
@@ -42,7 +42,7 @@ def dashboard():
 
 @app.route("/status.json")
 def status():
-    
+
     return jsonify(data.status[__get_bobcat_status()])
 
 

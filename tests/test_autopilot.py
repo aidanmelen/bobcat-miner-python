@@ -10,7 +10,8 @@ import mock_endpoints
 class TestAutopilot(unittest.TestCase):
     """Test BobcatAutopilot."""
 
-    @patch("bobcat_miner.BobcatAutopilot.checks", new_callable=PropertyMock)
+    @patch("bobcat_miner.BobcatAutopilot.error_checks", new_callable=PropertyMock)
+    @patch("bobcat_miner.BobcatAutopilot.status_checks", new_callable=PropertyMock)
     @patch("bobcat_miner.BobcatConnection.verify", return_value=AsyncMock())
     @patch("requests.post")
     @patch("requests.get", side_effect=mock_endpoints.mock_online)
@@ -19,7 +20,8 @@ class TestAutopilot(unittest.TestCase):
         mock_requests_get,
         mock_requests_post,
         mock_verify,
-        mock_checks,
+        mock_status_checks,
+        mock_error_checks,
     ):
         self.mock_hostname = "192.168.0.10"
         self.bobcat = Bobcat(hostname=self.mock_hostname)
@@ -61,13 +63,12 @@ class TestAutopilot(unittest.TestCase):
                 call.debug("Refresh: DNS Data"),
                 call.debug("The Bobcat Autopilot is starting 🚀 🚀 🚀"),
                 call.debug("Lock Acquired: .mock.lock"),
+                call.warning(
+                    "Online Status: Bobcat is healthy. Helium API needs time to update.", extra={}
+                ),
                 call.debug("Checking: Down or Error Status"),
                 call.debug("Checking: Height API Error Status"),
                 call.debug("Checking: Unknown Error Status"),
-                call.debug("Checking: Online Status"),
-                call.warning(
-                    "Online Status: Bobcat is healthy and the Helium API is stale", extra={}
-                ),
                 call.debug("Checking: Sync Status"),
                 call.info("Sync Status: Synced (gap:0) 💫"),
                 call.debug("Checking: Relay Status"),

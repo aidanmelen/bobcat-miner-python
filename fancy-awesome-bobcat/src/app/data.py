@@ -282,7 +282,6 @@ dashboard = {
 </body>
 </html>
 """,
-
     "Down": """
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -560,7 +559,6 @@ dashboard = {
 </body>
 </html>
 """,
-
     "Syncing": """
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
