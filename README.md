@@ -8,7 +8,7 @@
 
 # bobcat miner python
 
-A command line tool used to automate the Bobcat miner. This project also offers a robust python SDK's for interacting with the Bobcat miner.
+A command line tool used to automate the Bobcat miner.
 
 ## Install
 
