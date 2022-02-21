@@ -431,7 +431,6 @@ class Bobcat(BobcatAPI):
 
         attempt_count = 0
         while not self.can_connect():
-            self.logger.warning(f"Can Connect? {self.can_connect()}")
             self.logger.warning(f"The Bobcat ({self.animal}) is unreachable")
 
             self.wait(backoff_duration)
