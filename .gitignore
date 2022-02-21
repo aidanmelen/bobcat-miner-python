@@ -135,6 +135,7 @@ dmypy.json
 *bobcat*.json
 *bobcat*.log
 scratch*.py
+fancy-awesome-bobcat/src/app/state.txt
 
 
 # Apple
