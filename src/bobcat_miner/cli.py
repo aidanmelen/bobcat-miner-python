@@ -15,12 +15,16 @@ except:
     from autopilot import BobcatAutopilot
 
 
+LOG_LEVELS_CHOICES = ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
+
 @click.group(name="bobcat")
 @click.version_option()
 @click.pass_context
 @click.option(
-    "--hostname",
     "--ip-address",
+    "-ip",
+    "--hostname",
     "-h",
     required=False,
     metavar="NAME",
@@ -58,11 +62,19 @@ except:
 )
 @click.option(
     "--dry-run",
-    "-d",
+    "-dr",
     is_flag=True,
     envvar="BOBCAT_DRY_RUN",
     show_envvar=True,
-    help="Dry run where actions are skipped and wait times are 1 second long.",
+    help="Dry run where actions are skipped",
+)
+@click.option(
+    "--no-wait",
+    "-nw",
+    is_flag=True,
+    envvar="BOBCAT_NO_WAIT",
+    show_envvar=True,
+    help="Dry run where actions are skipped",
 )
 @click.option(
     "--trace",
@@ -96,9 +108,7 @@ except:
     "-C",
     default="INFO",
     show_default=True,
-    type=click.Choice(
-        ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
-    ),
+    type=click.Choice(LOG_LEVELS_CHOICES, case_sensitive=False),
     metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_CONSOLE",
     show_envvar=True,
@@ -109,9 +119,7 @@ except:
     "-F",
     default="DEBUG",
     show_default=True,
-    type=click.Choice(
-        ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
-    ),
+    type=click.Choice(LOG_LEVELS_CHOICES, case_sensitive=False),
     metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_FILE",
     show_envvar=True,
@@ -122,35 +130,11 @@ except:
     "-D",
     default="WARNING",
     show_default=True,
-    type=click.Choice(
-        ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
-    ),
+    type=click.Choice(LOG_LEVELS_CHOICES, case_sensitive=False),
     metavar="LEVEL",
     envvar="BOBCAT_LOG_LEVEL_DISCORD",
     show_envvar=True,
     help="The log level for the discord channel log handler.",
-)
-@click.option(
-    "--lock-file",
-    "-L",
-    required=False,
-    default=".bobcat.lock",
-    show_default=True,
-    type=click.Path(writable=True),
-    envvar="BOBCAT_LOCK_FILE",
-    show_envvar=True,
-    help="The lock file path.",
-)
-@click.option(
-    "--state-file",
-    "-s",
-    required=False,
-    default=".bobcat.json",
-    show_default=True,
-    type=click.Path(writable=True),
-    envvar="BOBCAT_STATE_FILE",
-    show_envvar=True,
-    help="The state file path.",
 )
 def cli(*args, **kwargs) -> None:
     """Bobcat miner command line tools."""
@@ -169,7 +153,7 @@ def cli(*args, **kwargs) -> None:
 @click.pass_context
 @click.option(
     "--lock-file",
-    "-L",
+    "-l",
     required=False,
     default=".bobcat.lock",
     show_default=True,

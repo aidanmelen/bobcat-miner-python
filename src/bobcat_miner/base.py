@@ -17,6 +17,7 @@ class BobcatBase:
         self._hostname = kwargs.pop("hostname", None)
         self._animal = kwargs.pop("animal", None)
         self._dry_run = kwargs.pop("dry_run", None)
+        self._no_wait = kwargs.pop("no_wait", None)
         self._trace = kwargs.pop("trace", False)
         self._networks = kwargs.pop(
             "networks",

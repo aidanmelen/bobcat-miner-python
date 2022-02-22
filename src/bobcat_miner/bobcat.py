@@ -354,7 +354,7 @@ class Bobcat(BobcatAPI):
     def reboot(self) -> None:
         """Reboot the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run is enabled: Reboot Skipped")
+            self.logger.warning("Dry Run: Reboot Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__reboot().text))
             self.wait(FIVE_MINUTES)
@@ -363,7 +363,7 @@ class Bobcat(BobcatAPI):
     def reset(self) -> None:
         """Reset the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run is enabled: Reset Skipped")
+            self.logger.warning("Dry Run: Reset Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__reset().text))
             self.wait(FIVE_MINUTES)
@@ -372,7 +372,7 @@ class Bobcat(BobcatAPI):
     def resync(self) -> None:
         """Resync the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run is enabled: Resync Skipped")
+            self.logger.warning("Dry Run: Resync Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__resync().text))
             self.wait(FIVE_MINUTES)
@@ -381,7 +381,7 @@ class Bobcat(BobcatAPI):
     def fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run is enabled: Fastsync Skipped")
+            self.logger.warning("Dry Run: Fastsync Skipped")
         else:
             self.refresh_status()
 
@@ -413,7 +413,7 @@ class Bobcat(BobcatAPI):
         Args:
             duration (int, optional): An arbitrary duration of time to wait.
         """
-        if self._dry_run:
+        if self._no_wait:
             duration = 1
 
         self.logger.debug(f"Waiting for {int(duration / 60)} Minutes ⏳")
@@ -426,7 +426,7 @@ class Bobcat(BobcatAPI):
             backoff_duration int: A backoff duration of time in seconds to wait after connection attempts.
             max_attempts int: The max number of attempts before giving up.
         """
-        if self._dry_run:
+        if self._no_wait:
             backoff_duration = 1
 
         attempt_count = 0
@@ -448,7 +448,7 @@ class Bobcat(BobcatAPI):
             backoff_duration int: A backoff duration of time in seconds to wait after status attempts.
             max_attempts int: The max number of attempts before giving up.
         """
-        if self._dry_run:
+        if self._no_wait:
             backoff_duration = 1
 
         refresh_kwargs = {

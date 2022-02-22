@@ -15,36 +15,37 @@ Deploy the Bobcat Autopilot to a Raspberry Pi for unattended automation and moni
 
 Install the Docker Community Edition.
 
-```bash
-sudo apt install -y docker-ce
+```console
+$ sudo apt install -y docker-ce
 ```
 
-Pull and tag the `bobcat` image
+Pull the `bobcat` image
 
 ```
-sudo docker pull aidanmelen/bobcat
+$ sudo docker pull aidanmelen/bobcat
 ```
 
 Create a file called `/home/pi/bobcat.env` with your configuration information. For Example:
 
-```bash
+```properties
 BOBCAT_HOSTNAME=192.168.0.10
-BOBCAT_ANIMAL='Fancy Awesome Bobcat'
+BOBCAT_ANIMAL=fancy-awesome-bobcat
 BOBCAT_LOCK_FILE=/etc/bobcat/autopilot.lock
 BOBCAT_LOG_STATE=/etc/bobcat/autopilot.json
 BOBCAT_LOG_FILE=/var/log/bobcat/autopilot.log
 BOBCAT_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx
 BOBCAT_LOG_LEVEL_FILE=DEBUG
-BOBCAT_LOG_LEVEL_CONSOLE=DEBUG
+BOBCAT_LOG_LEVEL_CONSOLE=INFO
 BOBCAT_LOG_LEVEL_DISCORD=WARNING
 BOBCAT_TRACE=TRUE
+BOBCAT_VERBOSE=TRUE
 ```
 
 ℹ️ Run `sudo docker run aidanmelen/bobcat --help` for more information about the environment variables.
 
 Next we will verify the configuration file with a dry run
 
-```bash
+```console
 $ sudo docker run \
 -v /etc/bobcat:/etc/bobcat \
 -v /var/log/bobcat:/var/log/bobcat \
@@ -53,7 +54,7 @@ $ sudo docker run \
 aidanmelen/bobcat autopilot
 ```
 
-Finally schedule Bobcat Autopilot with Cron
+Finally schedule Bobcat Autopilot with Cron using this script
 
 ```bash
 # write out current crontab to a file

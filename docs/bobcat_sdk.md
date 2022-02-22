@@ -1,9 +1,9 @@
 # Bobcat SDK
 
 ```python
-import bobcat_miner
+from bobcat_miner import Bobcat
 
-bobcat = bobcat_miner.Bobcat("192.168.1.10")
+bobcat = Bobcat("192.168.1.10")
 
 # refresh
 bobcat.refresh_status()
@@ -56,6 +56,7 @@ bobcat.dig_name
 bobcat.dig_message
 bobcat.dig_dns
 bobcat.dig_records
+bobcat.is_healthy
 
 # actions
 bobcat.reboot()

@@ -8,30 +8,48 @@
 
 # bobcat miner python
 
-A command line tool used to automate the Bobcat miner.
+Automate the Bobcat miner from the command line.
 
 ## Install
 
 ### Pipx
 
-```bash
-pipx install bobcat-miner
+```console
+$ pipx install bobcat-miner
 ```
 
-Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
+ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
 ### Docker
 
-```bash
-docker pull aidanmelen/bobcat
+```console
+$ docker pull aidanmelen/bobcat
 ```
 
 ## Usage
 
-Automatically diagnose and repair the Bobcat miner!
+Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
-```bash
-bobcat autopilot
+**Offline**
+```console
+$ bobcat autopilot
+❌ Online Status: Offline
+❌ Bobcat Status: Down
+⚠️ Rebooting Bobcat
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+⚠️ Resetting Bobcat
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+⚠️ Fastsyncing Bobcat
+✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
+✅ Repair Status: Complete
+✅ Relay Status: Not Relayed ✨
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
+
+**Online**
+```console
+$ bobcat autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:-1) 💫
 ✅ Relay Status: Not Relayed ✨
@@ -41,44 +59,78 @@ bobcat autopilot
 
 or run with the official Docker image
 
-```bash
-docker run --rm -it aidanmelen/bobcat autopilot
+```console
+$docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
 Run `bobcat --help` to learn about the available sub-commands and options.
 
 ## Finding your Bobcat
 
-By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10.0.0.0/24` local networks to find the Bobcat miner.
+Searching for your bobcat may be slow. This step can be skipped by using the `--ip-address` option
 
-### Find Bobcat by Animal Name
-
-This will connect to the Bobcat on your network that matches the animal name.
-
-```bash
-bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-🐛 Refresh: Miner Data
-🐛 Verified Bobcat Animal: fancy-awesome-bobcat
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-```
-
-### Specify the Hostname / IP Address
-
-Otherwise, follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and specify it with:
-
-```bash
-bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
+```console
+$ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+...
 ```
+
+ℹ️ Please see the offical [bobcat instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to manually find the IP address.
+
+## Dry Run
+
+Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would normally run
+
+```console
+$ bobcat --dry-run autopilot
+❌ Online Status: Offline
+❌ Bobcat Status: Down
+⚠️ Dry Run: Reboot Skipped
+⚠️ Dry Run: Reset Skipped
+⚠️ Dry Run: Fastsync Skipped
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
+
+## Verbose
+
+Use the `--verbose` option to see detail diagnostics
+
+```console
+$ bobcat --dry-run autopilot --verbose
+...
+❌ Bobcat Status: Down
+**Points to:** Miner's Docker Container
+
+**Why does this happen?** 
+This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.
+
+**What You Can Try:** 
+1. First Try Reboot
+2. Try Reset
+3. Then Fastsync
+4. Make Sure Your Miner is Connected to the Internet. What color is your miner's LED?
+
+**What to provide customer support if unable to resolve:**
+1. If Possible, Screenshots of Your Diagnoser.
+2. Indicate Miner's LED Color
+3. Open Port 22, if Unable to Access the Diagnoser
+4. Provide Miner's IP Address
+5. Confirm Port 22 is Open (Include a Screenshot of this Page)
+
+**Troublesooting Guides:**
+- https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-
+...
+```
+
 
 ## Monitoring with Discord
 
-Monitor your Bobcat remotely by sending events to a Discord channel by specifying a [webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks). No need for VPN or SSH agent setup!
+Monitor your Bobcat remotely by sending events to a Discord channel. No need for VPN or SSH agent setup!
 
-```bash
-bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
+```console
+$ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:0) 💫
 ⚠️ Relay Status: Relayed
@@ -86,20 +138,12 @@ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ❌ Temperature Status: Hot (78°C) 🌋
 ```
 
-By default, all events `WARNING` or higher (i.e. `ERROR` and `CRITICAL`) will be sent to the Discord channel. This can be configured to include `DEBUG` and `INFO` events as well.
+and check the Discord channel
 
 <!-- <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/> -->
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
-### Dry Run
-
-This example is admittedly contrived, but it demonstrates how the `--dry-run` option can be used show what actions would normally be performed against the bobcat without actually running them.
-
-```bash
-bobcat --dry-run reboot
-Are you sure you want to restart your hotspot? [y/N]: y
-⚠️ Dry run is enabled: Reboot Skipped
-```
+ℹ️ Please see Discord's [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) document for more information.
 
 ## Bobcat SDK
 
@@ -108,7 +152,7 @@ Please see the [Bobcat SDK Docs](https://github.com/aidanmelen/bobcat-miner-pyth
 
 ## Contributions
 
-Please see the [Contributions Docs](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/contributions.md) for more information. This document includes sections for Development, Test and Release.
+Please see the [Contributions Docs](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/contributions.md) for more information. This document includes sections for Development, Test, and Release.
 
 ## DIY Troubleshooting
 

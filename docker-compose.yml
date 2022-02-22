@@ -16,7 +16,7 @@ services:
       bobcatnet:
 
         # set the service to a static IP to simulate a Bobcat with a DHCP reservation
-        ipv4_address: 172.18.0.10
+        ipv4_address: "172.18.0.10"
 
   # bobcat-miner-python command line tools
   bobcat-miner-python-dev:
@@ -28,6 +28,7 @@ services:
       BOBCAT_ANIMAL: "fancy-awesome-bobcat"
       BOBCAT_NETWORKS: "192.168.0.0/24 10.0.0.0/24 172.16.0.0/24 172.18.0.0/24"
       BOBCAT_DRY_RUN: "FALSE"
+      BOBCAT_NO_WAIT: "TRUE"
       BOBCAT_VERBOSE: "FALSE"
       BOBCAT_TRACE: "FALSE"
       BOBCAT_LOCK_FILE: "/etc/bobcat/autopilot.lock"
