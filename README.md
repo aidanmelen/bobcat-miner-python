@@ -32,7 +32,7 @@ Automatically diagnose and repair the Bobcat miner!
 
 ```bash
 # unhealthy bobcat
-bobcat --no-wait -C info autopilot
+bobcat autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
 ⚠️ Rebooting Bobcat
