@@ -106,9 +106,9 @@ Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would
 bobcat --dry-run autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
-⚠️ Dry run: Reboot Skipped
-⚠️ Dry run: Reset Skipped
-⚠️ Dry run: Fastsync Skipped
+⚠️ Dry Run: Reboot Skipped
+⚠️ Dry Run: Reset Skipped
+⚠️ Dry Run: Fastsync Skipped
 ✅ Network Status: Good 📶
 ✅ Temperature Status: Good (38°C) ☀️
 ```

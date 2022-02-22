@@ -354,7 +354,7 @@ class Bobcat(BobcatAPI):
     def reboot(self) -> None:
         """Reboot the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run: Reboot Skipped")
+            self.logger.warning("Dry Run: Reboot Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__reboot().text))
             self.wait(FIVE_MINUTES)
@@ -363,7 +363,7 @@ class Bobcat(BobcatAPI):
     def reset(self) -> None:
         """Reset the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run: Reset Skipped")
+            self.logger.warning("Dry Run: Reset Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__reset().text))
             self.wait(FIVE_MINUTES)
@@ -372,7 +372,7 @@ class Bobcat(BobcatAPI):
     def resync(self) -> None:
         """Resync the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run: Resync Skipped")
+            self.logger.warning("Dry Run: Resync Skipped")
         else:
             self.logger.debug(self._parse_html(self._BobcatAPI__resync().text))
             self.wait(FIVE_MINUTES)
@@ -381,7 +381,7 @@ class Bobcat(BobcatAPI):
     def fastsync(self) -> None:
         """Fastsync the Bobcat and wait."""
         if self._dry_run:
-            self.logger.warning("Dry run: Fastsync Skipped")
+            self.logger.warning("Dry Run: Fastsync Skipped")
         else:
             self.refresh_status()
 
