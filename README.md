@@ -31,7 +31,7 @@ $ docker pull aidanmelen/bobcat
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
 **Offline**
-```console
+```shell-session
 $ bobcat autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
