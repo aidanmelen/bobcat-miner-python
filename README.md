@@ -30,8 +30,8 @@ docker pull aidanmelen/bobcat
 
 Automatically diagnose and repair the Bobcat miner!
 
+**Offline**
 ```bash
-# unhealthy bobcat
 bobcat autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
@@ -45,8 +45,10 @@ bobcat autopilot
 ✅ Relay Status: Not Relayed ✨
 ✅ Network Status: Good 📶
 ✅ Temperature Status: Good (38°C) ☀️
+```
 
-# healthy bobcat
+**Online**
+```bash
 bobcat autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:-1) 💫
