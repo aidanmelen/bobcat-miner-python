@@ -95,7 +95,7 @@ $ bobcat --dry-run autopilot
 
 ## Verbose
 
-Use the `--verbose` option to see a detail diagnostics
+Use the `--verbose` option to see detail diagnostics
 
 ```console
 $ bobcat --dry-run autopilot --verbose
