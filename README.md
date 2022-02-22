@@ -15,7 +15,7 @@ Automate the Bobcat miner from the command line.
 ### Pipx
 
 ```console
-pipx install bobcat-miner
+$ pipx install bobcat-miner
 ```
 
 ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
@@ -23,7 +23,7 @@ pipx install bobcat-miner
 ### Docker
 
 ```console
-docker pull aidanmelen/bobcat
+$ docker pull aidanmelen/bobcat
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
 **Offline**
 ```console
-bobcat autopilot
+$ bobcat autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
 ⚠️ Rebooting Bobcat
@@ -49,7 +49,7 @@ bobcat autopilot
 
 **Online**
 ```console
-bobcat autopilot
+$ bobcat autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:-1) 💫
 ✅ Relay Status: Not Relayed ✨
@@ -60,7 +60,7 @@ bobcat autopilot
 or run with the official Docker image
 
 ```console
-docker run --rm -it aidanmelen/bobcat autopilot
+$docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
 Run `bobcat --help` to learn about the available sub-commands and options.
@@ -70,7 +70,7 @@ Run `bobcat --help` to learn about the available sub-commands and options.
 Searching for your bobcat may be slow. This step can be skipped by using the `--ip-address` option
 
 ```console
-bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
+$ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 ...
@@ -83,7 +83,7 @@ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would normally run
 
 ```console
-bobcat --dry-run autopilot
+$ bobcat --dry-run autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
 ⚠️ Dry Run: Reboot Skipped
@@ -98,7 +98,7 @@ bobcat --dry-run autopilot
 Use the `--verbose` option to see a detailed description of failed checks
 
 ```console
-bobcat --dry-run autopilot --verbose
+$ bobcat --dry-run autopilot --verbose
 ...
 ❌ Bobcat Status: Down
 **Points to:** Miner's Docker Container
@@ -130,7 +130,7 @@ This can happen if your miner's Docker crashes. Sometimes losing power or intern
 Monitor your Bobcat remotely by sending events to a Discord channel. No need for VPN or SSH agent setup!
 
 ```console
-bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
+$ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:0) 💫
 ⚠️ Relay Status: Relayed
