@@ -6,8 +6,8 @@
 
 The containerized development environment can be spun up with `docker compose`.
 
-```bash
-docker compose up --detach
+```console
+$docker compose up --detach
 [+] Running 3/3
  ⠿ Network bobcat-miner-python_default  Created
  ⠿ Container bobcat-miner-python-dev    Started
@@ -19,7 +19,7 @@ docker compose up --detach
 Get a shell in the `bobcat-miner-python-dev` container.
 
 ```
-docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
+$ docker-compose exec bobcat-miner-python-dev poetry run /bin/bash
 root@bobcat-miner-python-dev:/app# bobcat --help
 Usage: bobcat [OPTIONS] COMMAND [ARGS]...
 
@@ -59,14 +59,14 @@ root@bobcat-miner-python-dev:/app# bobcat autopilot
 
 `fancy-awesome-bobcat` has a special test endpoint for simulating a `Down` state
 
-```bash
+```console
 root@bobcat-miner-python-dev:/app# curl -X post fancy-awesome-bobcat/set/down
 Set Status: Down
 ```
 
 The bobcat is now in a `Down` state
 
-```bash
+```console
 root@bobcat-miner-python-dev:/app# bobcat -C INFO status
 {'blockchain_height': '1234527', 'epoch': 'Error:', 'gap': '-', 'miner_height': 'command', 'status': 'Down'}
 ```
@@ -104,8 +104,8 @@ root@bobcat-miner-python-dev:/app# bobcat -C INFO autopilot
 ```
 Run the following to tear down the development environment
 
-```bash
-docker compose down
+```console
+$ docker compose down
 [+] Running 3/2
  ⠿ Container bobcat-miner-python-dev
  ⠿ Container fancy-awesome-bobcat
@@ -116,24 +116,38 @@ Please see the [docker-compose.yml](https://github.com/aidanmelen/bobcat-miner-p
 
 ## Test
 
+Build development images
+
+```console
+$ make build
+```
+
 Run unittests
 
-```bash
-docker build . -t bobcat-miner-python-test --target test
-docker run --rm -it -v $(pwd):/app bobcat-miner-python-test
+```console
+$ make test
+docker run --rm -it -v "$(pwd)":/app bobcat-miner-python-test
+test_fastsync (test_api.TestBobcatAPI) ... ok
+test_reboot (test_api.TestBobcatAPI) ... ok
+test_refresh (test_api.TestBobcatAPI) ... ok
 ```
 
 and run the linter
 
-```bash
-docker run --rm --volume $(pwd):/src --workdir /src pyfound/black:latest_release black --line-length 100 .
+```console
+$ make lint
+docker run --rm -it -v "$(pwd)":/app bobcat-miner-python-lint
+All done! ✨ 🍰 ✨
+21 files left unchanged.
 ```
+
+Or quickly run both `lint` and `test` targets with `make tests`
 
 ## Release
 
 Read the version from `poetry`, tag, and push.
 
-```bash
+```console
 # ensure we are tagging the main branch
 git checkout main
 git pull
