@@ -28,7 +28,7 @@ docker pull aidanmelen/bobcat
 
 ## Usage
 
-Automatically find, diagnose, and repair the Bobcat miner!
+Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
 **Offline**
 ```bash
@@ -67,22 +67,13 @@ Run `bobcat --help` to learn about the available sub-commands and options.
 
 ## Finding your Bobcat
 
-The `bobcat autopilot` command will automatically *search*, *find*, *diagnose*, and *repair* the bobcat.
-
-```bash
-bobcat -C DEBUG autopilot
-🐛 Searching for a bobcat in these networks: 192.168.0.0/24, 10.0.0.0/24, 172.16.0.0/24
-🐛 Found Bobcat: 192.168.0.10
-🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
-...
-```
-
-The *search* step, which may be slow in some cases, can be skipped by using the `--ip-address` option
+Searching for your bobcat may be slow. This step can be skipped by using the `--ip-address` option
 
 ```bash
 bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+...
 ```
 
 ℹ️ Please see the offical [bobcat instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to manually find the IP address.
@@ -100,16 +91,16 @@ bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ❌ Temperature Status: Hot (78°C) 🌋
 ```
 
-and the Discord channel
+and check the Discord channel
 
 <!-- <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" style="width:500px;"/> -->
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
-ℹ️ Please see the [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) for information.
+ℹ️ Please see Discord's [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) document for more information.
 
 ## Dry Run
 
-Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would be taken during a normal run
+Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would normally run
 
 ```bash
 bobcat --dry-run autopilot
