@@ -14,7 +14,7 @@ Automate the Bobcat miner from the command line.
 
 ### Pipx
 
-```bash
+```console
 pipx install bobcat-miner
 ```
 
@@ -22,7 +22,7 @@ pipx install bobcat-miner
 
 ### Docker
 
-```bash
+```console
 docker pull aidanmelen/bobcat
 ```
 
@@ -31,7 +31,7 @@ docker pull aidanmelen/bobcat
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
 **Offline**
-```bash
+```console
 bobcat autopilot
 ❌ Online Status: Offline
 ❌ Bobcat Status: Down
@@ -48,7 +48,7 @@ bobcat autopilot
 ```
 
 **Online**
-```bash
+```console
 bobcat autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:-1) 💫
@@ -59,7 +59,7 @@ bobcat autopilot
 
 or run with the official Docker image
 
-```bash
+```console
 docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
@@ -69,7 +69,7 @@ Run `bobcat --help` to learn about the available sub-commands and options.
 
 Searching for your bobcat may be slow. This step can be skipped by using the `--ip-address` option
 
-```bash
+```console
 bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
@@ -78,11 +78,58 @@ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 
 ℹ️ Please see the offical [bobcat instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to manually find the IP address.
 
+## Dry Run
+
+Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would normally run
+
+```console
+bobcat --dry-run autopilot
+❌ Online Status: Offline
+❌ Bobcat Status: Down
+⚠️ Dry Run: Reboot Skipped
+⚠️ Dry Run: Reset Skipped
+⚠️ Dry Run: Fastsync Skipped
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
+
+## Verbose
+
+Use the `--verbose` option to see a detailed description of failed checks
+
+```console
+bobcat --dry-run autopilot --verbose
+...
+❌ Bobcat Status: Down
+**Points to:** Miner's Docker Container
+
+**Why does this happen?** 
+This can happen if your miner's Docker crashes. Sometimes losing power or internet connection during an OTA can cause a miner's Docker to crash. This can typically be fixed with a reboot or a reset, followed by a fast sync if your gap is >400. Fast Sync is recommended if your gap is >400 and your miner has been fully synced before.
+
+**What You Can Try:** 
+1. First Try Reboot
+2. Try Reset
+3. Then Fastsync
+4. Make Sure Your Miner is Connected to the Internet. What color is your miner's LED?
+
+**What to provide customer support if unable to resolve:**
+1. If Possible, Screenshots of Your Diagnoser.
+2. Indicate Miner's LED Color
+3. Open Port 22, if Unable to Access the Diagnoser
+4. Provide Miner's IP Address
+5. Confirm Port 22 is Open (Include a Screenshot of this Page)
+
+**Troublesooting Guides:**
+- https://bobcatminer.zendesk.com/hc/en-us/articles/4413666097051-Status-Down-4413666097051-Status-Down-
+...
+```
+
+
 ## Monitoring with Discord
 
 Monitor your Bobcat remotely by sending events to a Discord channel. No need for VPN or SSH agent setup!
 
-```bash
+```console
 bobcat --discord-webhook-url https://discord.com/api/webhooks/xxx autopilot
 ✅ Online Status: Online ⭐
 ✅ Sync Status: Synced (gap:0) 💫
@@ -97,21 +144,6 @@ and check the Discord channel
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
 ℹ️ Please see Discord's [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) document for more information.
-
-## Dry Run
-
-Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would normally run
-
-```bash
-bobcat --dry-run autopilot
-❌ Online Status: Offline
-❌ Bobcat Status: Down
-⚠️ Dry Run: Reboot Skipped
-⚠️ Dry Run: Reset Skipped
-⚠️ Dry Run: Fastsync Skipped
-✅ Network Status: Good 📶
-✅ Temperature Status: Good (38°C) ☀️
-```
 
 ## Bobcat SDK
 
