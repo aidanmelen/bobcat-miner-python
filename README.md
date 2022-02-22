@@ -14,7 +14,7 @@ Automate the Bobcat miner from the command line.
 
 ### Pipx
 
-```console
+```shell-session
 $ pipx install bobcat-miner
 ```
 
