@@ -28,7 +28,7 @@ docker pull aidanmelen/bobcat
 
 ## Usage
 
-Automatically diagnose and repair the Bobcat miner!
+Automatically find, diagnose, and repair the Bobcat miner!
 
 **Offline**
 ```bash
@@ -67,29 +67,25 @@ Run `bobcat --help` to learn about the available sub-commands and options.
 
 ## Finding your Bobcat
 
-By default, the Bobcat Autopilot will search the common `192.168.0.0/24` and `10.0.0.0/24` local networks to find the Bobcat miner.
-
-### Find Bobcat by Animal Name
-
-This will connect to the Bobcat on your network that matches the animal name.
+The `bobcat autopilot` command will automatically *search*, *find*, *diagnose*, and *repair* the bobcat.
 
 ```bash
-bobcat --animal "Fancy Awesome Bobcat" -C DEBUG autopilot
-🐛 Connected to Bobcat: 192.168.0.10
-🐛 Refresh: Miner Data
-🐛 Verified Bobcat Animal: fancy-awesome-bobcat
+bobcat -C DEBUG autopilot
+🐛 Searching for a bobcat in these networks: 192.168.0.0/24, 10.0.0.0/24, 172.16.0.0/24
+🐛 Found Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+...
 ```
 
-### Specify the Hostname / IP Address
-
-Otherwise, follow these [instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to find your Bobcats's ip address and specify it with
+The *search* step, which may be slow in some cases, can be skipped by using the `--ip-address` option
 
 ```bash
 bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
 🐛 Connected to Bobcat: 192.168.0.10
 🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
 ```
+
+ℹ️ Please see the offical [bobcat instructions](https://bobcatminer.zendesk.com/hc/en-us/articles/4412905935131-How-to-Access-the-Diagnoser) to manually find the IP address.
 
 ## Monitoring with Discord
 
@@ -110,6 +106,7 @@ and the Discord channel
 <img src="https://raw.githubusercontent.com/aidanmelen/bobcat-miner-python/main/assets/bobcat-autopilot-discord-app.png" alt="drawing" width="300"/>
 
 ℹ️ Please see the [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) for information.
+
 ## Dry Run
 
 Use the `--dry-run` option to see what repair steps the `bobcat autopilot` would be taken during a normal run
@@ -132,7 +129,7 @@ Please see the [Bobcat SDK Docs](https://github.com/aidanmelen/bobcat-miner-pyth
 
 ## Contributions
 
-Please see the [Contributions Docs](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/contributions.md) for more information. This document includes sections for Development, Test and Release.
+Please see the [Contributions Docs](https://github.com/aidanmelen/bobcat-miner-python/blob/main/docs/contributions.md) for more information. This document includes sections for Development, Test, and Release.
 
 ## DIY Troubleshooting
 
