@@ -14,16 +14,16 @@ Automate the Bobcat miner from the command line.
 
 ### Pipx
 
-```console
-$ pipx install bobcat-miner
+```
+pipx install bobcat-miner
 ```
 
 ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
 
 ### Docker
 
-```console
-$ docker pull aidanmelen/bobcat
+```
+docker pull aidanmelen/bobcat
 ```
 
 ## Usage
@@ -60,7 +60,7 @@ $ bobcat autopilot
 or run with the official Docker image
 
 ```console
-$docker run --rm -it aidanmelen/bobcat autopilot
+docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
 Run `bobcat --help` to learn about the available sub-commands and options.
