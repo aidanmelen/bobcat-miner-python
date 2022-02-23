@@ -59,7 +59,7 @@ $ bobcat autopilot
 
 or run with the official Docker image
 
-```console
+```
 docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
