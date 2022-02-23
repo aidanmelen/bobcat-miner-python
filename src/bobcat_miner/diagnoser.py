@@ -612,6 +612,13 @@ class OnlineStatusCheck(BobcatCheck):
     def _is_offline(self) -> (Dict, None):
         """Get Hotspot data from Helium API."""
         data = requests.get(f"https://api.helium.io/v1/hotspots/{self.bobcat.pubkey}").json()
+
+        if self.bobcat._trace:
+            self.bobcat.logger.debug(
+                "Refresh: Helium API Data",
+                extra={"description": f"\n```\n{json.dumps(data, indent=4)}\n```"},
+            )
+
         return data.get("data", {}).get("status", {}).get("online", "offline").lower() != "online"
 
     def check(self) -> bool:
@@ -628,12 +635,15 @@ class OnlineStatusCheck(BobcatCheck):
             if is_offline:
 
                 is_running = self.bobcat.miner_state.lower() == "running"
+
                 if is_running and self.bobcat.is_healthy:
+
                     self.bobcat.logger.warning(
                         f"{self.name}: Bobcat is healthy. Helium API needs time to update.",
                         extra={"description": str(self)} if self.verbose else {},
                     )
                     return False
+
                 else:
                     self.bobcat.logger.error(
                         f"{self.name}: Offline",

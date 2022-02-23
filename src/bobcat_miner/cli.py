@@ -22,10 +22,11 @@ LOG_LEVELS_CHOICES = ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 @click.version_option()
 @click.pass_context
 @click.option(
-    "--ip-address",
-    "-ip",
+    "hostname",
     "--hostname",
     "-h",
+    "--ip-address",
+    "-ip",
     required=False,
     metavar="NAME",
     envvar="BOBCAT_HOSTNAME",

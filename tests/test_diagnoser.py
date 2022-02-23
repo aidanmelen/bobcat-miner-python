@@ -156,6 +156,7 @@ class TestOnlineStatusCheck(unittest.TestCase):
     def setUp(self):
         self.mock_bobcat = MagicMock(spec=Bobcat)
         self.mock_bobcat.logger = MagicMock()
+        self.mock_bobcat._trace = False
         mock_verbose = False
         self.check = OnlineStatusCheck(self.mock_bobcat, mock_verbose)
 
