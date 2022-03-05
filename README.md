@@ -10,22 +10,6 @@
 
 Automate the Bobcat miner from the command line.
 
-## Install
-
-### Pipx
-
-```
-pipx install bobcat-miner
-```
-
-ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
-
-### Docker
-
-```
-docker pull aidanmelen/bobcat
-```
-
 ## Usage
 
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
@@ -63,7 +47,23 @@ or run with the official Docker image
 docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
-Run `bobcat --help` to learn about the available sub-commands and options.
+ℹ️ Run `bobcat --help` to learn about the available sub-commands and options.
+
+## Install
+
+### Pipx
+
+```
+pipx install bobcat-miner
+```
+
+ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
+
+### Docker
+
+```
+docker pull aidanmelen/bobcat
+```
 
 ## Finding your Bobcat
 
