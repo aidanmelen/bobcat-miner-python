@@ -1,0 +1,8 @@
+{
+    "name": "bobcat-miner-python-dev",
+  
+    "dockerComposeFile": ["../docker-compose.yml"],
+  
+    "service": "bobcat-miner-python-dev",
+    "workspaceFolder": "/app",
+  }

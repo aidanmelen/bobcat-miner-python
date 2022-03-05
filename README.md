@@ -5,30 +5,23 @@
 [![Lint](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
 # bobcat miner python
 
 Automate the Bobcat miner from the command line.
 
-## Install
-
-### Pipx
-
-```
-pipx install bobcat-miner
-```
-
-ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
-
-### Docker
-
-```
-docker pull aidanmelen/bobcat
-```
-
 ## Usage
 
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
+
+**Online**
+```console
+$ bobcat autopilot
+✅ Online Status: Online ⭐
+✅ Sync Status: Synced (gap:-1) 💫
+✅ Relay Status: Not Relayed ✨
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
 
 **Offline**
 ```console
@@ -47,23 +40,29 @@ $ bobcat autopilot
 ✅ Temperature Status: Good (38°C) ☀️
 ```
 
-**Online**
-```console
-$ bobcat autopilot
-✅ Online Status: Online ⭐
-✅ Sync Status: Synced (gap:-1) 💫
-✅ Relay Status: Not Relayed ✨
-✅ Network Status: Good 📶
-✅ Temperature Status: Good (38°C) ☀️
-```
-
 or run with the official Docker image
 
 ```
 docker run --rm -it aidanmelen/bobcat autopilot
 ```
 
-Run `bobcat --help` to learn about the available sub-commands and options.
+ℹ️ Run `bobcat --help` to learn about the available sub-commands and options.
+
+## Install
+
+### Pipx
+
+```
+pipx install bobcat-miner
+```
+
+ℹ️ Please see this [guide](https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/) for more information about installing stand alone command line tools with [pipx](https://pypa.github.io/pipx/).
+
+### Docker
+
+```
+docker pull aidanmelen/bobcat
+```
 
 ## Finding your Bobcat
 
@@ -95,7 +94,7 @@ $ bobcat --dry-run autopilot
 
 ## Verbose
 
-Use the `--verbose` option to see detail diagnostics
+Use the `--verbose` option to see detailed diagnostics
 
 ```console
 $ bobcat --dry-run autopilot --verbose
