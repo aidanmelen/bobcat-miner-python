@@ -5,7 +5,6 @@
 [![Lint](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml/badge.svg)](https://github.com/aidanmelen/bobcat-miner-python/actions/workflows/lint.yaml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
 # bobcat miner python
 
 Automate the Bobcat miner from the command line.
@@ -13,6 +12,16 @@ Automate the Bobcat miner from the command line.
 ## Usage
 
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
+
+**Online**
+```console
+$ bobcat autopilot
+✅ Online Status: Online ⭐
+✅ Sync Status: Synced (gap:-1) 💫
+✅ Relay Status: Not Relayed ✨
+✅ Network Status: Good 📶
+✅ Temperature Status: Good (38°C) ☀️
+```
 
 **Offline**
 ```console
@@ -26,16 +35,6 @@ $ bobcat autopilot
 ⚠️ Fastsyncing Bobcat
 ✅ Reconnected to the Bobcat (fancy-awesome-bobcat)
 ✅ Repair Status: Complete
-✅ Relay Status: Not Relayed ✨
-✅ Network Status: Good 📶
-✅ Temperature Status: Good (38°C) ☀️
-```
-
-**Online**
-```console
-$ bobcat autopilot
-✅ Online Status: Online ⭐
-✅ Sync Status: Synced (gap:-1) 💫
 ✅ Relay Status: Not Relayed ✨
 ✅ Network Status: Good 📶
 ✅ Temperature Status: Good (38°C) ☀️
@@ -95,7 +94,7 @@ $ bobcat --dry-run autopilot
 
 ## Verbose
 
-Use the `--verbose` option to see detail diagnostics
+Use the `--verbose` option to see detailed diagnostics
 
 ```console
 $ bobcat --dry-run autopilot --verbose
