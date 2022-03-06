@@ -62,7 +62,7 @@ docker pull aidanmelen/bobcat
 
 ## Finding your Bobcat
 
-Autopilot will automatically search and find your Bobcat.
+Autopilot will automatically search and find your Bobcat. Setting the log-level to `DEBUG` will show more information about the search process.
 
 ```console
 $ bobcat -C DEBUG autopilot
@@ -74,7 +74,7 @@ $ bobcat -C DEBUG autopilot
 ...
 ```
 
-The search may take awhile depending on your Bobcat's IP address in the local network. However; this step can be skipped by specifying either the `--ip-address` or `--hostname` options.
+The search may take awhile depending on IP address assigned to your Bobcat. However; this step can be skipped by specifying either the `--ip-address` or `--hostname` options.
 
 ```console
 $ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
