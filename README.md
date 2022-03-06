@@ -74,7 +74,7 @@ $ bobcat -C DEBUG autopilot
 ...
 ```
 
-The search may take awhile depending on IP address assigned to your Bobcat. However; this step can be skipped by specifying either the `--ip-address` or `--hostname` options.
+The search may take awhile depending on your Bobcat's IP address. However; this step can be skipped by specifying either the `--ip-address` or `--hostname` options.
 
 ```console
 $ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
