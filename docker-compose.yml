@@ -8,7 +8,7 @@ services:
     ports:
       - "80:80"
     build:
-      context: ./fancy-awesome-bobcat
+      context: .devcontainer/fancy-awesome-bobcat
       dockerfile: ./Dockerfile
     volumes:
       - ./fancy-awesome-bobcat/src/app:/app
@@ -42,7 +42,7 @@ services:
     command: "-f /dev/null"
     build:
       context: .
-      dockerfile: ./Dockerfile.dev
+      dockerfile: Dockerfile.dev
       target: dev
     volumes:
       - .:/app

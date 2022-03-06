@@ -1,0 +1,13 @@
+{
+    "terminal.integrated.defaultProfile.linux": "poetry",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+        },
+        "poetry": {
+            "path": "poetry run /bin/bash",
+            "icon": "terminal-bash"
+        }
+    }
+}
