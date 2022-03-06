@@ -93,7 +93,7 @@ $ bobcat --dry-run autopilot
 Use the `--verbose` option to see detailed diagnostics
 
 ```console
-$ bobcat --dry-run autopilot --verbose
+$ bobcat autopilot --verbose
 ...
 ❌ Bobcat Status: Down
 **Points to:** Miner's Docker Container
