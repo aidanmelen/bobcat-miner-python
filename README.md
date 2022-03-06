@@ -62,7 +62,19 @@ docker pull aidanmelen/bobcat
 
 ## Finding your Bobcat
 
-Searching for your bobcat may be slow. This step can be skipped by using the `--ip-address` option
+Autopilot will automatically search and find your Bobcat.
+
+```console
+$ bobcat -C DEBUG autopilot
+🐛 Searching for a bobcat in these networks: 192.168.0.0/24, 10.0.0.0/24, 172.16.0.0/24, 192.168.0.1/16, 10.0.0.1/16, 172.16.0.1/16
+🐛 Searching network: 192.168.0.0/24
+🐛 Connected to Bobcat: 192.168.0.10
+🐛 Found Bobcat: 192.168.0.10
+🐛 The Bobcat Autopilot is starting 🚀 🚀 🚀
+...
+```
+
+The search may take awhile depending on your Bobcat's IP address in the local network. However; this step can be skipped by specifying either the `--ip-address` or `--hostname` options.
 
 ```console
 $ bobcat --ip-address 192.168.0.10 -C DEBUG autopilot
