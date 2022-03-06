@@ -7,10 +7,6 @@
 
 # bobcat miner python
 
-Automate the Bobcat miner from the command line.
-
-## Usage
-
 Automatically *find*, *diagnose*, and *repair* the Bobcat miner!
 
 **Online**
