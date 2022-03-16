@@ -16,7 +16,7 @@ except:
 
 import aiohttp
 import asyncio
-import backoff
+# import backoff
 import ipaddress
 import json
 import requests
@@ -205,11 +205,11 @@ class BobcatConnection(BobcatBase):
             s.close()
             return result
 
-    @backoff.on_exception(
-        backoff.expo,
-        (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
-        max_time=FIVE_MINUTES,
-    )
+    # @backoff.on_exception(
+    #     backoff.expo,
+    #     (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
+    #     max_time=FIVE_MINUTES,
+    # )
     def __get(self, url: str) -> str:
         """Make GET request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes.
         Args:
@@ -217,11 +217,11 @@ class BobcatConnection(BobcatBase):
         """
         return requests.get(url)
 
-    @backoff.on_exception(
-        backoff.expo,
-        (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
-        max_time=FIVE_MINUTES,
-    )
+    # @backoff.on_exception(
+    #     backoff.expo,
+    #     (requests.exceptions.Timeout, requests.exceptions.ConnectionError),
+    #     max_time=FIVE_MINUTES,
+    # )
     def __post(self, url: str) -> str:
         """Make POST request for a URL. The request will exponentially backoff on connection errors and timeouts. The backoff timeout is 5 minutes.
         Args:
