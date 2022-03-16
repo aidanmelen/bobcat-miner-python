@@ -2,7 +2,7 @@
     "name": "bobcat-miner-python-dev",
     "dockerComposeFile": ["../docker-compose.yml"],
     "service": "bobcat-miner-python-dev",
-    "runServices": ["fancy-awesome-bobcat"],
-    "runArgs": ["poetry", "run", "/bin/bash"],
+    "runServices": ["bobcat-miner-python-dev", "fancy-awesome-bobcat"],
+    // "runArgs": ["poetry", "run", "/bin/bash"],
     "workspaceFolder": "/app",
   }
